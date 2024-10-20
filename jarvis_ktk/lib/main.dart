@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:javis_ktk/pages/home_page.dart';
+import 'package:jarvis_ktk/pages/home_page.dart';
 
 void main() {
   runApp(const MainApp());

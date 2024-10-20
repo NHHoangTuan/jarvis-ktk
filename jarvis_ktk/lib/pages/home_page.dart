@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:javis_ktk/navigation/custom_drawer.dart'; // Import CustomDrawer nếu cần
+import 'package:jarvis_ktk/navigation/custom_drawer.dart'; // Import CustomDrawer nếu cần
 
 class HomePage extends StatelessWidget {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+
+  HomePage({super.key});
 
   @override
   Widget build(BuildContext context) {
