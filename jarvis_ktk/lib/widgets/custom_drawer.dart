@@ -1,20 +1,18 @@
+
 import 'package:flutter/material.dart';
 
 class CustomDrawer extends StatelessWidget {
-  const CustomDrawer({super.key});
-
   @override
   Widget build(BuildContext context) {
     return SafeArea(
       child: Drawer(
-        width: MediaQuery.of(context).size.width * 0.7, // Giảm kích thước Drawer
+        width: MediaQuery.of(context).size.width * 0.7,
         child: Column(
           children: [
             // Phần tên app (ngắn hơn)
-            Expanded(
-              flex: 1,
-              child: Container(
+            Container(
               color: Colors.blue,
+              padding: EdgeInsets.all(5.0),
               child: ListTile(
                 title: Text(
                   'ChatGPT',
@@ -25,42 +23,53 @@ class CustomDrawer extends StatelessWidget {
                 ),
               ),
             ),
-            ),
 
             // Phần điều hướng
-            Expanded(
-              flex: 2,
-              child: ListView(
-                children: [
-                  ListTile(
-                    leading: Icon(Icons.home),
-                    title: Text('ChatGPT'),
-                    onTap: () {
-                      Navigator.pop(context);
-                    },
-                  ),
-                  ListTile(
-                    leading: Icon(Icons.search),
-                    title: Text('Khám phá GPT'),
-                    onTap: () {
-                      Navigator.pop(context);
-                    },
-                  ),
-                ],
-              ),
+            ListView(
+              shrinkWrap: true,
+              physics: NeverScrollableScrollPhysics(),
+              children: [
+                ListTile(
+                  leading: Icon(Icons.home),
+                  title: Text('Chat'),
+                  onTap: () {
+                    Navigator.pop(context);
+                  },
+                ),
+                ListTile(
+                  leading: Icon(Icons.person),
+                  title: Text('Personal'),
+                  onTap: () {
+                    Navigator.pop(context);
+                  },
+                ),
+                ListTile(
+                  leading: Icon(Icons.explore),
+                  title: Text('AI Action'),
+                  onTap: () {
+                    Navigator.pop(context);
+                  },
+                ),
+                ListTile(
+                  leading: Icon(Icons.settings),
+                  title: Text('Settings'),
+                  onTap: () {
+                    Navigator.pop(context);
+                  },
+                ),
+              ],
             ),
 
             Divider(),
 
-            // Phần lịch sử chat
+            // Phần lịch sử chat chiếm không gian còn lại
             Expanded(
-              flex: 8,
               child: ListView.builder(
                 itemCount: 20, // Số lượng lịch sử chat
                 itemBuilder: (context, index) {
                   return ListTile(
                     leading: Icon(Icons.message),
-                    title: Text('Lịch sử chat $index'),
+                    title: Text('History $index'),
                     onTap: () {
                       Navigator.pop(context);
                     },
@@ -72,9 +81,8 @@ class CustomDrawer extends StatelessWidget {
             Divider(),
 
             // Phần tên tài khoản
-            Expanded(
-              flex: 1,
-              
+            Container(
+              padding: EdgeInsets.all(5.0),
               child: ListTile(
                 leading: CircleAvatar(
                   child: Icon(Icons.person),
