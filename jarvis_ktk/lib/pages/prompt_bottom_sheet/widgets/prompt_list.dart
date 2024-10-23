@@ -23,7 +23,7 @@ class CombinedPromptList extends StatelessWidget {
         }
         return const SizedBox();
       },
-      separatorBuilder: (context, index) => const Divider(),
+      separatorBuilder: (context, index) => const Divider(indent: 16.0, endIndent: 16.0),
     );
   }
 }

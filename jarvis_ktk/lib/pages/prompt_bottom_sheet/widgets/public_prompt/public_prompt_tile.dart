@@ -9,52 +9,64 @@ class PublicPromptTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ListTile(
-      title: Text(prompt.name,
-          style: const TextStyle(
-              fontWeight: FontWeight.bold)),
-      subtitle: prompt.description != null ? Text(prompt.description!) : null,
-      subtitleTextStyle: TextStyle(
-        color: Colors.grey[500],
-      ),
-      trailing: Row(
-        mainAxisSize: MainAxisSize.min,
+    return Container(
+      padding: const EdgeInsets.only(left: 16.0, right: 16.0, top: 4.0, bottom: 4.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Column(
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Container(
-                padding: const EdgeInsets.all(0.0),
-                width: 30.0,
-                height: 30.0,
-                child: IconButton(
-                  alignment: Alignment.center,
-                  icon: Icon(
-                    prompt.isFavorite ? Icons.star : Icons.star_border,
-                    color: prompt.isFavorite ? Colors.black : null,
-                    size: 15,
+              // ListTile title
+              Text(
+                prompt.name,
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
+                maxLines: 1,
+              ),
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(0.0),
+                    width: 32.0,
+                    height: 32.0,
+                    child: IconButton(
+                      alignment: Alignment.center,
+                      icon: Icon(
+                        prompt.isFavorite ? Icons.star : Icons.star_border,
+                        color: prompt.isFavorite ? Colors.black : null,
+                        size: 16,
+                      ),
+                      onPressed: () {
+                        // Handle favorite button press
+                      },
+                    ),
                   ),
-                  onPressed: () {
-                    // Handle favorite button press
-                  },
-                ),
+                  Container(
+                    padding: const EdgeInsets.all(0.0),
+                    width: 32.0,
+                    height: 32.0,
+                    child: IconButton(
+                      icon: const Icon(Icons.info_outline, size: 16),
+                      onPressed: () {
+                        // Handle info button press
+                      },
+                    ),
+                  ),
+                ],
               ),
             ],
           ),
-          Column(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(0.0),
-                width: 30.0,
-                height: 30.0,
-                child: IconButton(
-                  icon: const Icon(Icons.info_outline, size: 15),
-                  onPressed: () {
-                    // Handle info button press
-                  },
-                ),
-              ),
-            ],
-          ),
+          Text(
+            prompt.description!,
+            style: TextStyle(
+              fontSize: 14,
+              color: Colors.grey[600],
+            ),
+          )
         ],
       ),
     );

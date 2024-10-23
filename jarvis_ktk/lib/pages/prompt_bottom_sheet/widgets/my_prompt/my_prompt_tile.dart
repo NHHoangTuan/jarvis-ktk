@@ -9,19 +9,39 @@ class MyPromptTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ListTile(
-      title: Text(prompt.name),
-      trailing: Container(
-        padding: const EdgeInsets.all(0.0),
-        width: 30.0,
-        height: 30.0,
-        child: IconButton(
-          icon: const Icon(Icons.edit_note, size: 15),
-          onPressed: () {
-            // Handle edit button press
-          },
-        ),
-      ),
+    return Container(
+      padding: const EdgeInsets.only(left: 16.0, right: 16.0, top: 4.0, bottom: 4.0),
+      child:
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              // ListTile title
+              Text(
+                prompt.name,
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
+                maxLines: 1,
+              ),
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(0.0),
+                    width: 32.0,
+                    height: 32.0,
+                    child: IconButton(
+                      icon: const Icon(Icons.edit, size: 16),
+                      onPressed: () {
+                        // Handle info button press
+                      },
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
     );
   }
 }

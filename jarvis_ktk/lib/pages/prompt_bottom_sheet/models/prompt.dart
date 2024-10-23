@@ -19,7 +19,7 @@ class PublicPrompt extends Prompt {
     required this.category,
     this.description,
     required this.language,
-    this.isFavorite = false,
+    this.isFavorite = true,
     required super.name,
     required super.prompt,
   });
