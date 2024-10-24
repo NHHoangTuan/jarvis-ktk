@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../models/prompt.dart';
+import 'info_dialog/info_dialog.dart';
 
 class PublicPromptTile extends StatelessWidget {
   final PublicPrompt prompt;
@@ -53,6 +54,7 @@ class PublicPromptTile extends StatelessWidget {
                       icon: const Icon(Icons.info_outline, size: 16),
                       onPressed: () {
                         // Handle info button press
+                        showInfoDialog(context, prompt);
                       },
                     ),
                   ),

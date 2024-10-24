@@ -15,25 +15,29 @@ class PromptAppBar extends StatelessWidget implements PreferredSizeWidget {
           style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
       automaticallyImplyLeading: false,
       actions: [
-        Ink(
-          height: 34,
-          width: 34,
-          decoration: const ShapeDecoration(
-            color: Color(0xFF611FEC),
-            shape: CircleBorder(),
-          ),
+        SizedBox(
+          height: 43,
+          width: 43,
           child: IconButton(
-            iconSize: 18,
-            icon: const Icon(Icons.add),
-            color: Colors.white,
+            iconSize: 25,
+            icon: const Icon(Icons.add_circle),
+            color: const Color(0xFF611FEC),
             onPressed: () {},
           ),
         ),
-        IconButton(
-          icon: const Icon(Icons.close),
-          onPressed: () {
-            Navigator.of(context).pop();
-          },
+        Padding(
+          padding: const EdgeInsets.only(right: 16.0),
+          child: SizedBox(
+            height: 32,
+            width: 32,
+            child: IconButton(
+              icon: const Icon(Icons.close),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              iconSize: 16,
+            ),
+          ),
         ),
       ],
       shape: const RoundedRectangleBorder(

@@ -16,6 +16,7 @@ class MyPromptContent extends StatelessWidget {
         language: 'English',
         name: 'Grammar corrector',
         prompt: '',
+        author: 'Henry',
       ),
     ];
 

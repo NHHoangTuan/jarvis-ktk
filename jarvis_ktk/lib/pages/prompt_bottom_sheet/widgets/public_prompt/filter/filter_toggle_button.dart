@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 
 class FilterToggleButton extends StatelessWidget {
   final bool showMoreFilters;
@@ -15,6 +16,6 @@ class FilterToggleButton extends StatelessWidget {
     return IconButton(
       icon: Icon(showMoreFilters ? Icons.arrow_drop_up : Icons.arrow_drop_down),
       onPressed: onToggle,
-    );
+    ).animate().fade().scale();
   }
 }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'filter_chip.dart';
 import 'filter_toggle_button.dart';
 
@@ -87,7 +88,7 @@ class _FilterButtonsState extends State<FilterButtons> {
                           _handleFilterSelection(selectedFilter, isSelected);
                         });
                       },
-                    );
+                    ).animate().fade().scale();
                   }),
                   // Toggle button for "More" or "Less"
                   FilterToggleButton(
