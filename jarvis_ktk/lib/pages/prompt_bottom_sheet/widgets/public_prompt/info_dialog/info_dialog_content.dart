@@ -14,14 +14,16 @@ class InfoDialogContent extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('${prompt.category} - ${prompt.author}', style: const TextStyle(fontSize: 16)),
+          Text('${prompt.category} - ${prompt.author}',
+              style: const TextStyle(fontSize: 16)),
           if (prompt.description != null)
             Text(
               prompt.description!,
               style: TextStyle(fontSize: 11, color: Colors.grey[600]),
             ),
           const SizedBox(height: 8),
-          const Text("Prompt", style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+          const Text("Prompt",
+              style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
           const SizedBox(height: 8),
           PromptTextBox(promptText: prompt.prompt),
         ],
@@ -80,7 +82,8 @@ class UsePromptButton extends StatelessWidget {
       onPressed: onPressed,
       label: const Text(
         'Use Prompt',
-        style: TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.bold),
+        style: TextStyle(
+            color: Colors.white, fontSize: 13, fontWeight: FontWeight.bold),
       ),
     );
   }
@@ -107,23 +110,29 @@ class InfoDialogTitle extends StatelessWidget {
         Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            IconButton(
-              icon: const Icon(Icons.star_border, size: 16),
-              onPressed: () {
-                // Handle favorite button press
-              },
+            SizedBox(
+              height: 32,
+              width: 32,
+              child: IconButton(
+                icon: const Icon(Icons.star_border, size: 16),
+                onPressed: () {
+                  // Handle favorite button press
+                },
+              ),
             ),
-            IconButton(
-              icon: const Icon(Icons.close, size: 16),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
+            SizedBox(
+              height: 32,
+              width: 32,
+              child: IconButton(
+                icon: const Icon(Icons.close, size: 16),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              ),
+            )
           ],
         ),
       ],
     );
   }
 }
-
-

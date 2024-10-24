@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'new_prompt/new_prompt_dialog.dart';
+
 class PromptAppBar extends StatelessWidget implements PreferredSizeWidget {
   @override
   final Size preferredSize;
@@ -22,7 +24,7 @@ class PromptAppBar extends StatelessWidget implements PreferredSizeWidget {
             iconSize: 25,
             icon: const Icon(Icons.add_circle),
             color: const Color(0xFF611FEC),
-            onPressed: () {},
+            onPressed: () {showNewPromptDialog(context);},
           ),
         ),
         Padding(
