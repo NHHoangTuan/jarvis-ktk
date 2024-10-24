@@ -10,7 +10,7 @@ class PromptTabBar extends StatelessWidget {
     return Container(
       color: Colors.white,
       child: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.only(left: 16.0, right: 16.0, top: 4.0, bottom: 16.0),
         child: Container(
           height: 35,
           decoration: BoxDecoration(
