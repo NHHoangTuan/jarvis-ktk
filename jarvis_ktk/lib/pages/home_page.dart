@@ -1,40 +1,76 @@
 import 'package:flutter/material.dart';
-import 'package:jarvis_ktk/widgets/custom_drawer.dart'; // Import CustomDrawer nếu cần
+import 'package:jarvis_ktk/pages/email_reply/email_reply_page.dart';
+import 'package:jarvis_ktk/widgets/custom_drawer.dart';
 
-class HomePage extends StatelessWidget {
-  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+import 'email_reply/email_reply_app_bar.dart';
 
-  HomePage({super.key});
+class HomePage extends StatefulWidget {
+  const HomePage({super.key});
+
+  @override
+  State<HomePage> createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
+  // Variable to track which screen is being displayed in the body
+  Widget _currentBody = const Center(child: Text('Home Page'));
+  PreferredSizeWidget _currentAppBar =
+      AppBar(title: const Text('Chat with AI'));
+  final GlobalKey<ScaffoldState> _scaffoldKey =
+      GlobalKey<ScaffoldState>(); // Correct key placement
+
+  // Method to change the body content
+  void _changeBody(Widget newBody) {
+    setState(() {
+      _currentBody = newBody;
+    });
+  }
+
+  void _changeAppBar(PreferredSizeWidget newAppBar) {
+    setState(() {
+      _currentAppBar = newAppBar;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      key: _scaffoldKey,
-      appBar: AppBar(
-        title: Text('Chat with AI'),
+      key: _scaffoldKey, // Associate the Scaffold with the GlobalKey
+      appBar: _currentAppBar,
+      drawer: CustomDrawer(
+        onItemTap: (selectedItem) {
+          // Change body content based on the selected item
+          switch (selectedItem) {
+            case 'Chat':
+              _changeBody(const Center(child: Text('Chat Page')));
+              _changeAppBar(AppBar(title: const Text('Chat with AI')));
+              break;
+            case 'Personal':
+              _changeBody(const Center(child: Text('Personal Chat')));
+              _changeAppBar(AppBar(title: const Text('Personal Chat')));
+              break;
+            case 'Email Reply':
+              _changeBody(const EmailReplyPage());
+              _changeAppBar(const EmailReplyAppBar());
+              break;
+            case 'Settings':
+              _changeBody(const Center(child: Text('Settings Page')));
+              _changeAppBar(AppBar(title: const Text('Settings')));
+              break;
+          }
+          Navigator.pop(context); // Close the drawer after selecting an item
+        },
       ),
-      drawer: CustomDrawer(), // Sử dụng CustomDrawer
       body: Stack(
         children: [
-          Center(child: Text('Home Page')),
-          // Vùng vuốt từ 1/3 màn hình
-          Positioned(
-            left: 0,
-            top: 0,
-            bottom: 0,
-            child: GestureDetector(
-              behavior: HitTestBehavior.translucent,
-              onPanUpdate: (details) {
-                // Nếu vuốt từ trái sang phải
-                if (details.delta.dx > 10) {
-                  _scaffoldKey.currentState?.openDrawer(); // Mở Drawer qua GlobalKey
-                }
-              },
-              child: Container(
-                width: MediaQuery.of(context).size.width * 0.5, // 50% màn hình
-                color: Colors.transparent, // Để vùng chạm có thể nhìn thấy
-              ),
-            ),
+          _currentBody, // Display the currently selected body content
+          // Swipe area to open drawer
+          GestureDetector(
+            onHorizontalDragEnd: (details) {
+              if (details.primaryVelocity! > 0) {
+                _scaffoldKey.currentState!.openDrawer();
+              }
+            },
           ),
         ],
       ),
