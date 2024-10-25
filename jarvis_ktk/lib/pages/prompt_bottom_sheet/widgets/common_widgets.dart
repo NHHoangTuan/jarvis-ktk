@@ -125,30 +125,51 @@ class NewPromptDialogTitle extends StatelessWidget {
   }
 }
 
-class PromptTextFormField extends StatelessWidget {
+class PromptTextFormField  extends StatefulWidget {
   final String hintText;
   final int hintMaxLines;
+  final String? initialValue;
   final ValueChanged<String> onChanged;
-  final TextEditingController controller;
 
-  const PromptTextFormField({
+  const PromptTextFormField ({
     super.key,
     required this.hintText,
+    required this.hintMaxLines,
+    this.initialValue,
     required this.onChanged,
-    required this.controller, required this.hintMaxLines,
   });
+
+  @override
+  State<PromptTextFormField> createState() => _PromptTextFormField();
+
+}
+
+class _PromptTextFormField extends State<PromptTextFormField> {
+  late TextEditingController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = TextEditingController(text: widget.initialValue);
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.only(top: 4, bottom: 12),
       child: TextFormField(
-        controller: controller,
+        controller: _controller,
         style: const TextStyle(fontSize: 12),
         decoration: InputDecoration(
           border: const OutlineInputBorder(),
-          hintText: hintText,
-          hintMaxLines: hintMaxLines,
+          hintText: widget.hintText,
+          hintMaxLines: widget.hintMaxLines,
           hintStyle: const TextStyle(color: Colors.grey, fontSize: 12),
           contentPadding: const EdgeInsets.only(
               left: 8, top: 6, bottom: 6, right: 8),
@@ -157,7 +178,7 @@ class PromptTextFormField extends StatelessWidget {
             borderSide: BorderSide(color: Colors.grey, width: 0.9),
           ),
         ),
-        onChanged: onChanged,
+        onChanged: widget.onChanged,
       ),
     );
   }

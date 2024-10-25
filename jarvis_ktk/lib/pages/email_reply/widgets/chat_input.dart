@@ -26,6 +26,7 @@ class ChatInput extends StatelessWidget {
           ),
           Expanded(
             child: TextField(
+              autofocus: false,
               controller: controller,
               decoration: InputDecoration(
                 fillColor: SimpleColors.babyBlue.withOpacity(0.15),

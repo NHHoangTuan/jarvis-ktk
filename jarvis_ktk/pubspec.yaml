@@ -10,7 +10,11 @@ dependencies:
   flutter:
     sdk: flutter
   font_awesome_flutter: 10.7.0
+  dropdown_button2: ^2.3.8
+  dropdown_search: 6.0.0
   flutter_animate: 4.0.0
+  fluttertoast: ^8.2.8
+  provider: ^6.0.0
 
 dev_dependencies:
   flutter_test:

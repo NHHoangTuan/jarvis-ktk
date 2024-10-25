@@ -31,7 +31,7 @@ class _NewPromptDialogContentState extends State<NewPromptDialogContent>
   Widget build(BuildContext context) {
     return SingleChildScrollView(
       child: SizedBox(
-        height: 550,
+        height: 485,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [

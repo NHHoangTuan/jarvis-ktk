@@ -42,24 +42,29 @@ class _PromptBottomSheetState extends State<PromptBottomSheet>
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        const PromptAppBar(),
-        PromptTabBar(
-          tabController: _tabController,
-        ),
-        SizedBox(
-          height: 500,
-          child: TabBarView(
-            controller: _tabController,
-            children: const [
-              MyPromptContent(),
-              PublicPromptContent(),
-            ],
-          ),
-        ),
-      ],
-    );
+    return GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: () {
+          FocusScope.of(context).requestFocus(FocusNode());
+        },
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const PromptAppBar(),
+            PromptTabBar(
+              tabController: _tabController,
+            ),
+            SizedBox(
+              height: 500,
+              child: TabBarView(
+                controller: _tabController,
+                children: const [
+                  MyPromptContent(),
+                  PublicPromptContent(),
+                ],
+              ),
+            ),
+          ],
+        ));
   }
 }

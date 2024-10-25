@@ -6,14 +6,14 @@ import 'package:jarvis_ktk/utils/colors.dart';
 
 const double borderRadius = 25.0;
 
-class LoginSwitchState extends StatefulWidget {
+class LoginPage extends StatefulWidget {
   @override
-  _LoginSwitchStateState createState() => _LoginSwitchStateState();
+  _LoginPageState createState() => _LoginPageState();
 }
 
 enum LoginScreens { signIn, signUp, forgotPassword }
 
-class _LoginSwitchStateState extends State<LoginSwitchState>
+class _LoginPageState extends State<LoginPage>
     with SingleTickerProviderStateMixin {
   LoginScreens currentScreen = LoginScreens.signIn;
 
@@ -35,8 +35,8 @@ class _LoginSwitchStateState extends State<LoginSwitchState>
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Image.asset('assets/logo.png', height: 100),
-                  SizedBox(width: 10),
-                  Text('Jarvis',
+                  const SizedBox(width: 10),
+                  const Text('Jarvis',
                       style:
                           TextStyle(fontSize: 44, fontWeight: FontWeight.bold)),
                 ],
@@ -101,11 +101,12 @@ class _LoginSwitchStateState extends State<LoginSwitchState>
         children: <Widget>[
           Expanded(
             child: InkWell(
-              borderRadius: BorderRadius.all(Radius.circular(borderRadius)),
+              borderRadius:
+                  const BorderRadius.all(Radius.circular(borderRadius)),
               onTap: _onLoginButtonPress,
               child: Container(
                 width: MediaQuery.of(context).size.width,
-                padding: EdgeInsets.symmetric(vertical: 15),
+                padding: const EdgeInsets.symmetric(vertical: 15),
                 alignment: Alignment.center,
                 decoration: (currentScreen == LoginScreens.signIn)
                     ? const BoxDecoration(
@@ -121,9 +122,9 @@ class _LoginSwitchStateState extends State<LoginSwitchState>
                 child: Text(
                   "Sign in",
                   style: (currentScreen == LoginScreens.signIn)
-                      ? TextStyle(
+                      ? const TextStyle(
                           color: Colors.white, fontWeight: FontWeight.bold)
-                      : TextStyle(
+                      : const TextStyle(
                           color: Colors.black, fontWeight: FontWeight.bold),
                 ),
               ),
@@ -131,11 +132,12 @@ class _LoginSwitchStateState extends State<LoginSwitchState>
           ),
           Expanded(
             child: InkWell(
-              borderRadius: BorderRadius.all(Radius.circular(borderRadius)),
+              borderRadius:
+                  const BorderRadius.all(Radius.circular(borderRadius)),
               onTap: _onSignupButtonPress,
               child: Container(
                 width: MediaQuery.of(context).size.width,
-                padding: EdgeInsets.symmetric(vertical: 15),
+                padding: const EdgeInsets.symmetric(vertical: 15),
                 alignment: Alignment.center,
                 decoration: (currentScreen == LoginScreens.signUp)
                     ? const BoxDecoration(
@@ -151,9 +153,9 @@ class _LoginSwitchStateState extends State<LoginSwitchState>
                 child: Text(
                   "Sign up",
                   style: (currentScreen == LoginScreens.signUp)
-                      ? TextStyle(
+                      ? const TextStyle(
                           color: Colors.white, fontWeight: FontWeight.bold)
-                      : TextStyle(
+                      : const TextStyle(
                           color: Colors.black, fontWeight: FontWeight.bold),
                 ),
               ),

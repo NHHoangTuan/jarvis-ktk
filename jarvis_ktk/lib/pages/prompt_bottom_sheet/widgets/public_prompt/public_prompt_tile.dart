@@ -3,10 +3,23 @@ import 'package:flutter/material.dart';
 import '../../models/prompt.dart';
 import 'info_dialog/info_dialog.dart';
 
-class PublicPromptTile extends StatelessWidget {
+class PublicPromptTile extends StatefulWidget {
   final PublicPrompt prompt;
 
   const PublicPromptTile({super.key, required this.prompt});
+
+  @override
+  State<PublicPromptTile> createState() => _PublicPromptTileState();
+}
+
+class _PublicPromptTileState extends State<PublicPromptTile> {
+  late bool isFavorite;
+
+  @override
+  void initState() {
+    super.initState();
+    isFavorite = widget.prompt.isFavorite;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -20,7 +33,7 @@ class PublicPromptTile extends StatelessWidget {
             children: [
               // ListTile title
               Text(
-                prompt.name,
+                widget.prompt.name,
                 style: const TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
@@ -37,12 +50,15 @@ class PublicPromptTile extends StatelessWidget {
                     child: IconButton(
                       alignment: Alignment.center,
                       icon: Icon(
-                        prompt.isFavorite ? Icons.star : Icons.star_border,
-                        color: prompt.isFavorite ? Colors.black : null,
+                        isFavorite ? Icons.star : Icons.star_border,
+                        color: isFavorite ? Colors.black : null,
                         size: 16,
                       ),
                       onPressed: () {
-                        // Handle favorite button press
+                        setState(() {
+                          isFavorite = !isFavorite;
+                          widget.prompt.isFavorite = isFavorite;
+                        });
                       },
                     ),
                   ),
@@ -54,7 +70,7 @@ class PublicPromptTile extends StatelessWidget {
                       icon: const Icon(Icons.info_outline, size: 16),
                       onPressed: () {
                         // Handle info button press
-                        showInfoDialog(context, prompt);
+                        showInfoDialog(context, widget.prompt);
                       },
                     ),
                   ),
@@ -63,7 +79,7 @@ class PublicPromptTile extends StatelessWidget {
             ],
           ),
           Text(
-            prompt.description!,
+            widget.prompt.description!,
             style: TextStyle(
               fontSize: 14,
               color: Colors.grey[600],

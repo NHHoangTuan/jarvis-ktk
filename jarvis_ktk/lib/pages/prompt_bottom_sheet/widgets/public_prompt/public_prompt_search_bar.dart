@@ -12,6 +12,8 @@ class PublicPromptSearchBar extends StatelessWidget {
       child: TextField(
         onChanged: onChanged,
         style: const TextStyle(fontSize: 15.0, height: 1),
+        autofocus: false,
+        showCursor: true,
         decoration: InputDecoration(
           hintText: 'Search',
           fillColor: Colors.grey[100],

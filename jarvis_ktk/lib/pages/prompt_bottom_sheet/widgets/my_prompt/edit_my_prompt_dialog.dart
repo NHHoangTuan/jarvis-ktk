@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:jarvis_ktk/pages/prompt_bottom_sheet/widgets/new_prompt/new_prompt_content.dart';
+import 'package:jarvis_ktk/pages/prompt_bottom_sheet/models/prompt.dart';
 
 import '../common_widgets.dart';
+import 'edit_my_prompt_content.dart';
 
-class NewPromptDialog extends StatelessWidget {
-  const NewPromptDialog({super.key});
+class EditMyPrompt extends StatelessWidget {
+  final MyPrompt prompt;
+
+  const EditMyPrompt({super.key, required this.prompt});
 
   @override
   Widget build(BuildContext context) {
@@ -15,34 +18,36 @@ class NewPromptDialog extends StatelessWidget {
           const EdgeInsets.only(top: 0, left: 24, right: 24, bottom: 0),
       actionsPadding:
           const EdgeInsets.only(top: 0, left: 24, right: 24, bottom: 16),
-      title: const NewPromptDialogTitle(),
+      title: EditMyPromptTitle(
+        prompt: prompt.name,
+      ),
       content: GestureDetector(
         behavior: HitTestBehavior.opaque,
         onTap: () {
           FocusScope.of(context).requestFocus(FocusNode());
         },
         child: SizedBox(
+          height: MediaQuery.of(context).size.height * 0.3,
           width: MediaQuery.of(context).size.width,
-          child: const NewPromptDialogContent(),
+          child: EditMyPromptContent(prompt: prompt),
         ),
       ),
-      insetPadding: const EdgeInsets.all(10),
       actions: [
-        const CancelButton(),
         SaveButton(onPressed: () {
           // Handle "Use Prompt" action
           Navigator.of(context).pop();
         }),
       ],
+      insetPadding: const EdgeInsets.all(10),
     );
   }
 }
 
-void showNewPromptDialog(BuildContext context) {
+void showEditPromptDialog(BuildContext context, MyPrompt prompt) {
   showDialog(
     context: context,
     builder: (BuildContext context) {
-      return const NewPromptDialog();
+      return EditMyPrompt(prompt: prompt);
     },
   );
 }
