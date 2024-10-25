@@ -30,13 +30,7 @@ class _PreviewBotPageState extends State<PreviewBotPage> {
         appBar: AppBar(
           title: Row(
             children: [
-              IconButton(
-                icon: const Icon(Icons.arrow_back),
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-              ),
-              const SizedBox(width: 5), // Khoảng cách giữa nút back và avatar
+              const SizedBox(width: 5), // Khoảng cách giữa avatar và text
               const CircleAvatar(
                 backgroundImage: AssetImage('assets/logo.png'),
                 radius: 20,
@@ -67,10 +61,11 @@ class _PreviewBotPageState extends State<PreviewBotPage> {
                             ),
                           ],
                         ),
-                        content: const SizedBox(
+                        content: SizedBox(
                           width: double.maxFinite,
-                          child:
-                              EditPreviewBotPage(), // Hiển thị EditPreviewBotPage
+                          child: EditPreviewBotPage(
+                            onApply: () {},
+                          ), // Hiển thị EditPreviewBotPage
                         ),
                       );
                     },

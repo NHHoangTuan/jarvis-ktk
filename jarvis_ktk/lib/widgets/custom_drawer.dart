@@ -1,10 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:jarvis_ktk/pages/prompt_bottom_sheet/prompt_bottom_sheet.dart';
 
-class CustomDrawer extends Drawer {
+class CustomDrawer extends StatefulWidget {
   final Function(String) onItemTap;
 
   const CustomDrawer({super.key, required this.onItemTap});
+
+  @override
+  // ignore: library_private_types_in_public_api
+  _CustomDrawerState createState() => _CustomDrawerState();
+}
+
+class _CustomDrawerState extends State<CustomDrawer> {
+  bool _showPersonalOptions = false;
 
   @override
   Widget build(BuildContext context) {
@@ -36,22 +44,45 @@ class CustomDrawer extends Drawer {
                 ListTile(
                   leading: const Icon(Icons.home),
                   title: const Text('Chat'),
-                  onTap: () => onItemTap('Chat'), // Send 'Chat' back to HomePage
+                  onTap: () =>
+                      widget.onItemTap('Chat'), // Send 'Chat' back to HomePage
                 ),
                 ListTile(
                   leading: const Icon(Icons.person),
                   title: const Text('Personal'),
-                  onTap: () => onItemTap('Personal'), // Send 'Personal'
+                  onTap: () {
+                    setState(() {
+                      _showPersonalOptions = !_showPersonalOptions;
+                    });
+                  }, // Toggle personal options
                 ),
+                if (_showPersonalOptions) ...[
+                  ListTile(
+                    leading: const Icon(Icons.android),
+                    title: const Text('My Bot'),
+                    tileColor: Colors.grey[300], // Dark background color
+                    onTap: () {
+                      widget.onItemTap('My Bot');
+                    },
+                  ),
+                  ListTile(
+                    leading: const Icon(Icons.book),
+                    title: const Text('Knowledge'),
+                    tileColor: Colors.grey[300], // Dark background color
+                    onTap: () => widget.onItemTap('Knowledge'),
+                  ),
+                ],
                 ListTile(
                   leading: const Icon(Icons.email),
                   title: const Text('Email Reply'),
-                  onTap: () => onItemTap('Email Reply'), // Send 'Email Reply'
+                  onTap: () =>
+                      widget.onItemTap('Email Reply'), // Send 'Email Reply'
                 ),
                 ListTile(
                   leading: const Icon(Icons.settings),
                   title: const Text('Settings'),
-                  onTap: () => showPromptBottomSheet(context), // Send 'Settings'
+                  onTap: () =>
+                      showPromptBottomSheet(context), // Send 'Settings'
                 ),
               ],
             ),
@@ -85,7 +116,8 @@ class CustomDrawer extends Drawer {
                 ),
                 title: const Text('Hoang Tuan'), // Account name
                 onTap: () {
-                  Navigator.pop(context); // Action for account tap (e.g., profile view).
+                  Navigator.pop(
+                      context); // Action for account tap (e.g., profile view).
                 },
               ),
             ),

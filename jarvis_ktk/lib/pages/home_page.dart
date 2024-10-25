@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:jarvis_ktk/pages/email_reply/email_reply_page.dart';
+import 'package:jarvis_ktk/pages/personal/my_bot.dart'; // Import MyBotPage
+import 'package:jarvis_ktk/pages/preview_bot/preview_bot.dart'; // Import PreviewBotPage
 import 'package:jarvis_ktk/widgets/custom_drawer.dart';
 import 'package:provider/provider.dart';
 
@@ -62,6 +64,15 @@ class _HomePageState extends State<HomePage> {
               case 'Settings':
                 _changeBody(const Center(child: Text('Settings Page')));
                 _changeAppBar(AppBar(title: const Text('Settings')));
+                break;
+              case 'My Bot': // Handle My Bot case
+                _changeBody(MyBotPage(
+                  onApply: () {
+                    _changeBody(const PreviewBotPage());
+                    _changeAppBar(AppBar(title: const Text('Preview Bot')));
+                  },
+                ));
+                _changeAppBar(AppBar(title: const Text('My Bot')));
                 break;
             }
             Navigator.pop(context); // Close the drawer after selecting an item
