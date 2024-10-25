@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:jarvis_ktk/pages/email_reply/email_reply_page.dart';
-import 'package:jarvis_ktk/pages/personal/my_bot.dart'; // Import MyBotPage
-import 'package:jarvis_ktk/pages/preview_bot/preview_bot.dart'; // Import PreviewBotPage
+import 'package:jarvis_ktk/pages/personal/my_bot.dart';
+import 'package:jarvis_ktk/pages/preview_bot/preview_bot.dart';
+import 'package:jarvis_ktk/pages/personal/knowledge.dart';
 import 'package:jarvis_ktk/widgets/custom_drawer.dart';
 import 'package:provider/provider.dart';
 
@@ -50,8 +51,8 @@ class _HomePageState extends State<HomePage> {
             // Change body content based on the selected item
             switch (selectedItem) {
               case 'Chat':
-                _changeBody(ChatBody());
-                _changeAppBar(ChatAppBar());
+                _changeBody(const Center(child: Text('Chat Page')));
+                _changeAppBar(AppBar(title: const Text('Chat with AI')));
                 break;
               case 'Personal':
                 _changeBody(const Center(child: Text('Personal Chat')));
@@ -73,6 +74,10 @@ class _HomePageState extends State<HomePage> {
                   },
                 ));
                 _changeAppBar(AppBar(title: const Text('My Bot')));
+                break;
+              case 'Knowledge': // Handle Knowledge case
+                _changeBody(const KnowledgePage());
+                _changeAppBar(AppBar(title: const Text('Knowledge')));
                 break;
             }
             Navigator.pop(context); // Close the drawer after selecting an item

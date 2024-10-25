@@ -81,17 +81,19 @@ class _AddKnowledgePreviewBotState extends State<AddKnowledgePreviewBot> {
                               ),
                             ),
                             child: Padding(
-                              padding: const EdgeInsets.all(8.0),
+                              padding:
+                                  const EdgeInsets.all(4.0), // Reduce padding
                               child: Text(
                                 '$index Unit',
                                 style: const TextStyle(
+                                  fontSize: 12.0, // Reduce font size
                                   color: SimpleColors
                                       .indigoBlue, // Set text color to match border color
                                 ),
                               ),
                             ),
                           ),
-                          const SizedBox(width: 8.0),
+                          const SizedBox(width: 4.0), // Reduce spacing
                           Card(
                             color: SimpleColors.mediumBlue.withOpacity(
                                 0.2), // Set background color with opacity
@@ -103,10 +105,12 @@ class _AddKnowledgePreviewBotState extends State<AddKnowledgePreviewBot> {
                               ),
                             ),
                             child: Padding(
-                              padding: const EdgeInsets.all(8.0),
+                              padding:
+                                  const EdgeInsets.all(4.0), // Reduce padding
                               child: Text(
                                 '$index KB',
                                 style: const TextStyle(
+                                  fontSize: 12.0, // Reduce font size
                                   color: SimpleColors
                                       .mediumBlue, // Set text color to match border color
                                 ),
@@ -117,9 +121,14 @@ class _AddKnowledgePreviewBotState extends State<AddKnowledgePreviewBot> {
                       ),
                       Row(
                         children: [
-                          const Icon(Icons.schedule),
+                          const Icon(Icons.schedule,
+                              size: 12.0), // Reduce icon size
                           const SizedBox(width: 4.0),
-                          Text('Today ${TimeOfDay.now().format(context)}'),
+                          Text(
+                            'Today ${TimeOfDay.now().format(context)}',
+                            style: const TextStyle(
+                                fontSize: 12.0), // Reduce text size
+                          ),
                         ],
                       ),
                     ],
