@@ -1,6 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:jarvis_ktk/pages/prompt_bottom_sheet/prompt_bottom_sheet.dart';
 
-class CustomDrawer extends StatelessWidget {
+class CustomDrawer extends Drawer {
+  final Function(String) onItemTap;
+
+  const CustomDrawer({super.key, required this.onItemTap});
+
   @override
   Widget build(BuildContext context) {
     return SafeArea(
@@ -8,11 +13,11 @@ class CustomDrawer extends StatelessWidget {
         width: MediaQuery.of(context).size.width * 0.7,
         child: Column(
           children: [
-            // Phần tên app (ngắn hơn)
+            // App name section
             Container(
               color: Colors.blue,
-              padding: EdgeInsets.all(5.0),
-              child: ListTile(
+              padding: const EdgeInsets.all(5.0),
+              child: const ListTile(
                 title: Text(
                   'ChatGPT',
                   style: TextStyle(
@@ -23,72 +28,64 @@ class CustomDrawer extends StatelessWidget {
               ),
             ),
 
-            // Phần điều hướng
+            // Navigation section
             ListView(
-              shrinkWrap: true,
-              physics: NeverScrollableScrollPhysics(),
+              shrinkWrap: true, // Prevents ListView from expanding infinitely
+              physics: const NeverScrollableScrollPhysics(),
               children: [
                 ListTile(
-                  leading: Icon(Icons.home),
-                  title: Text('Chat'),
-                  onTap: () {
-                    Navigator.pop(context);
-                  },
+                  leading: const Icon(Icons.home),
+                  title: const Text('Chat'),
+                  onTap: () => onItemTap('Chat'), // Send 'Chat' back to HomePage
                 ),
                 ListTile(
-                  leading: Icon(Icons.person),
-                  title: Text('Personal'),
-                  onTap: () {
-                    Navigator.pop(context);
-                  },
+                  leading: const Icon(Icons.person),
+                  title: const Text('Personal'),
+                  onTap: () => onItemTap('Personal'), // Send 'Personal'
                 ),
                 ListTile(
-                  leading: Icon(Icons.explore),
-                  title: Text('AI Action'),
-                  onTap: () {
-                    Navigator.pop(context);
-                  },
+                  leading: const Icon(Icons.email),
+                  title: const Text('Email Reply'),
+                  onTap: () => onItemTap('Email Reply'), // Send 'Email Reply'
                 ),
                 ListTile(
-                  leading: Icon(Icons.settings),
-                  title: Text('Settings'),
-                  onTap: () {
-                    Navigator.pop(context);
-                  },
+                  leading: const Icon(Icons.settings),
+                  title: const Text('Settings'),
+                  onTap: () => showPromptBottomSheet(context), // Send 'Settings'
                 ),
               ],
             ),
 
-            Divider(),
+            const Divider(),
 
-            // Phần lịch sử chat chiếm không gian còn lại
+            // Chat history section
             Expanded(
               child: ListView.builder(
-                itemCount: 20, // Số lượng lịch sử chat
+                itemCount: 20, // Number of chat history items
                 itemBuilder: (context, index) {
                   return ListTile(
-                    leading: Icon(Icons.message),
+                    leading: const Icon(Icons.message),
                     title: Text('History $index'),
                     onTap: () {
-                      Navigator.pop(context);
+                      Navigator.pop(context); // Close drawer on tap
                     },
                   );
                 },
               ),
             ),
 
-            Divider(),
+            const Divider(),
 
-            // Phần tên tài khoản
+            // Account section
             Container(
-              padding: EdgeInsets.all(5.0),
+              padding: const EdgeInsets.all(5.0),
               child: ListTile(
-                leading: CircleAvatar(
+                leading: const CircleAvatar(
                   child: Icon(Icons.person),
                 ),
-                title: Text('Hoang Tuan'), // Tên tài khoản
+                title: const Text('Hoang Tuan'), // Account name
                 onTap: () {
-                  Navigator.pop(context);
+                  Navigator.pop(context); // Action for account tap (e.g., profile view).
                 },
               ),
             ),

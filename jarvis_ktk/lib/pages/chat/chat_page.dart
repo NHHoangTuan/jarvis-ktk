@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:jarvis_ktk/widgets/custom_drawer.dart';
-import 'package:jarvis_ktk/pages/home/widgets/message_bubble.dart';
-import 'package:jarvis_ktk/pages/home/widgets/select_agent_dropdown.dart';
+import 'package:jarvis_ktk/pages/chat/widgets/message_bubble.dart';
+import 'package:jarvis_ktk/pages/chat/widgets/select_agent_dropdown.dart';
 import 'package:dropdown_search/dropdown_search.dart';
-import 'package:jarvis_ktk/pages/home/widgets/welcome.dart';
+import 'package:jarvis_ktk/pages/chat/widgets/welcome.dart';
 
-class HomePage extends StatefulWidget {
+class ChatPage extends StatefulWidget {
   @override
-  _HomePageState createState() => _HomePageState();
+  _ChatPageState createState() => _ChatPageState();
 }
 
-class _HomePageState extends State<HomePage> {
+class _ChatPageState extends State<ChatPage> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   final TextEditingController _messageController = TextEditingController();
   final FocusNode _messageFocusNode = FocusNode(); // Tạo FocusNode
@@ -193,7 +193,9 @@ class _HomePageState extends State<HomePage> {
             ),
           ],
         ),
-        drawer: CustomDrawer(),
+        drawer: CustomDrawer(
+          onItemTap: (String) {},
+        ),
         body: Stack(
           children: [
             Column(
