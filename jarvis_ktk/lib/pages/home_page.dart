@@ -64,7 +64,7 @@ class _HomePageState extends State<HomePage> {
                 _changeAppBar(ChatAppBar());
                 break;
               case 'Personal':
-                _changeBody(const Center(child: Text('ewqej')));
+                _changeBody(const Center(child: Text('Personal Chat')));
                 _changeAppBar(AppBar(title: const Text('Personal Chat')));
                 break;
               case 'Email Reply':
