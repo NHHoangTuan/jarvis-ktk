@@ -1,10 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:jarvis_ktk/utils/colors.dart';
 
-class SignUpView extends StatelessWidget {
+class SignUpView extends StatefulWidget {
   final VoidCallback onLoginPressed;
 
   SignUpView(this.onLoginPressed);
+
+  @override
+  _SignUpViewState createState() => _SignUpViewState();
+}
+
+class _SignUpViewState extends State<SignUpView> {
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _usernameController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+  bool _obscureText = true; // Biến trạng thái để quản lý việc ẩn/hiện mật khẩu
 
   @override
   Widget build(BuildContext context) {
@@ -14,45 +24,52 @@ class SignUpView extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Container(
-            child: TextFormField(
-              decoration: InputDecoration(
-                labelText: 'Email',
-                hintText: 'Enter your email address',
-                border:
-                    OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+          TextFormField(
+            controller: _emailController,
+            decoration: InputDecoration(
+              labelText: 'Email',
+              hintText: 'Enter your email address',
+              border:
+                  OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+            ),
+          ),
+          const SizedBox(height: 16),
+          TextFormField(
+            controller: _usernameController,
+            decoration: InputDecoration(
+              labelText: 'Username',
+              hintText: 'Enter your username',
+              border:
+                  OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+            ),
+          ),
+          const SizedBox(height: 16),
+          TextFormField(
+            controller: _passwordController,
+            obscureText: _obscureText,
+            decoration: InputDecoration(
+              labelText: 'Password',
+              hintText: 'Enter your password',
+              border:
+                  OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+              suffixIcon: IconButton(
+                icon: Icon(
+                  _obscureText ? Icons.visibility_off : Icons.visibility,
+                ),
+                onPressed: () {
+                  setState(() {
+                    _obscureText =
+                        !_obscureText; // Thay đổi trạng thái ẩn/hiện mật khẩu
+                  });
+                },
               ),
             ),
           ),
-          SizedBox(height: 16),
-          Container(
-            child: TextFormField(
-              decoration: InputDecoration(
-                labelText: 'Username',
-                hintText: 'Enter your username',
-                border:
-                    OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-              ),
-            ),
-          ),
-          SizedBox(height: 16),
-          Container(
-            child: TextFormField(
-              obscureText: true,
-              decoration: InputDecoration(
-                labelText: 'Password',
-                hintText: 'Enter your password',
-                border:
-                    OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-                suffixIcon: Icon(Icons.visibility_off),
-              ),
-            ),
-          ),
-          SizedBox(height: 16),
+          const SizedBox(height: 16),
           Container(
             width: double.infinity,
             decoration: BoxDecoration(
-              gradient: LinearGradient(
+              gradient: const LinearGradient(
                 colors: GradientColors.blueOcean,
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
@@ -67,29 +84,27 @@ class SignUpView extends StatelessWidget {
               onPressed: () {
                 // Xử lý đăng ký
               },
-              child: Text('Register',
+              child: const Text('Register',
                   style: TextStyle(
                       fontSize: 18,
                       color: Colors.white,
                       fontWeight: FontWeight.bold)),
             ),
           ),
-          SizedBox(height: 16),
-          Container(
-            child: TextButton(
-              onPressed: onLoginPressed, // Nhấn vào để quay lại Login page
-              child: RichText(
-                text: TextSpan(
-                  text: "Already have an account? ",
-                  style: TextStyle(color: Colors.grey),
-                  children: [
-                    TextSpan(
-                      text: "Login",
-                      style: TextStyle(
-                          color: Colors.blue, fontWeight: FontWeight.bold),
-                    ),
-                  ],
-                ),
+          const SizedBox(height: 16),
+          TextButton(
+            onPressed: widget.onLoginPressed, // Nhấn vào để quay lại Login page
+            child: RichText(
+              text: const TextSpan(
+                text: "Already have an account? ",
+                style: TextStyle(color: Colors.grey),
+                children: [
+                  TextSpan(
+                    text: "Login",
+                    style: TextStyle(
+                        color: Colors.blue, fontWeight: FontWeight.bold),
+                  ),
+                ],
               ),
             ),
           ),

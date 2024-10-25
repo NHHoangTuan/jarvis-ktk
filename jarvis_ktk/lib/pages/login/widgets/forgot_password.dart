@@ -14,21 +14,19 @@ class ForgotPasswordView extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Container(
-            child: TextFormField(
-              decoration: InputDecoration(
-                labelText: 'Email',
-                hintText: 'Enter your email address',
-                border:
-                    OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-              ),
+          TextFormField(
+            decoration: InputDecoration(
+              labelText: 'Email',
+              hintText: 'Enter your email address',
+              border:
+                  OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
             ),
           ),
-          SizedBox(height: 16),
+          const SizedBox(height: 16),
           Container(
             width: double.infinity,
             decoration: BoxDecoration(
-              gradient: LinearGradient(
+              gradient: const LinearGradient(
                 colors: GradientColors.blueOcean,
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
@@ -43,29 +41,27 @@ class ForgotPasswordView extends StatelessWidget {
               onPressed: () {
                 // Xử lý đăng ký
               },
-              child: Text('Reset Password',
+              child: const Text('Reset Password',
                   style: TextStyle(
                       fontSize: 18,
                       color: Colors.white,
                       fontWeight: FontWeight.bold)),
             ),
           ),
-          SizedBox(height: 16),
-          Container(
-            child: TextButton(
-              onPressed: onLoginPressed, // Nhấn vào để quay lại Login page
-              child: RichText(
-                text: TextSpan(
-                  text: "Try out login again? ",
-                  style: TextStyle(color: Colors.grey),
-                  children: [
-                    TextSpan(
-                      text: "Login",
-                      style: TextStyle(
-                          color: Colors.blue, fontWeight: FontWeight.bold),
-                    ),
-                  ],
-                ),
+          const SizedBox(height: 16),
+          TextButton(
+            onPressed: onLoginPressed, // Nhấn vào để quay lại Login page
+            child: RichText(
+              text: const TextSpan(
+                text: "Try out login again? ",
+                style: TextStyle(color: Colors.grey),
+                children: [
+                  TextSpan(
+                    text: "Login",
+                    style: TextStyle(
+                        color: Colors.blue, fontWeight: FontWeight.bold),
+                  ),
+                ],
               ),
             ),
           ),
