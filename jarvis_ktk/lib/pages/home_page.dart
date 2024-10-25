@@ -3,12 +3,11 @@ import 'package:jarvis_ktk/pages/email_reply/email_reply_page.dart';
 import 'package:jarvis_ktk/pages/personal/my_bot.dart';
 import 'package:jarvis_ktk/pages/preview_bot/preview_bot.dart';
 import 'package:jarvis_ktk/pages/personal/knowledge.dart';
-import 'package:jarvis_ktk/widgets/custom_drawer.dart';
+import 'package:jarvis_ktk/widgets/nav_drawer.dart';
 import 'package:provider/provider.dart';
-
-import 'email_reply/email_reply_app_bar.dart';
 import 'chat/chat_app_bar.dart';
 import 'chat/chat_body.dart';
+import 'email_reply/email_reply_app_bar.dart';
 import 'chat/chat_model.dart';
 
 class HomePage extends StatefulWidget {
@@ -76,7 +75,7 @@ class _HomePageState extends State<HomePage> {
       child: Scaffold(
         key: _scaffoldKey, // Associate the Scaffold with the GlobalKey
         appBar: _currentAppBar,
-        drawer: CustomDrawer(
+        drawer: NavDrawer(
           initialSelectedItem:
               _currentSelectedItem, // Truyền selected item hiện tại
           onItemTap: (selectedItem) {
@@ -94,10 +93,6 @@ class _HomePageState extends State<HomePage> {
               case 'Email Reply':
                 _changeBody(const EmailReplyPage());
                 _changeAppBar(const EmailReplyAppBar());
-                break;
-              case 'Settings':
-                _changeBody(const Center(child: Text('Settings Page')));
-                _changeAppBar(AppBar(title: const Text('Settings')));
                 break;
               case 'My Bot': // Handle My Bot case
                 _changeBody(MyBotPage(

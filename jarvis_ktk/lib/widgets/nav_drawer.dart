@@ -1,23 +1,22 @@
 import 'package:flutter/material.dart';
-import 'package:jarvis_ktk/pages/prompt_bottom_sheet/prompt_bottom_sheet.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 
-class CustomDrawer extends StatefulWidget {
+class NavDrawer extends StatefulWidget {
   final Function(String) onItemTap;
   final String initialSelectedItem;
   final Function(int) onHistoryTap; // Thêm callback cho lịch sử chat
 
-  const CustomDrawer({
+  @override
+  _NavDrawerState createState() => _NavDrawerState();
+  const NavDrawer({
     super.key,
     required this.onItemTap,
     required this.onHistoryTap, // Thêm callback cho lịch sử chat
     this.initialSelectedItem = 'Chat',
   });
-
-  @override
-  _CustomDrawerState createState() => _CustomDrawerState();
 }
 
-class _CustomDrawerState extends State<CustomDrawer> {
+class _NavDrawerState extends State<NavDrawer> with TickerProviderStateMixin {
   bool _showPersonalOptions = false;
   late String _selectedItem;
 
@@ -77,6 +76,9 @@ class _CustomDrawerState extends State<CustomDrawer> {
                   title: const Text('Personal'),
                   tileColor:
                       _selectedItem == 'Personal' ? Colors.grey[300] : null,
+                  trailing: _showPersonalOptions
+                      ? const Icon(Icons.arrow_drop_up)
+                      : const Icon(Icons.arrow_drop_down),
                   onTap: () {
                     setState(() {
                       _showPersonalOptions = !_showPersonalOptions;
@@ -84,39 +86,56 @@ class _CustomDrawerState extends State<CustomDrawer> {
                     });
                   },
                 ),
-                if (_showPersonalOptions) ...[
-                  Padding(
-                    padding: const EdgeInsets.only(left: 40.0),
-                    child: ListTile(
-                      leading: const Icon(Icons.android),
-                      title: const Text('My Bot'),
-                      tileColor:
-                          _selectedItem == 'My Bot' ? Colors.grey[300] : null,
-                      onTap: () {
-                        setState(() {
-                          _selectedItem = 'My Bot';
-                        });
-                        widget.onItemTap('My Bot');
-                      },
+                AnimatedSize(
+                  duration: const Duration(milliseconds: 300),
+                  curve: Curves.easeInOut,
+                  child: Container(
+                    // You can set a minimum height to maintain space when collapsed
+                    constraints: BoxConstraints(
+                      minHeight: _showPersonalOptions ? 0 : 0,
+                    ),
+                    child: Column(
+                      children: [
+                        if (_showPersonalOptions) ...[
+                          // Indentation
+
+                          Padding(
+                            padding: const EdgeInsets.only(left: 40.0),
+                            child: ListTile(
+                              leading: const Icon(Icons.android),
+                              title: const Text('My Bot'),
+                              tileColor: _selectedItem == 'My Bot'
+                                  ? Colors.grey[300]
+                                  : null,
+                              onTap: () {
+                                setState(() {
+                                  _selectedItem = 'My Bot';
+                                });
+                                widget.onItemTap('My Bot');
+                              },
+                            ),
+                          ).animate().slide().fadeIn(),
+                          Padding(
+                            padding: const EdgeInsets.only(left: 40.0),
+                            child: ListTile(
+                              leading: const Icon(Icons.book),
+                              title: const Text('Knowledge'),
+                              tileColor: _selectedItem == 'Knowledge'
+                                  ? Colors.grey[300]
+                                  : null,
+                              onTap: () {
+                                setState(() {
+                                  _selectedItem = 'Knowledge';
+                                });
+                                widget.onItemTap('Knowledge');
+                              },
+                            ),
+                          ).animate().slide().fadeIn(),
+                        ],
+                      ],
                     ),
                   ),
-                  Padding(
-                    padding: const EdgeInsets.only(left: 40.0),
-                    child: ListTile(
-                      leading: const Icon(Icons.book),
-                      title: const Text('Knowledge'),
-                      tileColor: _selectedItem == 'Knowledge'
-                          ? Colors.grey[300]
-                          : null,
-                      onTap: () {
-                        setState(() {
-                          _selectedItem = 'Knowledge';
-                        });
-                        widget.onItemTap('Knowledge');
-                      },
-                    ),
-                  ),
-                ],
+                ),
                 ListTile(
                   leading: const Icon(Icons.email),
                   title: const Text('Email Reply'),
@@ -128,19 +147,6 @@ class _CustomDrawerState extends State<CustomDrawer> {
                       _showPersonalOptions = false;
                     });
                     widget.onItemTap('Email Reply');
-                  },
-                ),
-                ListTile(
-                  leading: const Icon(Icons.settings),
-                  title: const Text('Settings'),
-                  tileColor:
-                      _selectedItem == 'Settings' ? Colors.grey[300] : null,
-                  onTap: () {
-                    setState(() {
-                      _selectedItem = 'Settings';
-                      _showPersonalOptions = false;
-                    });
-                    showPromptBottomSheet(context);
                   },
                 ),
               ],

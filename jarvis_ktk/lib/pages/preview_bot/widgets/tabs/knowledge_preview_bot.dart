@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:jarvis_ktk/pages/preview_bot/widgets/dialog/add_knowledge_preview_bot.dart'; // Import file add_knowledge_preview_bot.dart
+import 'package:jarvis_ktk/pages/preview_bot/widgets/dialog/add_knowledge_preview_bot.dart';
+
+import '../../models/mock_data.dart';
 
 class KnowledgePreviewBotPage extends StatefulWidget {
   const KnowledgePreviewBotPage({super.key});
@@ -14,12 +16,6 @@ class _KnowledgePreviewBotPageState extends State<KnowledgePreviewBotPage>
     with AutomaticKeepAliveClientMixin {
   bool _isExpanded = false;
   bool _showDeleteButtons = false;
-  final List<String> _items = [
-    'Knowledge1',
-    'Knowledge2',
-    'Knowledge3',
-    'Knowledge4'
-  ];
 
   @override
   bool get wantKeepAlive => true;
@@ -74,9 +70,9 @@ class _KnowledgePreviewBotPageState extends State<KnowledgePreviewBotPage>
                                     ),
                                   ],
                                 ),
-                                content: const SizedBox(
+                                content: SizedBox(
                                   width: double.maxFinite,
-                                  child: AddKnowledgePreviewBot(),
+                                  child: AddKnowledgePreviewBot(knowledgeList: knowledgeList),
                                 ),
                               );
                             },
@@ -102,7 +98,7 @@ class _KnowledgePreviewBotPageState extends State<KnowledgePreviewBotPage>
                   if (_isExpanded) const Divider(),
                   AnimatedContainer(
                     duration: const Duration(milliseconds: 300),
-                    height: _isExpanded ? _items.length * 56.0 : 0.0,
+                    height: _isExpanded ? knowledgeList.length * 56.0 : 0.0,
                     child: _isExpanded
                         ? Container(
                             decoration: BoxDecoration(
@@ -116,17 +112,17 @@ class _KnowledgePreviewBotPageState extends State<KnowledgePreviewBotPage>
                               ),
                               child: ListView(
                                 physics: const NeverScrollableScrollPhysics(),
-                                children: _items
+                                children: knowledgeList
                                     .map(
-                                      (item) => ListTile(
-                                        title: Text(item),
+                                      (knowledge) => ListTile(
+                                        title: Text(knowledge.title),
                                         leading: const Icon(Icons.visibility),
                                         trailing: _showDeleteButtons
                                             ? IconButton(
                                                 icon: const Icon(Icons.delete),
                                                 onPressed: () {
                                                   setState(() {
-                                                    _items.remove(item);
+                                                    knowledgeList.remove(knowledge);
                                                   });
                                                 },
                                               )

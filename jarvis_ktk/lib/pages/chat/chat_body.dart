@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../prompt_bottom_sheet/prompt_bottom_sheet.dart';
 import 'chat_model.dart';
 import 'widgets/message_bubble.dart';
 import 'widgets/welcome.dart';
 import 'package:dropdown_search/dropdown_search.dart';
-import 'package:jarvis_ktk/pages/prompt_bottom_sheet/prompt_bottom_sheet.dart';
 
 class ChatBody extends StatefulWidget {
   final bool
@@ -71,16 +71,6 @@ class _ChatBodyState extends State<ChatBody> {
     }
   }
 
-// Sửa kiểu dữ liệu của hàm để chấp nhận giá trị null
-  void _handlePromptSelection((IconData, String)? selectedItem) {
-    if (selectedItem == null) return;
-
-    if (selectedItem.$2 == 'Prompt') {
-      showPromptBottomSheet(context);
-    } else if (selectedItem.$2 == 'Upload image') {
-    } else if (selectedItem.$2 == 'Take a photo') {}
-  }
-
   @override
   Widget build(BuildContext context) {
     final chatModel = Provider.of<ChatModel>(context);
@@ -142,7 +132,6 @@ class _ChatBodyState extends State<ChatBody> {
                         (Icons.electric_bolt, 'Prompt'),
                       ],
                       compareFn: (item1, item2) => item1.$1 == item2.$1,
-                      onChanged: _handlePromptSelection,
                       popupProps: PopupProps.modalBottomSheet(
                         fit: FlexFit.loose,
                         itemBuilder: (context, item, isDisabled, isSelected) =>
@@ -164,6 +153,12 @@ class _ChatBodyState extends State<ChatBody> {
                         Icons.add_box_outlined,
                         color: Colors.black,
                       ),
+                      onChanged: (selectedItem) {
+                        if (selectedItem != null &&
+                            selectedItem.$2 == 'Prompt') {
+                          showPromptBottomSheet(context);
+                        }
+                      },
                     ),
                     const SizedBox(width: 8),
                     Expanded(
