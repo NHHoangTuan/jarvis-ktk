@@ -58,7 +58,6 @@ class _EmailReplyPage extends State<EmailReplyPage>
       ));
       _controller.clear();
 
-      // Generate a random response from predefinedMessages
       final random = Random();
       final response =
           predefinedMessages[random.nextInt(predefinedMessages.length)];
@@ -71,51 +70,55 @@ class _EmailReplyPage extends State<EmailReplyPage>
       ));
     });
 
-    // Scroll to the bottom with a slight offset
     _scrollController.animateTo(
-      _scrollController.position.maxScrollExtent +
-          200, // Adjust the offset as needed
+      _scrollController.position.maxScrollExtent + 200,
       duration: const Duration(milliseconds: 500),
-
       curve: Curves.easeOut,
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    super.build(context); // Call super.build to ensure keep-alive functionality
-    return Column(
-      children: <Widget>[
-        Expanded(
-          child: _messages.isEmpty
-              ? const EmptyChatScreen()
-              : ListView.builder(
-                  controller: _scrollController,
-                  itemCount: _messages.length,
-                  itemBuilder: (context, index) {
-                    return ChatMessage(
-                      message: _messages[index].message,
-                      isBot: _messages[index].isBot,
-                      onSendMessage: _messages[index].onSendMessage,
-                      isPreviousMessage: index == _messages.length - 1,
-                    );
-                  },
-                ),
-        ),
-        // chat input
-        ChatInput(
-          controller: _controller,
-          onSendMessage: () => _sendMessage(null),
-          onClearMessages: () {
-            setState(() {
-              _messages.clear();
-            });
-          },
-        ),
-      ],
-    );
+    super.build(context);
+    return Scaffold(
+        backgroundColor: Colors.white,
+        body: Column(
+          children: <Widget>[
+            Expanded(
+              child: _messages.isEmpty
+                  ? const EmptyChatScreen()
+                  : ListView.builder(
+                      controller: _scrollController,
+                      itemCount: _messages.length,
+                      shrinkWrap: true,
+                      itemBuilder: (context, index) {
+                        return AnimatedSize(
+                          duration: const Duration(milliseconds: 300),
+                          curve: Curves.easeInOut,
+                          child: ChatMessage(
+                            message: _messages[index].message,
+                            isBot: _messages[index].isBot,
+                            onSendMessage: _messages[index].onSendMessage,
+                            isPreviousMessage: index == _messages.length - 1,
+                          ),
+                        );
+                      },
+                    ),
+            ),
+            // chat input
+            ChatInput(
+              controller: _controller,
+              onSendMessage: () => _sendMessage(null),
+              onClearMessages: () {
+                setState(() {
+                  _messages.clear();
+                });
+              },
+            ),
+          ],
+        ));
   }
 
   @override
-  bool get wantKeepAlive => true; // Ensure the state is kept alive
+  bool get wantKeepAlive => true;
 }
