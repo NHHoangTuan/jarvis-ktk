@@ -19,11 +19,11 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   // Variable to track which screen is being displayed in the body
-  Widget _currentBody = const Center(child: Text('Home Page'));
-  PreferredSizeWidget _currentAppBar =
-      AppBar(title: const Text('Chat with AI'));
+  Widget _currentBody = ChatBody();
+  PreferredSizeWidget _currentAppBar = ChatAppBar();
   final GlobalKey<ScaffoldState> _scaffoldKey =
       GlobalKey<ScaffoldState>(); // Correct key placement
+  String _currentSelectedItem = 'Chat'; // Thêm biến để theo dõi mục đang chọn
 
   // Method to change the body content
   void _changeBody(Widget newBody) {
@@ -38,6 +38,13 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
+  // Thêm method để thay đổi selected item
+  void _changeSelectedItem(String newItem) {
+    setState(() {
+      _currentSelectedItem = newItem;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
@@ -46,7 +53,10 @@ class _HomePageState extends State<HomePage> {
         key: _scaffoldKey, // Associate the Scaffold with the GlobalKey
         appBar: _currentAppBar,
         drawer: CustomDrawer(
+          initialSelectedItem:
+              _currentSelectedItem, // Truyền selected item hiện tại
           onItemTap: (selectedItem) {
+            _changeSelectedItem(selectedItem); // Cập nhật selected item
             // Change body content based on the selected item
             switch (selectedItem) {
               case 'Chat':
@@ -75,6 +85,7 @@ class _HomePageState extends State<HomePage> {
                 _changeAppBar(AppBar(title: const Text('My Bot')));
                 break;
             }
+
             Navigator.pop(context); // Close the drawer after selecting an item
           },
         ),
