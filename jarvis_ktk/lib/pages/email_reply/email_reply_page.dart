@@ -1,6 +1,8 @@
 import 'dart:math';
+
 import 'package:flutter/material.dart';
-import 'widgets/chart_input.dart';
+
+import 'widgets/chat_input.dart';
 import 'widgets/chat_message.dart';
 import 'widgets/empty_chat_screen.dart';
 
@@ -37,32 +39,44 @@ class _EmailReplyPage extends State<EmailReplyPage>
   final List<ChatMessage> _messages = [];
   final ScrollController _scrollController = ScrollController();
 
-  void _sendMessage() {
-    if (_controller.text.isEmpty) return;
+  void _sendMessage(String? action) {
+    if (_controller.text.isEmpty && action == null) return;
 
+    if (action != null) {
+      _controller.text = action;
+    }
+
+    addMessage(_controller.text);
+  }
+
+  void addMessage(String message) {
     setState(() {
       _messages.add(ChatMessage(
         message: _controller.text,
         isBot: false,
+        onSendMessage: _sendMessage,
       ));
       _controller.clear();
 
       // Generate a random response from predefinedMessages
       final random = Random();
       final response =
-      predefinedMessages[random.nextInt(predefinedMessages.length)];
+          predefinedMessages[random.nextInt(predefinedMessages.length)];
 
       _messages.add(ChatMessage(
         message: response,
         isBot: true,
+        onSendMessage: _sendMessage,
+        isPreviousMessage: true,
       ));
     });
 
     // Scroll to the bottom with a slight offset
     _scrollController.animateTo(
       _scrollController.position.maxScrollExtent +
-          80, // Adjust the offset as needed
-      duration: const Duration(milliseconds: 300),
+          200, // Adjust the offset as needed
+      duration: const Duration(milliseconds: 500),
+
       curve: Curves.easeOut,
     );
   }
@@ -76,17 +90,22 @@ class _EmailReplyPage extends State<EmailReplyPage>
           child: _messages.isEmpty
               ? const EmptyChatScreen()
               : ListView.builder(
-            controller: _scrollController,
-            itemCount: _messages.length,
-            itemBuilder: (context, index) {
-              return _messages[index];
-            },
-          ),
+                  controller: _scrollController,
+                  itemCount: _messages.length,
+                  itemBuilder: (context, index) {
+                    return ChatMessage(
+                      message: _messages[index].message,
+                      isBot: _messages[index].isBot,
+                      onSendMessage: _messages[index].onSendMessage,
+                      isPreviousMessage: index == _messages.length - 1,
+                    );
+                  },
+                ),
         ),
         // chat input
         ChatInput(
           controller: _controller,
-          onSendMessage: _sendMessage,
+          onSendMessage: () => _sendMessage(null),
           onClearMessages: () {
             setState(() {
               _messages.clear();
