@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../prompt_bottom_sheet/prompt_bottom_sheet.dart';
 import 'chat_model.dart';
 import 'widgets/message_bubble.dart';
 import 'widgets/welcome.dart';
@@ -121,6 +122,11 @@ class _ChatBodyState extends State<ChatBody> {
                         Icons.add_box_outlined,
                         color: Colors.black,
                       ),
+                      onChanged: (selectedItem) {
+                        if (selectedItem != null && selectedItem.$2 == 'Prompt') {
+                          showPromptBottomSheet(context);
+                        }
+                      },
                     ),
                     const SizedBox(width: 8),
                     Expanded(

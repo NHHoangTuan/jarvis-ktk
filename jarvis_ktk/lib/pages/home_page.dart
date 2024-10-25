@@ -3,12 +3,11 @@ import 'package:jarvis_ktk/pages/email_reply/email_reply_page.dart';
 import 'package:jarvis_ktk/pages/personal/my_bot.dart';
 import 'package:jarvis_ktk/pages/preview_bot/preview_bot.dart';
 import 'package:jarvis_ktk/pages/personal/knowledge.dart';
-import 'package:jarvis_ktk/widgets/custom_drawer.dart';
+import 'package:jarvis_ktk/widgets/nav_drawer.dart';
 import 'package:provider/provider.dart';
-
-import 'email_reply/email_reply_app_bar.dart';
 import 'chat/chat_app_bar.dart';
 import 'chat/chat_body.dart';
+import 'email_reply/email_reply_app_bar.dart';
 import 'chat/chat_model.dart';
 
 class HomePage extends StatefulWidget {
@@ -20,7 +19,7 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   // Variable to track which screen is being displayed in the body
-  Widget _currentBody = const Center(child: Text('Home Page'));
+  Widget _currentBody = ChatBody();
   PreferredSizeWidget _currentAppBar =
       AppBar(title: const Text('Chat with AI'));
   final GlobalKey<ScaffoldState> _scaffoldKey =
@@ -46,25 +45,17 @@ class _HomePageState extends State<HomePage> {
       child: Scaffold(
         key: _scaffoldKey, // Associate the Scaffold with the GlobalKey
         appBar: _currentAppBar,
-        drawer: CustomDrawer(
+        drawer: NavDrawer(
           onItemTap: (selectedItem) {
             // Change body content based on the selected item
             switch (selectedItem) {
               case 'Chat':
-                _changeBody(const Center(child: Text('Chat Page')));
-                _changeAppBar(AppBar(title: const Text('Chat with AI')));
-                break;
-              case 'Personal':
-                _changeBody(const Center(child: Text('Personal Chat')));
-                _changeAppBar(AppBar(title: const Text('Personal Chat')));
+                _changeBody(ChatBody());
+                _changeAppBar(ChatAppBar());
                 break;
               case 'Email Reply':
                 _changeBody(const EmailReplyPage());
                 _changeAppBar(const EmailReplyAppBar());
-                break;
-              case 'Settings':
-                _changeBody(const Center(child: Text('Settings Page')));
-                _changeAppBar(AppBar(title: const Text('Settings')));
                 break;
               case 'My Bot': // Handle My Bot case
                 _changeBody(MyBotPage(
