@@ -4,8 +4,20 @@ import 'chat_model.dart';
 import 'widgets/message_bubble.dart';
 import 'widgets/welcome.dart';
 import 'package:dropdown_search/dropdown_search.dart';
+import 'package:jarvis_ktk/pages/prompt_bottom_sheet/prompt_bottom_sheet.dart';
 
 class ChatBody extends StatefulWidget {
+  final bool
+      isHistory; // Thêm tham số để xác định có phải đang xem lịch sử không
+  final List<Map<String, dynamic>>?
+      historyChatMessages; // Thêm danh sách tin nhắn lịch sử
+
+  const ChatBody({
+    Key? key,
+    this.isHistory = false,
+    this.historyChatMessages,
+  }) : super(key: key);
+
   @override
   _ChatBodyState createState() => _ChatBodyState();
 }
@@ -59,24 +71,37 @@ class _ChatBodyState extends State<ChatBody> {
     }
   }
 
+// Sửa kiểu dữ liệu của hàm để chấp nhận giá trị null
+  void _handlePromptSelection((IconData, String)? selectedItem) {
+    if (selectedItem == null) return;
+
+    if (selectedItem.$2 == 'Prompt') {
+      showPromptBottomSheet(context);
+    } else if (selectedItem.$2 == 'Upload image') {
+    } else if (selectedItem.$2 == 'Take a photo') {}
+  }
+
   @override
   Widget build(BuildContext context) {
     final chatModel = Provider.of<ChatModel>(context);
+
+    // Quyết định danh sách tin nhắn sẽ hiển thị
+    final messages = widget.isHistory
+        ? widget.historyChatMessages ?? []
+        : chatModel.messages;
 
     return Stack(
       children: [
         Column(
           children: [
             Expanded(
-              child: chatModel.showWelcomeMessage
-                  ? const WelcomeMessage()
-                  : ListView.builder(
+              child: widget.isHistory
+                  ? ListView.builder(
                       reverse: true,
                       padding: const EdgeInsets.all(16),
-                      itemCount: chatModel.messages.length,
+                      itemCount: messages.length,
                       itemBuilder: (context, index) {
-                        final message = chatModel
-                            .messages[chatModel.messages.length - 1 - index];
+                        final message = messages[messages.length - 1 - index];
                         return MessageBubble(
                           text: message['text'],
                           isUser: message['isUser'],
@@ -84,7 +109,24 @@ class _ChatBodyState extends State<ChatBody> {
                           avatar: message['avatar'],
                         );
                       },
-                    ),
+                    )
+                  : chatModel.showWelcomeMessage
+                      ? const WelcomeMessage()
+                      : ListView.builder(
+                          reverse: true,
+                          padding: const EdgeInsets.all(16),
+                          itemCount: chatModel.messages.length,
+                          itemBuilder: (context, index) {
+                            final message = chatModel.messages[
+                                chatModel.messages.length - 1 - index];
+                            return MessageBubble(
+                              text: message['text'],
+                              isUser: message['isUser'],
+                              timestamp: message['timestamp'],
+                              avatar: message['avatar'],
+                            );
+                          },
+                        ),
             ),
             Container(
               padding: const EdgeInsets.all(8),
@@ -100,6 +142,7 @@ class _ChatBodyState extends State<ChatBody> {
                         (Icons.electric_bolt, 'Prompt'),
                       ],
                       compareFn: (item1, item2) => item1.$1 == item2.$1,
+                      onChanged: _handlePromptSelection,
                       popupProps: PopupProps.modalBottomSheet(
                         fit: FlexFit.loose,
                         itemBuilder: (context, item, isDisabled, isSelected) =>

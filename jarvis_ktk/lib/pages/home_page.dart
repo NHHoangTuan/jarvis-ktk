@@ -46,6 +46,29 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
+  void _handleHistoryTap(int index) {
+    // Tạo đoạn chat mẫu dựa trên index
+    final List<Map<String, dynamic>> sampleMessages = [
+      {
+        'text': 'Hello, how can I help you today?',
+        'isUser': false,
+        'timestamp': DateTime.now(),
+        'avatar': 'assets/bot_avatar.jpg',
+      },
+      {
+        'text': 'I need some information about your services.',
+        'isUser': true,
+        'timestamp': DateTime.now(),
+        'avatar': 'assets/user_avatar.jpg',
+      },
+    ];
+
+    // Chuyển đến màn hình Chat
+    _changeSelectedItem('Chat');
+    _changeBody(ChatBody(isHistory: true, historyChatMessages: sampleMessages));
+    _changeAppBar(ChatAppBar());
+  }
+
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
@@ -61,8 +84,8 @@ class _HomePageState extends State<HomePage> {
             // Change body content based on the selected item
             switch (selectedItem) {
               case 'Chat':
-                _changeBody(const Center(child: Text('Chat Page')));
-                _changeAppBar(AppBar(title: const Text('Chat with AI')));
+                _changeBody(ChatBody());
+                _changeAppBar(ChatAppBar());
                 break;
               case 'Personal':
                 _changeBody(const Center(child: Text('Personal Chat')));
@@ -93,6 +116,7 @@ class _HomePageState extends State<HomePage> {
 
             Navigator.pop(context); // Close the drawer after selecting an item
           },
+          onHistoryTap: _handleHistoryTap, // Thêm callback cho lịch sử chat
         ),
         body: Stack(
           children: [

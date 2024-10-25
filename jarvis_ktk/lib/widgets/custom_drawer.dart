@@ -4,10 +4,12 @@ import 'package:jarvis_ktk/pages/prompt_bottom_sheet/prompt_bottom_sheet.dart';
 class CustomDrawer extends StatefulWidget {
   final Function(String) onItemTap;
   final String initialSelectedItem;
+  final Function(int) onHistoryTap; // Thêm callback cho lịch sử chat
 
   const CustomDrawer({
     super.key,
     required this.onItemTap,
+    required this.onHistoryTap, // Thêm callback cho lịch sử chat
     this.initialSelectedItem = 'Chat',
   });
 
@@ -155,6 +157,8 @@ class _CustomDrawerState extends State<CustomDrawer> {
                     leading: const Icon(Icons.message),
                     title: Text('History $index'),
                     onTap: () {
+                      widget.onHistoryTap(
+                          index); // Gọi callback khi bấm vào lịch sử chat
                       Navigator.pop(context);
                     },
                   );
