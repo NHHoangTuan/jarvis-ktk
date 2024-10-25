@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:jarvis_ktk/utils/colors.dart';
+import 'package:jarvis_ktk/pages/home_page.dart';
 
 class SignInView extends StatefulWidget {
   final VoidCallback onSignUpPressed;
@@ -80,6 +81,11 @@ class _SignInViewState extends State<SignInView> {
               ),
               onPressed: () {
                 // Xử lý đăng nhập
+                // Điều hướng đến HomePage khi nhấn nút "Login"
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (context) => const HomePage()),
+                );
               },
               child: const Text('Login',
                   style: TextStyle(
