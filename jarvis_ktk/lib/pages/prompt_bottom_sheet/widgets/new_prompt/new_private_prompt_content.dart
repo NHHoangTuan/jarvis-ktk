@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'common_widgets.dart';
+import '../common_widgets.dart';
 
 class NewPrivatePromptContent extends StatefulWidget {
   const NewPrivatePromptContent({super.key});
@@ -36,7 +36,6 @@ class _NewPrivatePromptContentState extends State<NewPrivatePromptContent> with 
             const Text('Name',
                 style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
             PromptTextFormField(
-              controller: _controller,
               hintText: 'Name of the prompt',
               hintMaxLines: 2,
               onChanged: (value) {
@@ -49,7 +48,6 @@ class _NewPrivatePromptContentState extends State<NewPrivatePromptContent> with 
             ),
             const PromptHelperCard(),
             PromptTextFormField(
-              controller: _controller,
               hintText: 'e.g: Write an article about [TOPIC], make sure to include these keywords: [KEYWORDS]',
               hintMaxLines: 2,
               onChanged: (value) {

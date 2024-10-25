@@ -47,6 +47,7 @@ class PromptTextBox extends StatelessWidget {
       ),
       child: SizedBox(
         height: 200,
+        width: double.infinity,
         child: Scrollbar(
           radius: const Radius.circular(10),
           thumbVisibility: true,
@@ -89,10 +90,23 @@ class UsePromptButton extends StatelessWidget {
   }
 }
 
-class InfoDialogTitle extends StatelessWidget {
+class InfoDialogTitle extends StatefulWidget {
   const InfoDialogTitle({super.key, required this.prompt});
 
   final PublicPrompt prompt;
+
+  @override
+  State<InfoDialogTitle> createState() => _InfoDialogTitleState();
+}
+
+class _InfoDialogTitleState extends State<InfoDialogTitle> {
+  late bool isFavorite;
+
+  @override
+  void initState() {
+    super.initState();
+    isFavorite = widget.prompt.isFavorite;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -100,7 +114,7 @@ class InfoDialogTitle extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Text(
-          prompt.name,
+          widget.prompt.name,
           style: const TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.bold,
@@ -114,9 +128,16 @@ class InfoDialogTitle extends StatelessWidget {
               height: 32,
               width: 32,
               child: IconButton(
-                icon: const Icon(Icons.star_border, size: 16),
+                icon: Icon(
+                  isFavorite ? Icons.star : Icons.star_border,
+                  size: 16,
+                  color: isFavorite ? Colors.black : null,
+                ),
                 onPressed: () {
-                  // Handle favorite button press
+                  setState(() {
+                    isFavorite = !isFavorite;
+                    widget.prompt.isFavorite = isFavorite;
+                  });
                 },
               ),
             ),

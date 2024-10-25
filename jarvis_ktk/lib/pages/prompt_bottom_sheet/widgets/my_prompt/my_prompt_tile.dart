@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../models/prompt.dart';
+import 'edit_my_prompt_dialog.dart';
 
 class MyPromptTile extends StatelessWidget {
   final MyPrompt prompt;
@@ -34,7 +35,7 @@ class MyPromptTile extends StatelessWidget {
                     child: IconButton(
                       icon: const Icon(Icons.edit, size: 16),
                       onPressed: () {
-                        // Handle info button press
+                        showEditPromptDialog(context, prompt);
                       },
                     ),
                   ),

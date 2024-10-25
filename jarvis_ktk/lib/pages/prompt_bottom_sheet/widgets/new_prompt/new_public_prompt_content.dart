@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'common_widgets.dart';
+import '../common_widgets.dart';
 
 const Set<String> languagesList = <String>{'English', 'Spanish', 'French'};
 const Set<String> categoriesList = <String>{
@@ -76,7 +76,6 @@ class _NewPublicPromptContentState extends State<NewPublicPromptContent>
                 style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)
             ),
             PromptTextFormField(
-              controller: _controller,
               hintText: 'Name of the prompt',
               hintMaxLines: 1,
               onChanged: (value) {
@@ -87,7 +86,6 @@ class _NewPublicPromptContentState extends State<NewPublicPromptContent>
                 style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)
             ),
             PromptTextFormField(
-              controller: _controller,
               hintText:
                   'Describe your prompt so others can have a better understanding',
               hintMaxLines: 2,
@@ -101,7 +99,6 @@ class _NewPublicPromptContentState extends State<NewPublicPromptContent>
             ),
             const PromptHelperCard(),
             PromptTextFormField(
-              controller: _controller,
               hintText:
                   'e.g: Write an article about [TOPIC], make sure to include these keywords: [KEYWORDS]',
               hintMaxLines: 2,
