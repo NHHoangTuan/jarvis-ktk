@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:jarvis_ktk/utils/colors.dart';
 
+import '../../models/knowledge.dart';
+import '../knowledge_info_page.dart';
+
 class AddKnowledgePreviewBot extends StatefulWidget {
-  const AddKnowledgePreviewBot({super.key});
+  final List<Knowledge> knowledgeList;
+  const AddKnowledgePreviewBot({super.key, required this.knowledgeList});
 
   @override
   // ignore: library_private_types_in_public_api
@@ -59,15 +63,28 @@ class _AddKnowledgePreviewBotState extends State<AddKnowledgePreviewBot> {
           ),
           Expanded(
             child: ListView.separated(
-              itemCount: 10, // Example item count
+              itemCount: widget.knowledgeList.length,
               itemBuilder: (context, index) {
                 return ListTile(
+                  onTap: () {
+                    // Navigate to the knowledge detail page
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) {
+                          return KnowledgeInfoPage(knowledge: widget.knowledgeList[index]);
+                        },
+                      ),
+                    );
+                  },
                   leading:
                       const Icon(Icons.folder, size: 48.0), // Double the size
                   title: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('Knowledge $index'),
+                      Text(widget.knowledgeList[index].title,
+                          style: const TextStyle(
+                              fontWeight: FontWeight.bold, fontSize: 16)),
                       Row(
                         children: [
                           Card(
@@ -162,10 +179,4 @@ class _AddKnowledgePreviewBotState extends State<AddKnowledgePreviewBot> {
       ),
     );
   }
-}
-
-void main() {
-  runApp(const MaterialApp(
-    home: AddKnowledgePreviewBot(),
-  ));
 }

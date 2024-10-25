@@ -45,6 +45,30 @@ class SaveButton extends StatelessWidget {
   }
 }
 
+class NextButton extends StatelessWidget {
+  const NextButton({super.key, required this.onPressed});
+
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return TextButton(
+      style: TextButton.styleFrom(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(15.0),
+        ),
+        backgroundColor: const Color(0xFFB3A0F4),
+      ),
+      onPressed: onPressed,
+      child: const Text(
+        'Next',
+        style: TextStyle(
+            color: Colors.white, fontSize: 13, fontWeight: FontWeight.bold),
+      ),
+    );
+  }
+}
+
 class InfoDialogTitle extends StatelessWidget {
   const InfoDialogTitle({super.key, required this.prompt});
 

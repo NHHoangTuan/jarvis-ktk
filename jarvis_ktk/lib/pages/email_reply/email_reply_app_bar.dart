@@ -10,7 +10,6 @@ class EmailReplyAppBar extends StatelessWidget implements PreferredSizeWidget {
   @override
   Widget build(BuildContext context) {
     return AppBar(
-      backgroundColor: Colors.white,
       title: const EmailReplyTitle(),
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(25.0)),
@@ -25,22 +24,22 @@ class EmailReplyTitle extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Row(
-      mainAxisSize: MainAxisSize.min, // Adjusts row size to fit content
+      mainAxisSize: MainAxisSize.min,
       children: [
         const Text(
-          'Email reply', // The label
+          'Email reply',
           style: TextStyle(
-            fontSize: 16, // Text size
-            fontWeight: FontWeight.w500, // Text weight
+            fontSize: 16,
+            fontWeight: FontWeight.w500,
           ),
         ),
-        const SizedBox(width: 8), // Space between text and icon
+        const SizedBox(width: 8),
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
           transform: Matrix4.translationValues(0, 2, 0),
           decoration: BoxDecoration(
-            color: Colors.blue.withOpacity(0.1), // Background color
-            borderRadius: BorderRadius.circular(8), // Border radius
+            color: Colors.blue.withOpacity(0.1),
+            borderRadius: BorderRadius.circular(8),
           ),
           child: const Row(
             children: [
@@ -49,12 +48,12 @@ class EmailReplyTitle extends StatelessWidget {
                 color: Colors.blue,
                 size: 16,
               ),
-              SizedBox(width: 4), // Space between icon and number
+              SizedBox(width: 4),
               Text(
-                '73', // Number to display
+                '73',
                 style: TextStyle(
-                  fontSize: 12, // Text size
-                  fontWeight: FontWeight.w500, // Text weight
+                  fontSize: 12,
+                  fontWeight: FontWeight.w500,
                 ),
               ),
             ],
