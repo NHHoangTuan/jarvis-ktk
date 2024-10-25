@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:jarvis_ktk/utils/colors.dart';
 
 class EditPreviewBotPage extends StatefulWidget {
-  const EditPreviewBotPage({super.key});
+  final VoidCallback onApply; // Thêm callback
+
+  const EditPreviewBotPage({super.key, required this.onApply});
 
   @override
   // ignore: library_private_types_in_public_api
@@ -127,7 +129,7 @@ class _EditPreviewBotPageState extends State<EditPreviewBotPage> {
               children: [
                 TextButton(
                   onPressed: () {
-                    // Handle cancel action
+                    Navigator.of(context).pop(); // Đóng dialog
                   },
                   style: TextButton.styleFrom(
                     side: const BorderSide(
@@ -141,7 +143,8 @@ class _EditPreviewBotPageState extends State<EditPreviewBotPage> {
                 const SizedBox(width: 8),
                 TextButton(
                   onPressed: () {
-                    // Handle apply action
+                    widget.onApply(); // Gọi callback khi nhấn nút Apply
+                    Navigator.of(context).pop(); // Đóng dialog
                   },
                   style: TextButton.styleFrom(
                     backgroundColor: SimpleColors.navyBlue, // Background color
