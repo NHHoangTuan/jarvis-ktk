@@ -6,7 +6,9 @@ import 'package:jarvis_ktk/pages/preview_bot/widgets/tabs/knowledge_preview_bot.
 import 'package:jarvis_ktk/pages/preview_bot/widgets/dialog/edit_preview_bot.dart'; // Import file edit_preview_bot.dart
 
 class PreviewBotPage extends StatefulWidget {
-  const PreviewBotPage({super.key});
+  final VoidCallback onPublish; // Thêm callback onPublish
+
+  const PreviewBotPage({super.key, required this.onPublish});
 
   @override
   // ignore: library_private_types_in_public_api
@@ -86,9 +88,7 @@ class _PreviewBotPageState extends State<PreviewBotPage> {
                         BorderRadius.circular(5), // Set border radius to 5
                   ),
                 ),
-                onPressed: () {
-                  // Xử lý sự kiện khi nhấn nút 'Publish'
-                },
+                onPressed: widget.onPublish, // Gọi callback onPublish
                 child: const Row(
                   children: [
                     Icon(Icons.cloud_upload, color: Colors.white), // Add icon

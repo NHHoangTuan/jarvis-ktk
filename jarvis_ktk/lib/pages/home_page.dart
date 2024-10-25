@@ -3,6 +3,7 @@ import 'package:jarvis_ktk/pages/email_reply/email_reply_page.dart';
 import 'package:jarvis_ktk/pages/personal/my_bot.dart';
 import 'package:jarvis_ktk/pages/preview_bot/preview_bot.dart';
 import 'package:jarvis_ktk/pages/personal/knowledge.dart';
+import 'package:jarvis_ktk/pages/preview_bot/publish_bot.dart';
 import 'package:jarvis_ktk/widgets/nav_drawer.dart';
 import 'package:provider/provider.dart';
 import 'chat/chat_app_bar.dart';
@@ -97,7 +98,12 @@ class _HomePageState extends State<HomePage> {
               case 'My Bot': // Handle My Bot case
                 _changeBody(MyBotPage(
                   onApply: () {
-                    _changeBody(const PreviewBotPage());
+                    _changeBody(PreviewBotPage(
+                      onPublish: () {
+                        _changeBody(const PublishBotPage());
+                        _changeAppBar(AppBar(title: const Text('Publish Bot')));
+                      },
+                    ));
                     _changeAppBar(AppBar(title: const Text('Preview Bot')));
                   },
                 ));
