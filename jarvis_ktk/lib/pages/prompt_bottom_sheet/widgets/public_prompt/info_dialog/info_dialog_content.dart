@@ -9,9 +9,8 @@ class InfoDialogContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      height: 300,
-      child: Column(
+    return Wrap(children: [
+      Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text('${prompt.category} - ${prompt.author}',
@@ -28,7 +27,7 @@ class InfoDialogContent extends StatelessWidget {
           PromptTextBox(promptText: prompt.prompt),
         ],
       ),
-    );
+    ]);
   }
 }
 

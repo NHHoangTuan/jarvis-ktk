@@ -3,6 +3,7 @@ import 'package:jarvis_ktk/pages/login/widgets/sign_in.dart';
 import 'package:jarvis_ktk/pages/login/widgets/sign_up.dart';
 import 'package:jarvis_ktk/pages/login/widgets/forgot_password.dart';
 import 'package:jarvis_ktk/utils/colors.dart';
+import 'package:jarvis_ktk/utils/resized_image.dart';
 
 const double borderRadius = 25.0;
 
@@ -29,14 +30,14 @@ class _LoginPageState extends State<LoginPage>
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            Expanded(
+            const Expanded(
               flex: 2,
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Image.asset('assets/logo.png', height: 100),
-                  const SizedBox(width: 10),
-                  const Text('Jarvis',
+                  ResizedImage(imagePath: 'assets/logo.png', height: 100, width: 100),
+                  SizedBox(width: 10),
+                  Text('Jarvis',
                       style:
                           TextStyle(fontSize: 44, fontWeight: FontWeight.bold)),
                 ],

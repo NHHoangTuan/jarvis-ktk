@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:jarvis_ktk/utils/resized_image.dart';
 
 class NavDrawer extends StatefulWidget {
   final Function(String) onItemTap;
@@ -42,7 +43,7 @@ class _NavDrawerState extends State<NavDrawer> with TickerProviderStateMixin {
               color: Colors.blueGrey,
               padding: const EdgeInsets.all(5.0),
               child: const ListTile(
-                leading: Image(image: AssetImage('assets/logo.png')),
+                leading: ResizedImage(imagePath: 'assets/logo.png', width: 60, height: 60),
                 title: Text(
                   'Jarvis',
                   style: TextStyle(

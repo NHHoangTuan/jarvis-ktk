@@ -19,7 +19,7 @@ class UnitInfoDialog extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Source: ${unit.source}'),
+          Text('Source: ${unit.source.title}'),
           const SizedBox(height: 8),
           Text('Size: ${unit.size}'),
           const SizedBox(height: 8),

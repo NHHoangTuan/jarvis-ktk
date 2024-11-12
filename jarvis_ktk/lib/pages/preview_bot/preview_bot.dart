@@ -3,7 +3,8 @@ import 'package:jarvis_ktk/utils/colors.dart';
 import 'package:jarvis_ktk/pages/preview_bot/widgets/tabs/develop_preview_bot.dart';
 import 'package:jarvis_ktk/pages/preview_bot/widgets/tabs/chat_preview_bot.dart';
 import 'package:jarvis_ktk/pages/preview_bot/widgets/tabs/knowledge_preview_bot.dart';
-import 'package:jarvis_ktk/pages/preview_bot/widgets/dialog/edit_preview_bot.dart'; // Import file edit_preview_bot.dart
+import 'package:jarvis_ktk/pages/preview_bot/widgets/dialog/edit_preview_bot.dart';
+import 'package:jarvis_ktk/utils/resized_image.dart'; // Import file edit_preview_bot.dart
 
 class PreviewBotPage extends StatefulWidget {
   final VoidCallback onPublish; // Thêm callback onPublish
@@ -33,10 +34,7 @@ class _PreviewBotPageState extends State<PreviewBotPage> {
           title: Row(
             children: [
               const SizedBox(width: 5), // Khoảng cách giữa avatar và text
-              const CircleAvatar(
-                backgroundImage: AssetImage('assets/logo.png'),
-                radius: 20,
-              ),
+              const ResizedImage(imagePath: 'assets/logo.png', width: 40, height: 40),
               const SizedBox(width: 10), // Khoảng cách giữa avatar và text
               const Text('Bot Name'),
               const SizedBox(width: 5), // Khoảng cách giữa text và nút 'Edit'

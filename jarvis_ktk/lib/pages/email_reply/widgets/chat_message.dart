@@ -24,7 +24,6 @@ class ChatMessage extends StatelessWidget {
   Widget build(BuildContext context) {
     return isBot
         ? BotMessage(
-            key: ValueKey(message),
             message: message,
             onSendMessage: onSendMessage,
             isPreviousMessage: isPreviousMessage,
@@ -61,18 +60,15 @@ class BotMessage extends StatefulWidget {
 class _BotMessageState extends State<BotMessage> {
   bool _isVisible = true;
   late EmailActionsButtons emailActionsButton;
-  final GlobalKey emailButtonKey = GlobalKey();
 
   @override
   void initState() {
     super.initState();
     emailActionsButton = EmailActionsButtons(
-      key: emailButtonKey,
       actions: emailActions,
       onPressed: widget.onSendMessage,
     );
   }
-
 
   @override
   void didUpdateWidget(BotMessage oldWidget) {
@@ -207,27 +203,32 @@ class _BotMessageState extends State<BotMessage> {
             ),
           ),
           if (widget.isPreviousMessage || !_isVisible)
-          AnimatedSwitcher(
-            duration: const Duration(milliseconds: 500),
-            child: _isVisible
-                ? KeyedSubtree(
-                    key: const ValueKey('visible'),
-                    child:
-                        emailActionsButton.animate().fadeIn(duration: 500.ms),
-                  )
-                : KeyedSubtree(
-                    key: const ValueKey('invisible'),
-                    child: emailActionsButton
-                        .animate()
-                        .slideX(begin: 0, end: -1, duration: 500.ms)
-                        .fadeOut(duration: 700.ms)
-                        .swap(
-                      builder: (_, __) {
-                        return const SizedBox.shrink();
-                      },
-                    ), // Replace with empty space when invisible
-                  ),
-          ),
+            AnimatedSize(
+              duration: const Duration(milliseconds: 300),
+              curve: Curves.easeInOut,
+              child: AnimatedSwitcher(
+                duration: const Duration(milliseconds: 500),
+                child: _isVisible
+                    ? KeyedSubtree(
+                        key: const ValueKey('visible'),
+                        child: emailActionsButton
+                            .animate()
+                            .fadeIn(duration: 500.ms),
+                      )
+                    : KeyedSubtree(
+                        key: const ValueKey('invisible'),
+                        child: emailActionsButton
+                            .animate()
+                            .slideX(begin: 0, end: -1, duration: 500.ms)
+                            .fadeOut(duration: 700.ms)
+                            .swap(
+                          builder: (_, __) {
+                            return const SizedBox.shrink();
+                          },
+                        ), // Replace with empty space when invisible
+                      ),
+              ),
+            ),
         ],
       ),
     );

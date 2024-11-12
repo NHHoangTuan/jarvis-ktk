@@ -1,10 +1,11 @@
+import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+
 import '../prompt_bottom_sheet/prompt_bottom_sheet.dart';
 import 'chat_model.dart';
 import 'widgets/message_bubble.dart';
 import 'widgets/welcome.dart';
-import 'package:dropdown_search/dropdown_search.dart';
 
 class ChatBody extends StatefulWidget {
   final bool

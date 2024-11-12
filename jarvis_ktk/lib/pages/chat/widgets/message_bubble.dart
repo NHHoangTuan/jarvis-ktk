@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../utils/resized_image.dart';
+
 class MessageBubble extends StatelessWidget {
   final String text;
   final bool isUser;
@@ -23,10 +25,7 @@ class MessageBubble extends StatelessWidget {
             isUser ? MainAxisAlignment.end : MainAxisAlignment.start,
         children: [
           if (!isUser)
-            CircleAvatar(
-              backgroundImage: AssetImage(avatar),
-              radius: 16,
-            ),
+            ResizedImage(imagePath: avatar, width: 32, height: 32, isRound: true),
           const SizedBox(width: 8),
           Flexible(
             child: Container(
@@ -66,10 +65,7 @@ class MessageBubble extends StatelessWidget {
           ),
           const SizedBox(width: 8),
           if (isUser)
-            CircleAvatar(
-              backgroundImage: AssetImage(avatar),
-              radius: 16,
-            ),
+            ResizedImage(imagePath: avatar, width: 32, height: 32, isRound: true),
         ],
       ),
     );

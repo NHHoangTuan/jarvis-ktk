@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:jarvis_ktk/utils/resized_image.dart';
 import '../../../../prompt_bottom_sheet/widgets/common_widgets.dart';
 import '../../../../../utils/colors.dart';
 
@@ -187,11 +188,7 @@ class GithubConnectDialog extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             // GitHub icon
-            CircleAvatar(
-              backgroundImage: Image.asset(selectedDataSource.imagePath).image,
-              radius: 40,
-              backgroundColor: Colors.transparent,
-            ),
+            ResizedImage(imagePath: selectedDataSource.imagePath, width: 80, height: 80),
             const SizedBox(height: 20),
             // "GitHub is not authorized" text
             const Text(
@@ -282,7 +279,7 @@ class _GitlabConnectDialog extends State<GitlabConnectDialog> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const TextFormTitle(title: '* Gitlab Project Owner:'),
+                    const TextFormTitle(title: '* Project Owner:'),
                     PromptTextFormField(
                       hintText: 'Enter project owner',
                       onChanged: (value) {

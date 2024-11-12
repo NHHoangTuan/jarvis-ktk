@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:jarvis_ktk/utils/resized_image.dart';
 
 import '../../../../../utils/colors.dart';
 import '../../../models/knowledge.dart';
@@ -63,7 +64,7 @@ class _DataSourceDialogContent extends State<DataSourceDialogContent> {
         },
         title: Row(
           children: [
-            Image.asset(imagePath, width: 24, height: 24),
+            ResizedImage(imagePath: imagePath, width: 24, height: 24),
             const SizedBox(width: 8),
             // Add some space between the icon and the text
             Text(title),
