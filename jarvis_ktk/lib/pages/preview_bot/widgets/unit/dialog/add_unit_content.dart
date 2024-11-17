@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:jarvis_ktk/data/models/knowledge.dart';
+import 'package:jarvis_ktk/data/models/mock_data.dart';
 import 'package:jarvis_ktk/utils/resized_image.dart';
 import '../../../../prompt_bottom_sheet/widgets/common_widgets.dart';
 import '../../../../../utils/colors.dart';
 
-import '../../../models/knowledge.dart';
-import '../../../models/mock_data.dart';
 import '../../common_widgets.dart';
 import 'connect_dialog_base.dart';
 

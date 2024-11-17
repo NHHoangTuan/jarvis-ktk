@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:jarvis_ktk/pages/prompt_bottom_sheet/widgets/public_prompt/public_prompt_tile.dart';
 
-import '../models/prompt.dart';
+import '../../../data/models/prompt.dart';
 import 'my_prompt/my_prompt_tile.dart';
 
 

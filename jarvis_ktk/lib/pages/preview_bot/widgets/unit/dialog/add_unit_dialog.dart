@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:jarvis_ktk/data/models/knowledge.dart';
 
 import '../../../../prompt_bottom_sheet/widgets/common_widgets.dart';
-import '../../../models/knowledge.dart';
 import 'add_unit_content.dart';
 import 'add_unit_title.dart';
 import 'data_source_dialog_content.dart';

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:jarvis_ktk/pages/preview_bot/models/knowledge.dart';
+import 'package:jarvis_ktk/data/models/knowledge.dart';
 import 'package:jarvis_ktk/utils/resized_image.dart';
 
 import 'unit_info_dialog.dart';

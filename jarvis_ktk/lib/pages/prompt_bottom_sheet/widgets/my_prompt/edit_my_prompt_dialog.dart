@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:jarvis_ktk/pages/prompt_bottom_sheet/models/prompt.dart';
+import 'package:jarvis_ktk/data/models/prompt.dart';
 
 import '../common_widgets.dart';
 import 'edit_my_prompt_content.dart';
@@ -19,7 +19,7 @@ class EditMyPrompt extends StatelessWidget {
       actionsPadding:
           const EdgeInsets.only(top: 0, left: 24, right: 24, bottom: 16),
       title: EditMyPromptTitle(
-        prompt: prompt.name,
+        prompt: prompt.title,
       ),
       content: GestureDetector(
         behavior: HitTestBehavior.opaque,

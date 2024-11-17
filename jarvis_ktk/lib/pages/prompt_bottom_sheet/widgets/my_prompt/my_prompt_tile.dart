@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../models/prompt.dart';
+import '../../../../data/models/prompt.dart';
 import 'edit_my_prompt_dialog.dart';
 
 class MyPromptTile extends StatelessWidget {
@@ -18,7 +18,7 @@ class MyPromptTile extends StatelessWidget {
             children: [
               // ListTile title
               Text(
-                prompt.name,
+                prompt.title,
                 style: const TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,

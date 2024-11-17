@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import '../../../models/knowledge.dart';
+import 'package:jarvis_ktk/data/models/knowledge.dart';
 
 class UnitInfoDialog extends StatelessWidget {
   final Unit unit;

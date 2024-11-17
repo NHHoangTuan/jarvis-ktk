@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../models/prompt.dart';
+import '../../../../data/models/prompt.dart';
 import 'info_dialog/info_dialog.dart';
 
 class PublicPromptTile extends StatefulWidget {
@@ -33,7 +33,7 @@ class _PublicPromptTileState extends State<PublicPromptTile> {
             children: [
               // ListTile title
               Text(
-                widget.prompt.name,
+                widget.prompt.title,
                 style: const TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
