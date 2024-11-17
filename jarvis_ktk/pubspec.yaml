@@ -16,6 +16,8 @@ dependencies:
   fluttertoast: ^8.2.8
   file_picker: ^5.0.0
   intl: ^0.17.0
+  dio: ^5.7.0
+  flutter_secure_storage: ^9.2.2
 
   provider: ^6.0.0
 
