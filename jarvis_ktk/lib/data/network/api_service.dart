@@ -55,6 +55,9 @@ class ApiService {
   void _setDioOptions() {
     _dio.options.headers['Content-Type'] = 'application/json';
     _dio.options.headers['Accept'] = 'application/json';
+    _dio.options.validateStatus = (status) {
+      return true;
+    };
   }
 
   Future<String?> _refreshAccessToken() async {
@@ -101,6 +104,16 @@ class ApiService {
   }) async {
     String url = _constructUrl(endpoint, pathVars);
     return _dio.put(url, data: data, queryParameters: params);
+  }
+
+  Future<Response> patch(
+    String endpoint, {
+    dynamic data,
+    Map<String, dynamic>? params,
+    Map<String, dynamic>? pathVars,
+  }) async {
+    String url = _constructUrl(endpoint, pathVars);
+    return _dio.patch(url, data: data, queryParameters: params);
   }
 
   Future<Response> delete(
