@@ -18,7 +18,7 @@ dependencies:
   intl: ^0.17.0
   dio: ^5.7.0
   flutter_secure_storage: ^9.2.2
-
+  get_it: ^8.0.2
   provider: ^6.0.0
 
 dev_dependencies:
