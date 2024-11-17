@@ -53,9 +53,6 @@ class ApiService {
   }
 
   void _setDioOptions() {
-    _dio.options.validateStatus = (status) {
-      return status! < 500; // Accept 400–499 responses as valid
-    };
     _dio.options.headers['Content-Type'] = 'application/json';
     _dio.options.headers['Accept'] = 'application/json';
   }
@@ -65,9 +62,9 @@ class ApiService {
       String? refreshToken = await _storage.read(key: 'refreshToken');
       if (refreshToken == null) return null;
       final response = await get(ApiEndpoints.refreshToken,
-          pathVars: {'refreshToken': refreshToken});
+          params: {'refreshToken': refreshToken});
       if (response.statusCode == 200) {
-        String newAccessToken = response.data['access_token'];
+        String newAccessToken = response.data['token']['accessToken'];
         await _storage.write(key: 'accessToken', value: newAccessToken);
         return newAccessToken;
       }
