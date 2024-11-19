@@ -65,9 +65,15 @@ class _MyPromptContentState extends State<MyPromptContent> {
               }
               return true;
             }).toList();
-            return CombinedPromptList(
-              combinedPrompts: [...filteredPrompts],
-              onDelete: _refreshPrompts,
+            return ListView.separated(
+              itemCount: filteredPrompts.length,
+              itemBuilder: (context, index) {
+                return PromptListTile(
+                    anyPrompt: filteredPrompts[index],
+                    onDelete: _refreshPrompts);
+              },
+              separatorBuilder: (context, index) =>
+                  const Divider(indent: 16.0, endIndent: 16.0),
             );
           }
         },

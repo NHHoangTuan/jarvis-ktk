@@ -9,7 +9,7 @@ class PromptApi{
   PromptApi(this._apiService);
 
   Future<List<Prompt>> getPrompts({
-    String? string,
+    String? query,
     int? offset,
     int? limit,
     String? category,
@@ -17,7 +17,7 @@ class PromptApi{
     bool? isPublic,
   }) async {
     final params = {
-      if (string != null) 'string': string,
+      if (query != null) 'query': query,
       if (offset != null) 'offset': offset,
       if (limit != null) 'limit': limit,
       if (category != null) 'category': category,

@@ -1,12 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:jarvis_ktk/data/network/prompt_api.dart';
+import 'package:jarvis_ktk/services/service_locator.dart';
 
 import '../../../../data/models/prompt.dart';
 import 'info_dialog/info_dialog.dart';
 
 class PublicPromptTile extends StatefulWidget {
   final PublicPrompt prompt;
+  final VoidCallback onDelete;
 
-  const PublicPromptTile({super.key, required this.prompt});
+  const PublicPromptTile(
+      {super.key,
+      required this.prompt,
+      required this.onDelete});
 
   @override
   State<PublicPromptTile> createState() => _PublicPromptTileState();
@@ -58,11 +64,22 @@ class _PublicPromptTileState extends State<PublicPromptTile> {
                         color: isFavorite ? Colors.black : null,
                         size: 16,
                       ),
-                      onPressed: () {
-                        setState(() {
-                          isFavorite = !isFavorite;
-                          widget.prompt.isFavorite = isFavorite;
-                        });
+                      onPressed: () async {
+                        try {
+                          await getIt<PromptApi>()
+                              .addPromptToFavorite(widget.prompt.id!);
+                          setState(() {
+                            isFavorite = !isFavorite;
+                            widget.prompt.isFavorite = isFavorite;
+                          });
+                        } catch (e) {
+                          if (!context.mounted) return;
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                                content: Text(
+                                    'Failed to update favorite status: $e')),
+                          );
+                        }
                       },
                     ),
                   ),
