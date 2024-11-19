@@ -31,6 +31,7 @@ class PublicPrompt extends Prompt {
   final String? language;
   bool isFavorite;
   final String userName;
+  final String? userId;
 
   PublicPrompt({
     required this.category,
@@ -40,6 +41,7 @@ class PublicPrompt extends Prompt {
     this.isFavorite = true,
     required super.title,
     required super.content,
+    this.userId,
   });
 
   factory PublicPrompt.fromJson(Map<String, dynamic> json) => _$PublicPromptFromJson(json);

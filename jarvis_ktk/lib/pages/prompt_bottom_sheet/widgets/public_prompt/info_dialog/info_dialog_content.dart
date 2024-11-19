@@ -112,13 +112,15 @@ class _InfoDialogTitleState extends State<InfoDialogTitle> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(
-          widget.prompt.title,
-          style: const TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.bold,
+        Expanded(
+          child: Text(
+            widget.prompt.title,
+            style: const TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+            ),
+            maxLines: null,
           ),
-          maxLines: 1,
         ),
         Row(
           mainAxisSize: MainAxisSize.min,

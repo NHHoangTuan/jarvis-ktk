@@ -36,6 +36,7 @@ PublicPrompt _$PublicPromptFromJson(Map<String, dynamic> json) => PublicPrompt(
       isFavorite: json['isFavorite'] as bool? ?? true,
       title: json['title'] as String,
       content: json['content'] as String,
+      userId: json['userId'] as String?,
     )..id = json['_id'] as String?;
 
 Map<String, dynamic> _$PublicPromptToJson(PublicPrompt instance) =>
@@ -48,4 +49,5 @@ Map<String, dynamic> _$PublicPromptToJson(PublicPrompt instance) =>
       'language': instance.language,
       'isFavorite': instance.isFavorite,
       'userName': instance.userName,
+      'userId': instance.userId,
     };

@@ -24,7 +24,8 @@ class _PublicPromptTileState extends State<PublicPromptTile> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.only(left: 16.0, right: 16.0, top: 4.0, bottom: 4.0),
+      padding:
+          const EdgeInsets.only(left: 16.0, right: 16.0, top: 4.0, bottom: 4.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -32,13 +33,16 @@ class _PublicPromptTileState extends State<PublicPromptTile> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               // ListTile title
-              Text(
-                widget.prompt.title,
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
+              Expanded(
+                child: Text(
+                  widget.prompt.title,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
-                maxLines: 1,
               ),
               Row(
                 mainAxisSize: MainAxisSize.min,
@@ -78,13 +82,14 @@ class _PublicPromptTileState extends State<PublicPromptTile> {
               ),
             ],
           ),
-          Text(
-            widget.prompt.description!,
-            style: TextStyle(
-              fontSize: 14,
-              color: Colors.grey[600],
-            ),
-          )
+          if (widget.prompt.description != null)
+            Text(
+              widget.prompt.description!,
+              style: TextStyle(
+                fontSize: 14,
+                color: Colors.grey[600],
+              ),
+            )
         ],
       ),
     );

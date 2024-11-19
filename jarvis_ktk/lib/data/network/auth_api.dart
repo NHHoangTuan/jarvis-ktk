@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:jarvis_ktk/constants/api_endpoints.dart';
+import '../models/user.dart';
 import 'api_service.dart';
 
 class AuthApi {
@@ -26,14 +27,18 @@ class AuthApi {
     return response;
   }
 
-  Future<Response> signUp(String username, String password, String email) {
+  Future<Response> signUp(String username, String password, String email) async {
     return _apiService.post(
       ApiEndpoints.signUp,
       data: {'username': username, 'password': password, 'email': email},
     );
   }
 
-  Future<Response> getUserInfo() {
-    return _apiService.get(ApiEndpoints.me);
+  Future<Response> getUserInfo() async {
+    final response = await _apiService.get(ApiEndpoints.me);
+    if (response.statusCode == 200) {
+      _apiService.saveUser(User.fromJson(response.data));
+    }
+    return response;
   }
 }

@@ -7,8 +7,9 @@ import 'my_prompt/my_prompt_tile.dart';
 
 class CombinedPromptList extends StatelessWidget {
   final List<dynamic> combinedPrompts;
+  final VoidCallback onDelete;
 
-  const CombinedPromptList({super.key, required this.combinedPrompts});
+  const CombinedPromptList({super.key, required this.combinedPrompts, required this.onDelete});
 
   @override
   Widget build(BuildContext context) {
@@ -17,7 +18,7 @@ class CombinedPromptList extends StatelessWidget {
       itemBuilder: (context, index) {
         final item = combinedPrompts[index];
         if (item is MyPrompt) {
-          return MyPromptTile(prompt: item);
+          return MyPromptTile(prompt: item, onDelete: onDelete);
         } else if (item is PublicPrompt) {
           return PublicPromptTile(prompt: item);
         }

@@ -1,5 +1,8 @@
+import 'dart:convert';
+
 import 'package:dio/dio.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:jarvis_ktk/data/models/user.dart';
 import '../../constants/api_endpoints.dart';
 
 class ApiService {
@@ -18,6 +21,7 @@ class ApiService {
         onError: _handleError,
       ),
     );
+    _dio.interceptors.add(LogInterceptor(requestBody: true, responseBody: true));
   }
 
   Future<void> _handleRequest(RequestOptions options, RequestInterceptorHandler handler) async {
@@ -56,7 +60,7 @@ class ApiService {
     _dio.options.headers['Content-Type'] = 'application/json';
     _dio.options.headers['Accept'] = 'application/json';
     _dio.options.validateStatus = (status) {
-      return true;
+      return status != 401;
     };
   }
 
@@ -142,5 +146,14 @@ class ApiService {
   Future<void> clearTokens() async {
     await _storage.delete(key: 'accessToken');
     await _storage.delete(key: 'refreshToken');
+  }
+
+  Future<void> saveUser(User user) async {
+    final userJson = jsonEncode(user.toJson());
+    await _storage.write(key: 'user', value: userJson);
+  }
+
+  Future<void> clearUser() async {
+    await _storage.delete(key: 'user');
   }
 }
