@@ -30,7 +30,7 @@ Map<String, dynamic> _$MyPromptToJson(MyPrompt instance) => <String, dynamic>{
 
 PublicPrompt _$PublicPromptFromJson(Map<String, dynamic> json) => PublicPrompt(
       category: json['category'] as String,
-      userName: json['userName'] as String,
+      userName: json['userName'] as String?,
       description: json['description'] as String?,
       language: json['language'] as String?,
       isFavorite: json['isFavorite'] as bool? ?? true,

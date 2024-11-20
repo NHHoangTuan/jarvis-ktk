@@ -45,7 +45,7 @@ class PromptApi{
 
   Future<Prompt> createPrompt(Prompt prompt) async {
     final body = prompt is PublicPrompt
-        ? prompt.toJson()
+        ? {...prompt.toJson(), 'isPublic': true}
         : {...prompt.toJson(), 'isPublic': false};
     final response = await _apiService.post(ApiEndpoints.prompts, data: body);
     if (response.statusCode == 201) {

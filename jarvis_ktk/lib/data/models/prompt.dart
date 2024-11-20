@@ -30,12 +30,12 @@ class PublicPrompt extends Prompt {
   String? description;
   String? language;
   bool isFavorite;
-  final String userName;
+  final String? userName;
   final String? userId;
 
   PublicPrompt({
     required this.category,
-    required this.userName,
+    this.userName,
     this.description,
     this.language,
     this.isFavorite = true,
