@@ -68,7 +68,7 @@ class _NewPublicPromptContentState extends State<NewPublicPromptContent>
                     selectedItem: category!
                 ),
                 const Text('Placeholder',
-                    style: TextStyle(fontSize: 3, color: Colors.transparent)
+                    style: TextStyle(fontSize: 1, color: Colors.transparent)
                 ),
               ],
             ),

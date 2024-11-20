@@ -26,9 +26,9 @@ class MyPrompt extends Prompt {
 
 @JsonSerializable()
 class PublicPrompt extends Prompt {
-  final String category;
-  final String? description;
-  final String? language;
+  String category;
+  String? description;
+  String? language;
   bool isFavorite;
   final String userName;
   final String? userId;

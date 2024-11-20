@@ -4,7 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:jarvis_ktk/data/models/prompt.dart';
 import 'package:jarvis_ktk/data/network/prompt_api.dart';
+import 'package:jarvis_ktk/pages/prompt_bottom_sheet/widgets/my_prompt/expansion_tile_box.dart';
 import 'package:jarvis_ktk/services/service_locator.dart';
+import 'package:jarvis_ktk/utils/colors.dart';
 
 import '../../../../data/models/user.dart';
 import '../prompt_list.dart';
@@ -65,15 +67,29 @@ class _MyPromptContentState extends State<MyPromptContent> {
               }
               return true;
             }).toList();
-            return ListView.separated(
-              itemCount: filteredPrompts.length,
-              itemBuilder: (context, index) {
-                return PromptListTile(
-                    anyPrompt: filteredPrompts[index],
-                    onDelete: _refreshPrompts);
-              },
-              separatorBuilder: (context, index) =>
-                  const Divider(indent: 16.0, endIndent: 16.0),
+            final myPrompts = filteredPrompts.whereType<MyPrompt>().toList();
+            final publicPrompts =
+                filteredPrompts.whereType<PublicPrompt>().toList();
+
+            return ListView(
+              children: [
+                PromptExpansionTileBox(text: 'My Prompts', promptListTiles: myPrompts.map((prompt) {
+                  return PromptListTile(
+                    anyPrompt: prompt,
+                    onDelete: _refreshPrompts,
+                  );
+                }).toList(),
+                color: Colors.red,
+                ),
+                PromptExpansionTileBox(text: 'Public Prompts', promptListTiles: publicPrompts.map((prompt) {
+                  return PromptListTile(
+                    anyPrompt: prompt,
+                    onDelete: _refreshPrompts,
+                  );
+                }).toList(),
+                color: SimpleColors.mediumBlue,
+                ),
+              ],
             );
           }
         },

@@ -329,7 +329,7 @@ class PromptDropdownButton extends StatelessWidget {
               padding: const EdgeInsets.symmetric(
                   horizontal: 12, vertical: 4),
               height: 35,
-              width: 120,
+              width: 130,
               decoration: BoxDecoration(
                 border: Border.all(color: Colors.grey, width: 0.9),
                 borderRadius: BorderRadius.circular(8),
