@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:jarvis_ktk/utils/colors.dart';
 import 'package:jarvis_ktk/pages/home_page.dart';
+import 'package:jarvis_ktk/utils/colors.dart';
+import 'package:jarvis_ktk/utils/resized_image.dart';
 
 class SignInView extends StatefulWidget {
   final VoidCallback onSignUpPressed;
@@ -136,7 +137,8 @@ class _SignInViewState extends State<SignInView> {
                 child: ElevatedButton.icon(
                   style: ElevatedButton.styleFrom(
                     foregroundColor: Colors.black,
-                    backgroundColor: Colors.transparent, // Nền trong suốt
+                    backgroundColor: Colors.transparent,
+                    // Nền trong suốt
                     minimumSize: const Size(double.infinity, 50),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(25),
@@ -146,7 +148,11 @@ class _SignInViewState extends State<SignInView> {
                     ),
                     elevation: 0, // Bỏ hiệu ứng nổi của nút
                   ),
-                  icon: Image.asset('assets/google_logo.png', height: 24),
+                  icon: const ResizedImage(
+                    imagePath: 'assets/google_logo.png',
+                    height: 24,
+                    width: 24,
+                  ),
                   label: const Text('Sign in with google'),
                   onPressed: () {
                     // Xử lý khi nhấn vào nút

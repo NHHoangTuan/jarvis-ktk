@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:jarvis_ktk/pages/preview_bot/models/knowledge.dart';
+import 'package:jarvis_ktk/data/models/knowledge.dart';
+import 'package:jarvis_ktk/utils/resized_image.dart';
 
 import 'unit_info_dialog.dart';
 
@@ -32,7 +33,7 @@ class UnitListTile extends StatelessWidget {
                     padding: const EdgeInsets.symmetric(horizontal: 4.0),
                     width: 32.0,
                     height: 32.0,
-                    child: Image.asset(unit.source.imagePath),
+                    child: ResizedImage(imagePath: unit.source.imagePath, width: 32, height: 32),
                   ),
                   Text(
                     unit.name,

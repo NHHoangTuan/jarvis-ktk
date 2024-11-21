@@ -1,15 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:jarvis_ktk/data/models/prompt.dart';
 import 'package:jarvis_ktk/data/network/prompt_api.dart';
+import 'package:jarvis_ktk/pages/prompt_bottom_sheet/widgets/common_widgets.dart';
 import 'package:jarvis_ktk/services/service_locator.dart';
 
-import '../common_widgets.dart';
-import 'edit_my_prompt_content.dart';
+import 'edit_public_prompt_content.dart';
 
-class EditMyPrompt extends StatelessWidget {
-  final MyPrompt prompt;
+class EditPublicPrompt extends StatelessWidget {
+  final PublicPrompt prompt;
 
-  const EditMyPrompt({super.key, required this.prompt});
+  const EditPublicPrompt({super.key, required this.prompt});
 
   @override
   Widget build(BuildContext context) {
@@ -20,7 +21,7 @@ class EditMyPrompt extends StatelessWidget {
           const EdgeInsets.only(top: 0, left: 24, right: 24, bottom: 0),
       actionsPadding:
           const EdgeInsets.only(top: 0, left: 24, right: 24, bottom: 16),
-      title: EditMyPromptTitle(
+      title: EditPublicPromptTitle(
         prompt: prompt.title,
       ),
       content: GestureDetector(
@@ -29,9 +30,9 @@ class EditMyPrompt extends StatelessWidget {
           FocusScope.of(context).requestFocus(FocusNode());
         },
         child: SizedBox(
-          height: MediaQuery.of(context).size.height * 0.3,
+          height: MediaQuery.of(context).size.height * 0.6,
           width: MediaQuery.of(context).size.width,
-          child: EditMyPromptContent(prompt: prompt),
+          child: EditPublicPromptContent(prompt: prompt),
         ),
       ),
       actions: [
@@ -48,6 +49,15 @@ class EditMyPrompt extends StatelessWidget {
             );
           }
           Navigator.of(context).pop();
+          Fluttertoast.showToast(
+            msg: 'Prompt updated',
+            toastLength: Toast.LENGTH_SHORT,
+            gravity: ToastGravity.BOTTOM,
+            timeInSecForIosWeb: 1,
+            backgroundColor: Colors.black.withOpacity(0.8),
+            textColor: Colors.white,
+            fontSize: 16.0,
+          );
         }),
       ],
       insetPadding: const EdgeInsets.all(10),
@@ -55,11 +65,11 @@ class EditMyPrompt extends StatelessWidget {
   }
 }
 
-void showEditMyPromptDialog(BuildContext context, MyPrompt prompt) {
+void showEditPublicPromptDialog(BuildContext context, PublicPrompt prompt) {
   showDialog(
     context: context,
     builder: (BuildContext context) {
-      return EditMyPrompt(prompt: prompt);
+      return EditPublicPrompt(prompt: prompt);
     },
   );
 }

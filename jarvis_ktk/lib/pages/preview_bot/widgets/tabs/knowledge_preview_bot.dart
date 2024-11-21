@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:jarvis_ktk/data/models/mock_data.dart';
 import 'package:jarvis_ktk/pages/preview_bot/widgets/dialog/add_knowledge_preview_bot.dart';
 
-import '../../models/mock_data.dart';
 
 class KnowledgePreviewBotPage extends StatefulWidget {
   const KnowledgePreviewBotPage({super.key});

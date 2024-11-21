@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:jarvis_ktk/utils/colors.dart';
-import 'package:jarvis_ktk/pages/preview_bot/widgets/dialog/edit_preview_bot.dart'; // Import EditPreviewBotPage
+import 'package:jarvis_ktk/pages/preview_bot/widgets/dialog/edit_preview_bot.dart';
+import 'package:jarvis_ktk/utils/resized_image.dart'; // Import EditPreviewBotPage
 
 class MyBotPage extends StatefulWidget {
   final VoidCallback onApply;
@@ -250,11 +251,7 @@ class _MyBotPageState extends State<MyBotPage> {
                 padding: const EdgeInsets.all(4.0),
                 child: Row(
                   children: [
-                    const CircleAvatar(
-                      radius: 20.0,
-                      backgroundImage: AssetImage(
-                          'assets/logo.png'), // Replace with your image asset
-                    ),
+                    const ResizedImage(imagePath: 'assets/logo.png', height: 40, width: 40, isRound: true),
                     const SizedBox(width: 8.0),
                     Expanded(
                       child: Column(

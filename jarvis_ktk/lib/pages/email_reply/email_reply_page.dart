@@ -92,15 +92,12 @@ class _EmailReplyPage extends State<EmailReplyPage>
                       itemCount: _messages.length,
                       shrinkWrap: true,
                       itemBuilder: (context, index) {
-                        return AnimatedSize(
-                          duration: const Duration(milliseconds: 300),
-                          curve: Curves.easeInOut,
-                          child: ChatMessage(
+                        return  ChatMessage(
                             message: _messages[index].message,
                             isBot: _messages[index].isBot,
                             onSendMessage: _messages[index].onSendMessage,
                             isPreviousMessage: index == _messages.length - 1,
-                          ),
+
                         );
                       },
                     ),

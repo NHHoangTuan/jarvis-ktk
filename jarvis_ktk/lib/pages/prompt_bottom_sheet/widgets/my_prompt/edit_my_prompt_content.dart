@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:jarvis_ktk/pages/prompt_bottom_sheet/models/prompt.dart';
+import 'package:jarvis_ktk/data/models/prompt.dart';
 
 import '../common_widgets.dart';
 
@@ -39,9 +39,9 @@ class _EditMyPromptContent extends State<EditMyPromptContent>
             PromptTextFormField(
               hintText: 'Name of the prompt',
               hintMaxLines: 2,
-              initialValue: widget.prompt.name,
+              initialValue: widget.prompt.title,
               onChanged: (value) {
-                widget.prompt.name = value;
+                widget.prompt.title = value;
               },
             ),
             const Text(
@@ -52,9 +52,9 @@ class _EditMyPromptContent extends State<EditMyPromptContent>
               hintText:
                   'e.g: Write an article about [TOPIC], make sure to include these keywords: [KEYWORDS]',
               hintMaxLines: 2,
-              initialValue: widget.prompt.prompt,
+              initialValue: widget.prompt.content,
               onChanged: (value) {
-                widget.prompt.prompt = value;
+                widget.prompt.content = value;
               },
             ),
           ],

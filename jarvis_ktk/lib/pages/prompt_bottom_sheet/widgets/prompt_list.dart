@@ -1,29 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:jarvis_ktk/pages/prompt_bottom_sheet/widgets/public_prompt/public_prompt_tile.dart';
 
-import '../models/prompt.dart';
+import '../../../data/models/prompt.dart';
 import 'my_prompt/my_prompt_tile.dart';
 
+class PromptListTile extends StatelessWidget {
+  final Prompt anyPrompt;
+  final VoidCallback onDelete;
 
-class CombinedPromptList extends StatelessWidget {
-  final List<dynamic> combinedPrompts;
-
-  const CombinedPromptList({super.key, required this.combinedPrompts});
+  const PromptListTile({super.key, required this.anyPrompt, required this.onDelete});
 
   @override
   Widget build(BuildContext context) {
-    return ListView.separated(
-      itemCount: combinedPrompts.length,
-      itemBuilder: (context, index) {
-        final item = combinedPrompts[index];
-        if (item is MyPrompt) {
-          return MyPromptTile(prompt: item);
-        } else if (item is PublicPrompt) {
-          return PublicPromptTile(prompt: item);
-        }
-        return const SizedBox();
-      },
-      separatorBuilder: (context, index) => const Divider(indent: 16.0, endIndent: 16.0),
+    return Column(
+      children: [
+        if (anyPrompt is MyPrompt)
+          MyPromptTile(prompt: anyPrompt as MyPrompt, onDelete: onDelete),
+        if (anyPrompt is PublicPrompt)
+          PublicPromptTile(prompt: anyPrompt as PublicPrompt, onDelete: onDelete),
+      ],
     );
   }
 }

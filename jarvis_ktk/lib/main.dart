@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:jarvis_ktk/services/service_locator.dart';
 import 'package:jarvis_ktk/pages/login/login_page.dart';
 
 void main() {
+  setupLocator();
   runApp(const MainApp());
 }
 

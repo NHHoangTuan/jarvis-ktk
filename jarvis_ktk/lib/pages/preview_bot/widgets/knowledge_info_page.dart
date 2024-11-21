@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:jarvis_ktk/data/models/knowledge.dart';
 
-import '../models/knowledge.dart';
 import 'unit/dialog/add_unit_dialog.dart';
 import 'unit/info/empty_knowledge_screen.dart';
 import 'unit/info/unit_list.dart';

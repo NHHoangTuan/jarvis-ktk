@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../../models/prompt.dart';
+import '../../../../../data/models/prompt.dart';
 import 'info_dialog_content.dart';
 
 class InfoDialog extends StatelessWidget {
