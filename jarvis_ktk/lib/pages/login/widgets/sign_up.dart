@@ -18,6 +18,8 @@ class _SignUpViewState extends State<SignUpView> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _retypePasswordController =
+      TextEditingController();
   bool _obscureText = true; // Biến trạng thái để quản lý việc ẩn/hiện mật khẩu
 
   bool _isLoading = false;
@@ -32,6 +34,10 @@ class _SignUpViewState extends State<SignUpView> {
     }
     if (!_emailController.text.contains('@')) {
       setState(() => _errorMessage = "Invalid email format");
+      return false;
+    }
+    if (_passwordController.text != _retypePasswordController.text) {
+      setState(() => _errorMessage = "Passwords do not match");
       return false;
     }
     setState(() => _errorMessage = null);
@@ -90,6 +96,17 @@ class _SignUpViewState extends State<SignUpView> {
   }
 
   @override
+  void dispose() {
+    // TODO: implement dispose
+    // Giải phóng các controller để tránh memory leak
+    _emailController.dispose();
+    _usernameController.dispose();
+    _passwordController.dispose();
+    _retypePasswordController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16.0),
@@ -123,6 +140,28 @@ class _SignUpViewState extends State<SignUpView> {
             decoration: InputDecoration(
               labelText: 'Password',
               hintText: 'Enter your password',
+              border:
+                  OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+              suffixIcon: IconButton(
+                icon: Icon(
+                  _obscureText ? Icons.visibility_off : Icons.visibility,
+                ),
+                onPressed: () {
+                  setState(() {
+                    _obscureText =
+                        !_obscureText; // Thay đổi trạng thái ẩn/hiện mật khẩu
+                  });
+                },
+              ),
+            ),
+          ),
+          const SizedBox(height: 16),
+          TextFormField(
+            controller: _passwordController,
+            obscureText: _obscureText,
+            decoration: InputDecoration(
+              labelText: 'Retype Password',
+              hintText: 'Retype your password',
               border:
                   OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
               suffixIcon: IconButton(
