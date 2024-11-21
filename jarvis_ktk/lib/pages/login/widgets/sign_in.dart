@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:jarvis_ktk/pages/home_page.dart';
 import 'package:jarvis_ktk/utils/colors.dart';
 import 'package:jarvis_ktk/utils/resized_image.dart';
+
+import '../../../data/network/auth_api.dart';
+import '../../../services/service_locator.dart';
 
 class SignInView extends StatefulWidget {
   final VoidCallback onSignUpPressed;
@@ -17,6 +21,76 @@ class _SignInViewState extends State<SignInView> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   bool _obscureText = true; // Biến trạng thái để quản lý việc ẩn/hiện mật khẩu
+  bool _isLoading = false;
+  String? _errorMessage;
+
+  // Validate input
+  bool _validateInputs() {
+    if (_emailController.text.isEmpty || _passwordController.text.isEmpty) {
+      setState(() => _errorMessage = "Email and password are required");
+      return false;
+    }
+    if (!_emailController.text.contains('@')) {
+      setState(() => _errorMessage = "Invalid email format");
+      return false;
+    }
+    return true;
+  }
+
+  // Handle login
+  Future<void> _handleSignIn() async {
+    if (!_validateInputs()) {
+      showToast(_errorMessage!);
+      return;
+    }
+
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
+
+    try {
+      final authApi = getIt<AuthApi>();
+      final response = await authApi.signIn(
+        _emailController.text,
+        _passwordController.text,
+      );
+
+      if (response.statusCode == 200) {
+        // Get user info after login
+        await authApi.getUserInfo();
+        // Navigate to home page
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => HomePage()),
+        );
+      } else {
+        // Parse error message từ response data
+        final details = response.data['details'] as List;
+        if (details.isNotEmpty) {
+          final issue = details[0]['issue'] as String;
+          setState(() => _errorMessage = issue);
+          showToast(_errorMessage!);
+        }
+      }
+    } catch (e) {
+      setState(() => _errorMessage = "Network error occurred");
+      showToast(_errorMessage!);
+    } finally {
+      setState(() => _isLoading = false);
+    }
+  }
+
+  void showToast(String message) {
+    Fluttertoast.showToast(
+        msg: message,
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.BOTTOM,
+        timeInSecForIosWeb: 1,
+        backgroundColor: Colors.blueGrey.shade900,
+        textColor: Colors.white,
+        fontSize: 16.0);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -80,19 +154,21 @@ class _SignInViewState extends State<SignInView> {
                 backgroundColor: Colors.transparent,
                 shadowColor: Colors.transparent,
               ),
-              onPressed: () {
-                // Xử lý đăng nhập
-                // Điều hướng đến HomePage khi nhấn nút "Login"
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(builder: (context) => const HomePage()),
-                );
-              },
-              child: const Text('Login',
-                  style: TextStyle(
-                      fontSize: 18,
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold)),
+              onPressed: _isLoading ? null : _handleSignIn,
+              child: _isLoading
+                  ? const SizedBox(
+                      height: 20,
+                      width: 20,
+                      child: CircularProgressIndicator(
+                        color: Colors.white,
+                        strokeWidth: 2,
+                      ),
+                    )
+                  : const Text('Login',
+                      style: TextStyle(
+                          fontSize: 18,
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold)),
             ),
           ),
           const SizedBox(height: 16),

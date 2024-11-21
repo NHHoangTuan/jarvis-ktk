@@ -34,23 +34,15 @@ class _SignUpViewState extends State<SignUpView> {
       setState(() => _errorMessage = "Invalid email format");
       return false;
     }
-    // if (_passwordController.text.length < 6) {
-    //   setState(() => _errorMessage = "Password must be at least 6 characters");
-    //   return false;
-    // }
     setState(() => _errorMessage = null);
     return true;
   }
 
   Future<void> _handleSignUp() async {
-    //showToast("chua check validate");
-
     if (!_validateInputs()) {
       showToast(_errorMessage!);
       return;
     }
-
-    //showToast("da check validate");
 
     setState(() {
       _isLoading = true;
