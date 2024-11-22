@@ -2,6 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:jarvis_ktk/utils/resized_image.dart';
 
+import '../data/models/user.dart';
+import '../data/network/api_service.dart';
+import '../services/service_locator.dart';
+
 class NavDrawer extends StatefulWidget {
   final Function(String) onItemTap;
   final String initialSelectedItem;
@@ -43,7 +47,8 @@ class _NavDrawerState extends State<NavDrawer> with TickerProviderStateMixin {
               color: Colors.blueGrey,
               padding: const EdgeInsets.all(5.0),
               child: const ListTile(
-                leading: ResizedImage(imagePath: 'assets/logo.png', width: 60, height: 60),
+                leading: ResizedImage(
+                    imagePath: 'assets/logo.png', width: 60, height: 60),
                 title: Text(
                   'Jarvis',
                   style: TextStyle(
@@ -176,21 +181,76 @@ class _NavDrawerState extends State<NavDrawer> with TickerProviderStateMixin {
             const Divider(),
 
             // Account section
-            Container(
-              padding: const EdgeInsets.all(5.0),
-              child: ListTile(
-                leading: const CircleAvatar(
-                  child: Icon(Icons.person),
-                ),
-                title: const Text('Hoang Tuan'),
-                onTap: () {
-                  Navigator.pop(context);
-                },
-              ),
-            ),
+            _buildAccountSection(),
           ],
         ),
       ),
     );
   }
+}
+
+Widget _buildAccountSection() {
+  final apiService = getIt<ApiService>();
+
+  return FutureBuilder<User?>(
+    future: apiService.getStoredUser(),
+    builder: (context, snapshot) {
+      if (snapshot.connectionState == ConnectionState.waiting) {
+        return const Center(child: CircularProgressIndicator());
+      }
+
+      if (snapshot.hasData && snapshot.data != null) {
+        return Column(
+          children: [
+            // User info section
+            ListTile(
+              leading: const CircleAvatar(
+                child: Icon(Icons.person),
+              ),
+              title: Text(snapshot.data!.username),
+              subtitle: Text(snapshot.data!.email),
+            ),
+            const Divider(),
+            // Sign out button
+            const ListTile(
+              leading: Icon(Icons.logout),
+              title: Text('Sign Out'),
+              // onTap: () async {
+              //   await apiService.clearTokens(); // Xóa tokens
+              //   Navigator.pushNamedAndRemoveUntil(
+              //     context,
+              //     '/login',
+              //     (route) => false, // Xóa hết stack
+              //   );
+              // },
+            ),
+          ],
+        );
+      }
+
+      // Hiển thị nút đăng nhập/đăng ký
+      return Container(
+        padding: const EdgeInsets.all(5.0),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+                Navigator.pushNamed(context, '/login');
+              },
+              child: const Text('Sign in'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+                Navigator.pushNamed(context, '/register');
+              },
+              child: const Text('Sign up'),
+            ),
+          ],
+        ),
+      );
+    },
+  );
 }

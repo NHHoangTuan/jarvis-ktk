@@ -21,10 +21,12 @@ class ApiService {
         onError: _handleError,
       ),
     );
-    _dio.interceptors.add(LogInterceptor(requestBody: true, responseBody: true));
+    _dio.interceptors
+        .add(LogInterceptor(requestBody: true, responseBody: true));
   }
 
-  Future<void> _handleRequest(RequestOptions options, RequestInterceptorHandler handler) async {
+  Future<void> _handleRequest(
+      RequestOptions options, RequestInterceptorHandler handler) async {
     String? token = await _storage.read(key: 'accessToken');
     if (token != null) {
       options.headers['Authorization'] = 'Bearer $token';
@@ -32,11 +34,13 @@ class ApiService {
     handler.next(options);
   }
 
-  Future<void> _handleError(DioException error, ErrorInterceptorHandler handler) async {
+  Future<void> _handleError(
+      DioException error, ErrorInterceptorHandler handler) async {
     if (error.response?.statusCode == 401) {
       final newAccessToken = await _refreshAccessToken();
       if (newAccessToken != null) {
-        error.requestOptions.headers['Authorization'] = 'Bearer $newAccessToken';
+        error.requestOptions.headers['Authorization'] =
+            'Bearer $newAccessToken';
         final newResponse = await _retryRequest(error.requestOptions);
         return handler.resolve(newResponse);
       }
@@ -155,5 +159,11 @@ class ApiService {
 
   Future<void> clearUser() async {
     await _storage.delete(key: 'user');
+  }
+
+  Future<User?> getStoredUser() async {
+    final userJson = await _storage.read(key: 'user');
+    if (userJson == null) return null;
+    return User.fromJson(jsonDecode(userJson));
   }
 }
