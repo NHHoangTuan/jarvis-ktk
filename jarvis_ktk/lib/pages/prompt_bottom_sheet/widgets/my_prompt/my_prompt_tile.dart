@@ -4,11 +4,26 @@ import 'package:jarvis_ktk/pages/prompt_bottom_sheet/widgets/delete_prompt_dialo
 import '../../../../data/models/prompt.dart';
 import 'edit_my_prompt_dialog.dart';
 
-class MyPromptTile extends StatelessWidget {
+class MyPromptTile extends StatefulWidget {
   final MyPrompt prompt;
   final VoidCallback onDelete;
 
   const MyPromptTile({super.key, required this.prompt, required this.onDelete});
+
+  @override
+  State<MyPromptTile> createState() => _MyPromptTileState();
+}
+
+class _MyPromptTileState extends State<MyPromptTile> {
+
+
+  void onUpdate(MyPrompt prompt) {
+    setState(() {
+      widget.prompt.title = prompt.title;
+      widget.prompt.content = prompt.content;
+    });
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -19,13 +34,16 @@ class MyPromptTile extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           // ListTile title
-          Text(
-            prompt.title,
-            style: const TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
+          Expanded(
+            child: Text(
+              widget.prompt.title,
+              style: const TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
             ),
-            maxLines: 1,
           ),
           Row(
             mainAxisSize: MainAxisSize.min,
@@ -37,7 +55,7 @@ class MyPromptTile extends StatelessWidget {
                 child: IconButton(
                   icon: const Icon(Icons.edit, size: 16),
                   onPressed: () {
-                    showEditMyPromptDialog(context, prompt);
+                    showEditMyPromptDialog(context, widget.prompt, onUpdate);
                   },
                 ),
               ),
@@ -48,7 +66,7 @@ class MyPromptTile extends StatelessWidget {
                 child: IconButton(
                   icon: const Icon(Icons.delete, size: 16),
                   onPressed: () {
-                    showConfirmDeletePromptDialog(context, prompt, onDelete);
+                    showConfirmDeletePromptDialog(context, widget.prompt, widget.onDelete);
                   },
                 ),
               ),

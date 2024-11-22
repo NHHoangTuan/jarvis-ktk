@@ -24,7 +24,7 @@ void showConfirmDeletePromptDialog(
             ),
             onPressed: () async {
               try {
-                await getIt<PromptApi>().deletePrompt(prompt.id!);
+                await getIt<PromptApi>().deletePrompt(prompt.id);
                 onDelete();
                 if (!context.mounted) return;
                 Navigator.of(context).pop();

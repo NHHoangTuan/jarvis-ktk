@@ -15,10 +15,10 @@ class MyPromptContent extends StatefulWidget {
   const MyPromptContent({super.key});
 
   @override
-  State<MyPromptContent> createState() => _MyPromptContentState();
+  MyPromptContentState createState() => MyPromptContentState();
 }
 
-class _MyPromptContentState extends State<MyPromptContent> {
+class MyPromptContentState extends State<MyPromptContent> {
   late Future<List<Prompt>> _promptsFuture;
   final FlutterSecureStorage _storage = const FlutterSecureStorage();
   User? _user;
@@ -40,7 +40,7 @@ class _MyPromptContentState extends State<MyPromptContent> {
     }
   }
 
-  void _refreshPrompts() {
+  void refreshPrompts() {
     setState(() {
       _promptsFuture = getIt<PromptApi>().getPrompts();
     });
@@ -76,7 +76,7 @@ class _MyPromptContentState extends State<MyPromptContent> {
                 PromptExpansionTileBox(text: 'My Prompts', promptListTiles: myPrompts.map((prompt) {
                   return PromptListTile(
                     anyPrompt: prompt,
-                    onDelete: _refreshPrompts,
+                    onDelete: refreshPrompts,
                   );
                 }).toList(),
                 color: Colors.red,
@@ -84,7 +84,7 @@ class _MyPromptContentState extends State<MyPromptContent> {
                 PromptExpansionTileBox(text: 'Public Prompts', promptListTiles: publicPrompts.map((prompt) {
                   return PromptListTile(
                     anyPrompt: prompt,
-                    onDelete: _refreshPrompts,
+                    onDelete: refreshPrompts,
                   );
                 }).toList(),
                 color: SimpleColors.mediumBlue,
