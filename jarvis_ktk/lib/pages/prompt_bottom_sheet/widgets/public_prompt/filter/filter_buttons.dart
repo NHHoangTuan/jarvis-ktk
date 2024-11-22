@@ -114,6 +114,7 @@ class _FilterButtonsState extends State<FilterButtons> {
         filteredItems.clear();
       }
     } else {
+      filteredItems.clear();
       if (isSelected) {
         filteredItems.add(selectedFilter);
       } else {

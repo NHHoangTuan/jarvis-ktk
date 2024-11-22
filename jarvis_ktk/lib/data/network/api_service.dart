@@ -1,8 +1,13 @@
 import 'dart:convert';
 
 import 'package:dio/dio.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:jarvis_ktk/data/models/user.dart';
+import 'package:jarvis_ktk/main.dart';
+import 'package:jarvis_ktk/routes/app_routes.dart';
+
 import '../../constants/api_endpoints.dart';
 
 class ApiService {
@@ -43,6 +48,22 @@ class ApiService {
             'Bearer $newAccessToken';
         final newResponse = await _retryRequest(error.requestOptions);
         return handler.resolve(newResponse);
+      } else {
+        Fluttertoast.showToast(
+          msg: 'Session expired. Please login again.',
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.BOTTOM,
+          timeInSecForIosWeb: 3,
+          backgroundColor: Colors.black.withOpacity(0.8),
+          textColor: Colors.white,
+          fontSize: 16.0,
+        );
+        await clearTokens();
+        await clearUser();
+        navigatorKey.currentState?.pushNamedAndRemoveUntil(
+          AppRoutes.login,
+          (route) => false,
+        );
       }
     }
     handler.next(error);
