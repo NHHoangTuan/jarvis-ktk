@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:jarvis_ktk/pages/home_page.dart';
 import 'package:jarvis_ktk/utils/colors.dart';
 import 'package:jarvis_ktk/utils/resized_image.dart';
 
@@ -60,10 +59,7 @@ class _SignInViewState extends State<SignInView> {
         // Get user info after login
         await authApi.getUserInfo();
         // Navigate to home page
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => HomePage()),
-        );
+        Navigator.pushNamedAndRemoveUntil(context, '/home', (route) => false);
       } else {
         // Parse error message từ response data
         final details = response.data['details'] as List;
