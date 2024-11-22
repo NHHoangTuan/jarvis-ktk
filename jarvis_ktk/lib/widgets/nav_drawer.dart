@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:jarvis_ktk/utils/resized_image.dart';
 
 import '../data/models/user.dart';
 import '../data/network/api_service.dart';
+import '../data/network/auth_api.dart';
 import '../services/service_locator.dart';
 
 class NavDrawer extends StatefulWidget {
@@ -33,6 +35,29 @@ class _NavDrawerState extends State<NavDrawer> with TickerProviderStateMixin {
     if (_selectedItem == 'My Bot' || _selectedItem == 'Knowledge') {
       _showPersonalOptions = true;
     }
+  }
+
+  // Handle login
+  Future<void> _handleSignOut() async {
+    try {
+      final authApi = getIt<AuthApi>();
+      final response = await authApi.signOut();
+      final apiService = getIt<ApiService>();
+      if (response.statusCode == 200) {
+        await apiService.clearTokens(); // Xóa tokens
+        await apiService.clearUser(); // Xóa thông tin user
+        Navigator.pushNamedAndRemoveUntil(
+          context,
+          '/',
+          (route) => false, // Xóa hết stack
+        );
+        showToast('Sign out successful');
+      } else {
+        showToast('Sign out failed');
+      }
+    } catch (e) {
+      showToast(e.toString());
+    } finally {}
   }
 
   @override
@@ -187,70 +212,60 @@ class _NavDrawerState extends State<NavDrawer> with TickerProviderStateMixin {
       ),
     );
   }
-}
 
-Widget _buildAccountSection() {
-  final apiService = getIt<ApiService>();
+  Widget _buildAccountSection() {
+    final apiService = getIt<ApiService>();
 
-  return FutureBuilder<User?>(
-    future: apiService.getStoredUser(),
-    builder: (context, snapshot) {
-      if (snapshot.connectionState == ConnectionState.waiting) {
-        return const Center(child: CircularProgressIndicator());
-      }
+    return FutureBuilder<User?>(
+      future: apiService.getStoredUser(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        }
 
-      if (snapshot.hasData && snapshot.data != null) {
-        return Column(
-          children: [
-            // User info section
-            ListTile(
-              leading: const CircleAvatar(
-                child: Icon(Icons.person),
+        if (snapshot.hasData && snapshot.data != null) {
+          return Column(
+            children: [
+              // User info section
+              ListTile(
+                leading: const CircleAvatar(
+                  child: Icon(Icons.person),
+                ),
+                title: Text(snapshot.data!.username),
+                subtitle: Text(snapshot.data!.email),
               ),
-              title: Text(snapshot.data!.username),
-              subtitle: Text(snapshot.data!.email),
-            ),
-            const Divider(),
-            // Sign out button
-            const ListTile(
-              leading: Icon(Icons.logout),
-              title: Text('Sign Out'),
-              // onTap: () async {
-              //   await apiService.clearTokens(); // Xóa tokens
-              //   Navigator.pushNamedAndRemoveUntil(
-              //     context,
-              //     '/login',
-              //     (route) => false, // Xóa hết stack
-              //   );
-              // },
-            ),
-          ],
-        );
-      }
+              const Divider(),
+              // Sign out button
+              ListTile(
+                leading: const Icon(Icons.logout),
+                title: const Text('Sign Out'),
+                onTap: _handleSignOut,
+              ),
+            ],
+          );
+        }
 
-      // Hiển thị nút đăng nhập/đăng ký
-      return Container(
-        padding: const EdgeInsets.all(5.0),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: [
-            TextButton(
-              onPressed: () {
-                Navigator.pop(context);
-                Navigator.pushNamed(context, '/login');
-              },
-              child: const Text('Sign in'),
-            ),
-            TextButton(
-              onPressed: () {
-                Navigator.pop(context);
-                Navigator.pushNamed(context, '/register');
-              },
-              child: const Text('Sign up'),
-            ),
-          ],
-        ),
-      );
-    },
-  );
+        // Hiển thị nút đăng nhập/đăng ký
+        return ListTile(
+          leading: const Icon(Icons.login),
+          title: const Text('Sign In / Sign Up'),
+          onTap: () {
+            Navigator.pop(context);
+            Navigator.pushNamed(context, '/login');
+          },
+        );
+      },
+    );
+  }
+
+  void showToast(String message) {
+    Fluttertoast.showToast(
+        msg: message,
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.BOTTOM,
+        timeInSecForIosWeb: 1,
+        backgroundColor: Colors.blueGrey.shade900,
+        textColor: Colors.white,
+        fontSize: 16.0);
+  }
 }

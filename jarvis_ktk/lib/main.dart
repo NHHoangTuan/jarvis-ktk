@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:jarvis_ktk/routes/app_routes.dart';
 import 'package:jarvis_ktk/services/service_locator.dart';
-import 'package:jarvis_ktk/pages/login/login_page.dart';
 
 void main() {
   setupLocator();
@@ -15,7 +15,7 @@ class MainApp extends StatelessWidget {
     return MaterialApp(
       title: 'Jarvis KTK',
       debugShowCheckedModeBanner: false,
-      home: LoginPage(),
+      routes: AppRoutes.routes,
     );
   }
 }
