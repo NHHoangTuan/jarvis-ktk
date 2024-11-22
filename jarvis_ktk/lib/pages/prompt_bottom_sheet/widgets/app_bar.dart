@@ -1,12 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:jarvis_ktk/pages/prompt_bottom_sheet/widgets/public_prompt/public_prompt_content.dart';
 
+import 'my_prompt/my_prompt_content.dart';
 import 'new_prompt/new_prompt_dialog.dart';
 
 class PromptAppBar extends StatelessWidget implements PreferredSizeWidget {
   @override
   final Size preferredSize;
+  final GlobalKey<MyPromptContentState> myPromptKey;
+  final GlobalKey<PublicPromptContentState> publicPromptKey;
 
-  const PromptAppBar({super.key})
+  const PromptAppBar(
+      {super.key, required this.myPromptKey, required this.publicPromptKey})
       : preferredSize = const Size.fromHeight(kToolbarHeight);
 
   @override
@@ -24,7 +29,9 @@ class PromptAppBar extends StatelessWidget implements PreferredSizeWidget {
             iconSize: 25,
             icon: const Icon(Icons.add_circle),
             color: const Color(0xFF611FEC),
-            onPressed: () {showNewPromptDialog(context);},
+            onPressed: () {
+              showNewPromptDialog(context, myPromptKey, publicPromptKey);
+            },
           ),
         ),
         Padding(

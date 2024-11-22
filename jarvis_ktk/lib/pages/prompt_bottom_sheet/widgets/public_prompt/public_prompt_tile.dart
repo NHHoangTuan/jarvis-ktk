@@ -28,6 +28,7 @@ class _PublicPromptTileState extends State<PublicPromptTile> {
   late bool isFavorite;
   final FlutterSecureStorage _storage = const FlutterSecureStorage();
   User? _user;
+  bool _isLoading = false;
 
   @override
   void initState() {
@@ -46,120 +47,139 @@ class _PublicPromptTileState extends State<PublicPromptTile> {
     }
   }
 
+  void onUpdate(PublicPrompt prompt) {
+    setState(() {
+      widget.prompt.title = prompt.title;
+      widget.prompt.description = prompt.description;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding:
-      const EdgeInsets.only(left: 16.0, right: 16.0, top: 4.0, bottom: 4.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    return Stack(
+      children: [
+        Container(
+          padding: const EdgeInsets.only(left: 16.0, right: 16.0, top: 4.0, bottom: 4.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // ListTile title
-              Expanded(
-                child: Text(
-                  widget.prompt.title,
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(
+                    child: Text(
+                      widget.prompt.title,
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
                   ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-              if (_user?.id == widget.prompt.userId)
-                Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(0.0),
-                      width: 32.0,
-                      height: 32.0,
-                      child: IconButton(
-                        icon: const Icon(Icons.edit, size: 16),
-                        onPressed: () {
-                          showEditPublicPromptDialog(context, widget.prompt);
-                        },
-                      ),
-                    ),
-                    Container(
-                      padding: const EdgeInsets.all(0.0),
-                      width: 32.0,
-                      height: 32.0,
-                      child: IconButton(
-                        icon: const Icon(Icons.delete, size: 16),
-                        onPressed: () {
-                          showConfirmDeletePromptDialog(context, widget.prompt, widget.onDelete);
-                        },
-                      ),
-                    ),
-                  ],
-                )
-              else
-                Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(0.0),
-                      width: 32.0,
-                      height: 32.0,
-                      child: IconButton(
-                        alignment: Alignment.center,
-                        icon: Icon(
-                          isFavorite ? Icons.star : Icons.star_border,
-                          color: isFavorite ? Colors.black : null,
-                          size: 16,
+                  if (_user?.id == widget.prompt.userId)
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(0.0),
+                          width: 32.0,
+                          height: 32.0,
+                          child: IconButton(
+                            icon: const Icon(Icons.edit, size: 16),
+                            onPressed: () {
+                              showEditPublicPromptDialog(context, widget.prompt, onUpdate);
+                            },
+                          ),
                         ),
-                        onPressed: () async {
-                          try {
-                            if (isFavorite) {
-                              await getIt<PromptApi>().removePromptFromFavorite(widget.prompt.id!);
-                            } else {
-                              await getIt<PromptApi>().addPromptToFavorite(widget.prompt.id!);
-                            }
-                            setState(() {
-                              isFavorite = !isFavorite;
-                              widget.prompt.isFavorite = isFavorite;
-                            });
-                          } catch (e) {
-                            if (!context.mounted) return;
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text('Failed to update favorite status: $e'),
-                              ),
-                            );
-                          }
-                        },
-                      ),
+                        Container(
+                          padding: const EdgeInsets.all(0.0),
+                          width: 32.0,
+                          height: 32.0,
+                          child: IconButton(
+                            icon: const Icon(Icons.delete, size: 16),
+                            onPressed: () {
+                              showConfirmDeletePromptDialog(context, widget.prompt, widget.onDelete);
+                            },
+                          ),
+                        ),
+                      ],
+                    )
+                  else
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(0.0),
+                          width: 32.0,
+                          height: 32.0,
+                          child: IconButton(
+                            alignment: Alignment.center,
+                            icon: Icon(
+                              isFavorite ? Icons.star : Icons.star_border,
+                              color: isFavorite ? Colors.black : null,
+                              size: 16,
+                            ),
+                            onPressed: () async {
+                              setState(() {
+                                _isLoading = true;
+                              });
+                              try {
+                                if (isFavorite) {
+                                  await getIt<PromptApi>().removePromptFromFavorite(widget.prompt.id);
+                                } else {
+                                  await getIt<PromptApi>().addPromptToFavorite(widget.prompt.id);
+                                }
+                                setState(() {
+                                  isFavorite = !isFavorite;
+                                  widget.prompt.isFavorite = isFavorite;
+                                });
+                              } catch (e) {
+                                if (!context.mounted) return;
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text('Failed to update favorite status: $e'),
+                                  ),
+                                );
+                              } finally {
+                                setState(() {
+                                  _isLoading = false;
+                                });
+                              }
+                            },
+                          ),
+                        ),
+                        Container(
+                          padding: const EdgeInsets.all(0.0),
+                          width: 32.0,
+                          height: 32.0,
+                          child: IconButton(
+                            icon: const Icon(Icons.info_outline, size: 16),
+                            onPressed: () {
+                              showInfoDialog(context, widget.prompt);
+                            },
+                          ),
+                        ),
+                      ],
                     ),
-                    Container(
-                      padding: const EdgeInsets.all(0.0),
-                      width: 32.0,
-                      height: 32.0,
-                      child: IconButton(
-                        icon: const Icon(Icons.info_outline, size: 16),
-                        onPressed: () {
-                          // Handle info button press
-                          showInfoDialog(context, widget.prompt);
-                        },
-                      ),
-                    ),
-                  ],
-                ),
+                ],
+              ),
+              if (widget.prompt.description != null)
+                Text(
+                  widget.prompt.description!,
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Colors.grey[600],
+                  ),
+                )
             ],
           ),
-          if (widget.prompt.description != null)
-            Text(
-              widget.prompt.description!,
-              style: TextStyle(
-                fontSize: 14,
-                color: Colors.grey[600],
-              ),
-            )
-        ],
-      ),
+        ),
+        if (_isLoading)
+          const Center(
+            child: CircularProgressIndicator(),
+          ),
+      ],
     );
   }
 }

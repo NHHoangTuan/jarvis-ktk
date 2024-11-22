@@ -40,6 +40,7 @@ class _PromptExpansionTileBox extends State<PromptExpansionTileBox> {
         child: Padding(
           padding: const EdgeInsets.only(left: 12.0),
           child: ExpansionTile(
+            initiallyExpanded: true,
             title: Text(widget.text,
                 style: const TextStyle(
                     fontSize: 16,

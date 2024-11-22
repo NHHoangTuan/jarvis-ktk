@@ -13,10 +13,10 @@ class PublicPromptContent extends StatefulWidget {
   const PublicPromptContent({super.key});
 
   @override
-  State<PublicPromptContent> createState() => _PublicPromptContentState();
+  PublicPromptContentState createState() => PublicPromptContentState();
 }
 
-class _PublicPromptContentState extends State<PublicPromptContent> {
+class PublicPromptContentState extends State<PublicPromptContent> {
   late Future<List<Prompt>> _promptsFuture;
   Timer? _debounce;
   String? _selectedCategory;
@@ -40,6 +40,12 @@ class _PublicPromptContentState extends State<PublicPromptContent> {
       category: _selectedCategory?.toLowerCase(),
       offset: page,
     );
+  }
+
+  void refreshPrompts() {
+    setState(() {
+      _promptsFuture = _fetchPrompts();
+    });
   }
 
   void searchPrompt() {

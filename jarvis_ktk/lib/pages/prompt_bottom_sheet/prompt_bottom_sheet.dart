@@ -27,6 +27,8 @@ class PromptBottomSheet extends StatefulWidget {
 class _PromptBottomSheetState extends State<PromptBottomSheet>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
+  final GlobalKey<PublicPromptContentState> _publicPromptKey = GlobalKey<PublicPromptContentState>();
+  final GlobalKey<MyPromptContentState> _myPromptKey = GlobalKey<MyPromptContentState>();
 
   @override
   void initState() {
@@ -50,7 +52,7 @@ class _PromptBottomSheetState extends State<PromptBottomSheet>
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const PromptAppBar(),
+            PromptAppBar(myPromptKey: _myPromptKey, publicPromptKey: _publicPromptKey),
             PromptTabBar(
               tabController: _tabController,
             ),
@@ -58,9 +60,9 @@ class _PromptBottomSheetState extends State<PromptBottomSheet>
               height: 500,
               child: TabBarView(
                 controller: _tabController,
-                children: const [
-                  MyPromptContent(),
-                  PublicPromptContent(),
+                children: [
+                  MyPromptContent(key: _myPromptKey),
+                  PublicPromptContent(key: _publicPromptKey),
                 ],
               ),
             ),

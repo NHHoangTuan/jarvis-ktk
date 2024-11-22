@@ -60,7 +60,7 @@ class _EditPublicPromptContent extends State<EditPublicPromptContent>
                       });
                     },
                     hintText: 'Category',
-                    selectedItem: widget.prompt.category.toTitleCase(),
+                    selectedItem: widget.prompt.category?.toTitleCase() ?? 'All',
                   ),
                   const Text('Placeholder',
                       style: TextStyle(fontSize: 1, color: Colors.transparent)),

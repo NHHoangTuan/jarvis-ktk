@@ -35,9 +35,9 @@ class _NewPublicPromptContentState extends State<NewPublicPromptContent> {
 
   void _updatePrompt() {
     final newPrompt = PublicPrompt(
-      title: name!,
-      content: prompt!,
-      category: category!,
+      title: name != null? name! : '',
+      content: prompt != null? prompt! : '',
+      category: category == "all" ? null : category!,
       description: description,
       language: language,
     );
