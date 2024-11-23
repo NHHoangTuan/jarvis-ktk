@@ -10,7 +10,8 @@ import 'package:jarvis_ktk/services/service_locator.dart';
 import 'filter/filter_buttons.dart';
 
 class PublicPromptContent extends StatefulWidget {
-  const PublicPromptContent({super.key});
+  final void Function(Prompt) onClick;
+  const PublicPromptContent({super.key, required this.onClick});
 
   @override
   PublicPromptContentState createState() => PublicPromptContentState();
@@ -136,6 +137,7 @@ class PublicPromptContentState extends State<PublicPromptContent> {
                         onDelete: () {
                           // Handle delete action
                         },
+                        onClick: widget.onClick,
                       );
                     },
                   ),

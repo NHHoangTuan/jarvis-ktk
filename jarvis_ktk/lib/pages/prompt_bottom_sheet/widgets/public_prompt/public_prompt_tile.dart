@@ -14,11 +14,13 @@ import 'info_dialog/info_dialog.dart';
 class PublicPromptTile extends StatefulWidget {
   final PublicPrompt prompt;
   final VoidCallback onDelete;
+  final void Function(PublicPrompt) onClick;
 
   const PublicPromptTile(
       {super.key,
-        required this.prompt,
-        required this.onDelete});
+      required this.prompt,
+      required this.onDelete,
+      required this.onClick});
 
   @override
   State<PublicPromptTile> createState() => _PublicPromptTileState();
@@ -59,7 +61,8 @@ class _PublicPromptTileState extends State<PublicPromptTile> {
     return Stack(
       children: [
         Container(
-          padding: const EdgeInsets.only(left: 16.0, right: 16.0, top: 4.0, bottom: 4.0),
+          padding: const EdgeInsets.only(
+              left: 16.0, right: 16.0, top: 4.0, bottom: 4.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -88,7 +91,8 @@ class _PublicPromptTileState extends State<PublicPromptTile> {
                           child: IconButton(
                             icon: const Icon(Icons.edit, size: 16),
                             onPressed: () {
-                              showEditPublicPromptDialog(context, widget.prompt, onUpdate);
+                              showEditPublicPromptDialog(
+                                  context, widget.prompt, onUpdate);
                             },
                           ),
                         ),
@@ -99,7 +103,8 @@ class _PublicPromptTileState extends State<PublicPromptTile> {
                           child: IconButton(
                             icon: const Icon(Icons.delete, size: 16),
                             onPressed: () {
-                              showConfirmDeletePromptDialog(context, widget.prompt, widget.onDelete);
+                              showConfirmDeletePromptDialog(
+                                  context, widget.prompt, widget.onDelete);
                             },
                           ),
                         ),
@@ -126,9 +131,12 @@ class _PublicPromptTileState extends State<PublicPromptTile> {
                               });
                               try {
                                 if (isFavorite) {
-                                  await getIt<PromptApi>().removePromptFromFavorite(widget.prompt.id);
+                                  await getIt<PromptApi>()
+                                      .removePromptFromFavorite(
+                                          widget.prompt.id);
                                 } else {
-                                  await getIt<PromptApi>().addPromptToFavorite(widget.prompt.id);
+                                  await getIt<PromptApi>()
+                                      .addPromptToFavorite(widget.prompt.id);
                                 }
                                 setState(() {
                                   isFavorite = !isFavorite;
@@ -138,7 +146,8 @@ class _PublicPromptTileState extends State<PublicPromptTile> {
                                 if (!context.mounted) return;
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   SnackBar(
-                                    content: Text('Failed to update favorite status: $e'),
+                                    content: Text(
+                                        'Failed to update favorite status: $e'),
                                   ),
                                 );
                               } finally {
@@ -156,7 +165,7 @@ class _PublicPromptTileState extends State<PublicPromptTile> {
                           child: IconButton(
                             icon: const Icon(Icons.info_outline, size: 16),
                             onPressed: () {
-                              showInfoDialog(context, widget.prompt);
+                              showInfoDialog(context, widget.prompt, widget.onClick);
                             },
                           ),
                         ),

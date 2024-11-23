@@ -12,7 +12,9 @@ import '../../../../data/models/user.dart';
 import '../prompt_list.dart';
 
 class MyPromptContent extends StatefulWidget {
-  const MyPromptContent({super.key});
+  final void Function(Prompt) onClick;
+
+  const MyPromptContent({super.key, required this.onClick});
 
   @override
   MyPromptContentState createState() => MyPromptContentState();
@@ -77,6 +79,7 @@ class MyPromptContentState extends State<MyPromptContent> {
                   return PromptListTile(
                     anyPrompt: prompt,
                     onDelete: refreshPrompts,
+                    onClick: widget.onClick,
                   );
                 }).toList(),
                 color: Colors.red,
@@ -85,6 +88,7 @@ class MyPromptContentState extends State<MyPromptContent> {
                   return PromptListTile(
                     anyPrompt: prompt,
                     onDelete: refreshPrompts,
+                    onClick: widget.onClick,
                   );
                 }).toList(),
                 color: SimpleColors.mediumBlue,
