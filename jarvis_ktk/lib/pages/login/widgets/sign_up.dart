@@ -21,6 +21,8 @@ class _SignUpViewState extends State<SignUpView> {
   final TextEditingController _retypePasswordController =
       TextEditingController();
   bool _obscureText = true; // Biến trạng thái để quản lý việc ẩn/hiện mật khẩu
+  bool _retypeObscureText =
+      true; // Biến trạng thái để quản lý việc ẩn/hiện mật khẩu
 
   bool _isLoading = false;
   String? _errorMessage;
@@ -158,7 +160,7 @@ class _SignUpViewState extends State<SignUpView> {
           const SizedBox(height: 16),
           TextFormField(
             controller: _retypePasswordController,
-            obscureText: _obscureText,
+            obscureText: _retypeObscureText,
             decoration: InputDecoration(
               labelText: 'Retype Password',
               hintText: 'Retype your password',
@@ -166,12 +168,12 @@ class _SignUpViewState extends State<SignUpView> {
                   OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
               suffixIcon: IconButton(
                 icon: Icon(
-                  _obscureText ? Icons.visibility_off : Icons.visibility,
+                  _retypeObscureText ? Icons.visibility_off : Icons.visibility,
                 ),
                 onPressed: () {
                   setState(() {
-                    _obscureText =
-                        !_obscureText; // Thay đổi trạng thái ẩn/hiện mật khẩu
+                    _retypeObscureText =
+                        !_retypeObscureText; // Thay đổi trạng thái ẩn/hiện mật khẩu
                   });
                 },
               ),
