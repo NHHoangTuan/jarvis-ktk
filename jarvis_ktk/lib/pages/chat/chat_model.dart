@@ -1,35 +1,49 @@
 import 'package:flutter/material.dart';
+import 'package:jarvis_ktk/data/models/chat.dart';
 
 class ChatModel extends ChangeNotifier {
-  String _selectedAgent = '001';
+  String _selectedAgent = AssistantId.GPT_4O_MINI.name;
   int _tokenCount = 1000;
-  List<Map<String, dynamic>> _messages = [];
+  final List<Map<String, dynamic>> _messages = [];
   bool _showWelcomeMessage = true;
+  String _conversationId = '';
 
   final List<Map<String, String>> _aiAgents = [
     {
-      'id': '001',
-      'name': 'GPT - 3.5',
-      'avatar': 'assets/gpt-35.webp',
-      'tokens': '10'
+      'id': AssistantId.CLAUDE_3_HAIKU_20240307.name,
+      'name': 'claude-3-haiku',
+      'avatar': 'assets/claude-3-haiku.png',
+      'tokens': '1'
     },
     {
-      'id': '002',
-      'name': 'GPT - 4',
-      'avatar': 'assets/gpt-4.webp',
-      'tokens': '100'
+      'id': AssistantId.CLAUDE_3_5_SONNET_20240620.name,
+      'name': 'claude-3-5-sonnet',
+      'avatar': 'assets/claude-3-5-sonnet.webp',
+      'tokens': '1'
     },
     {
-      'id': '003',
-      'name': 'Claude',
-      'avatar': 'assets/claude.webp',
-      'tokens': '30'
-    },
-    {
-      'id': '004',
-      'name': 'Gemini',
+      'id': AssistantId.GEMINI_15_FLASH_LATEST.name,
+      'name': 'gemini-1.5-flash',
       'avatar': 'assets/gemini.png',
-      'tokens': '20'
+      'tokens': '1'
+    },
+    {
+      'id': AssistantId.GEMINI_15_PRO_LATEST.name,
+      'name': 'gemini-1.5-pro',
+      'avatar': 'assets/gemini.png',
+      'tokens': '1'
+    },
+    {
+      'id': AssistantId.GPT_4O.name,
+      'name': 'gpt-4o',
+      'avatar': 'assets/gpt-4o.webp',
+      'tokens': '1'
+    },
+    {
+      'id': AssistantId.GPT_4O_MINI.name,
+      'name': 'gpt-4o-mini',
+      'avatar': 'assets/gpt-4o-mini.webp',
+      'tokens': '1'
     },
   ];
 
@@ -38,6 +52,7 @@ class ChatModel extends ChangeNotifier {
   List<Map<String, dynamic>> get messages => _messages;
   bool get showWelcomeMessage => _showWelcomeMessage;
   List<Map<String, String>> get aiAgents => _aiAgents;
+  String get conversationId => _conversationId;
 
   void setSelectedAgent(String agent) {
     _selectedAgent = agent;
@@ -62,6 +77,16 @@ class ChatModel extends ChangeNotifier {
 
   void hideWelcomeMessage() {
     _showWelcomeMessage = false;
+    notifyListeners();
+  }
+
+  void setConversationId(String conversationId) {
+    _conversationId = conversationId;
+    notifyListeners();
+  }
+
+  void resetConversationId() {
+    _conversationId = '';
     notifyListeners();
   }
 }

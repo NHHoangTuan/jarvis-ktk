@@ -1,5 +1,7 @@
 import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/material.dart';
+import 'package:jarvis_ktk/data/network/chat_api.dart';
+import 'package:jarvis_ktk/services/service_locator.dart';
 import 'package:provider/provider.dart';
 
 import '../prompt_bottom_sheet/prompt_bottom_sheet.dart';
@@ -8,18 +10,19 @@ import 'widgets/message_bubble.dart';
 import 'widgets/welcome.dart';
 
 class ChatBody extends StatefulWidget {
-  final bool
-      isHistory; // Thêm tham số để xác định có phải đang xem lịch sử không
-  final List<Map<String, dynamic>>?
-      historyChatMessages; // Thêm danh sách tin nhắn lịch sử
+  final bool isHistory;
+  final List<Map<String, dynamic>>? historyChatMessages;
+  final String? conversationId;
 
   const ChatBody({
-    Key? key,
+    super.key,
     this.isHistory = false,
     this.historyChatMessages,
-  }) : super(key: key);
+    this.conversationId,
+  });
 
   @override
+  // ignore: library_private_types_in_public_api
   _ChatBodyState createState() => _ChatBodyState();
 }
 
@@ -41,7 +44,7 @@ class _ChatBodyState extends State<ChatBody> {
     super.dispose();
   }
 
-  void _sendMessage(ChatModel chatModel) {
+  Future<void> _sendMessage(ChatModel chatModel) async {
     if (_messageController.text.trim().isNotEmpty) {
       final selectedAI = chatModel.aiAgents.firstWhere(
         (agent) => agent['id'] == chatModel.selectedAgent,
@@ -52,19 +55,46 @@ class _ChatBodyState extends State<ChatBody> {
 
       final userMessage = _messageController.text;
 
-      chatModel.addMessage({
-        'text': userMessage,
-        'isUser': true,
-        'timestamp': DateTime.now(),
-        'avatar': 'assets/user_avatar.jpg',
-      });
+      final chatApi = getIt<ChatApi>();
 
-      chatModel.addMessage({
-        'text': userMessage,
-        'isUser': false,
-        'timestamp': DateTime.now(),
-        'avatar': selectedAI['avatar'],
-      });
+      // Gửi tin nhắn qua API và nhận phản hồi
+      try {
+        final response = await chatApi.sendMessage({
+          'content': userMessage,
+          if (widget.conversationId != null &&
+              widget.conversationId!.isNotEmpty)
+            "metadata": {
+              "conversation": {"id": widget.conversationId}
+            },
+          "assistant": {"id": chatModel.selectedAgent, "model": "dify"}
+        });
+
+        if (response.statusCode == 200) {
+          chatModel.addMessage({
+            'text': userMessage,
+            'isUser': true,
+            'timestamp': DateTime.now(),
+            'avatar': 'assets/user_avatar.jpg',
+          });
+
+          chatModel.addMessage({
+            'text': response.data['message'],
+            'isUser': false,
+            'timestamp': DateTime.now(),
+            'avatar': selectedAI['avatar'],
+          });
+
+          var remainingUsage = response.data['remainingUsage'];
+          chatModel.setTokenCount(remainingUsage);
+
+          var conversationId = response.data['conversationId'];
+          chatModel.setConversationId(conversationId);
+        } else {
+          throw Exception('Failed to send message (Chat body)');
+        }
+      } catch (e) {
+        return;
+      }
 
       _messageController.clear();
       _messageFocusNode.unfocus();

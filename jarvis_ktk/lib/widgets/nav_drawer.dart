@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:jarvis_ktk/data/models/chat.dart';
+import 'package:jarvis_ktk/data/network/chat_api.dart';
 import 'package:jarvis_ktk/utils/resized_image.dart';
 
 import '../data/models/user.dart';
@@ -11,9 +13,10 @@ import '../services/service_locator.dart';
 class NavDrawer extends StatefulWidget {
   final Function(String) onItemTap;
   final String initialSelectedItem;
-  final Function(int) onHistoryTap; // Thêm callback cho lịch sử chat
+  final Function(String) onHistoryTap; // Thêm callback cho lịch sử chat
 
   @override
+  // ignore: library_private_types_in_public_api
   _NavDrawerState createState() => _NavDrawerState();
   const NavDrawer({
     super.key,
@@ -26,6 +29,9 @@ class NavDrawer extends StatefulWidget {
 class _NavDrawerState extends State<NavDrawer> with TickerProviderStateMixin {
   bool _showPersonalOptions = false;
   late String _selectedItem;
+  late Future<List<Conversation>> _conversationsFuture = Future.value([]);
+  List<String> _conversationIds = [];
+  User? _user;
 
   @override
   void initState() {
@@ -35,6 +41,7 @@ class _NavDrawerState extends State<NavDrawer> with TickerProviderStateMixin {
     if (_selectedItem == 'My Bot' || _selectedItem == 'Knowledge') {
       _showPersonalOptions = true;
     }
+    _fetchUser();
   }
 
   // Handle login
@@ -47,6 +54,7 @@ class _NavDrawerState extends State<NavDrawer> with TickerProviderStateMixin {
         await apiService.clearTokens(); // Xóa tokens
         await apiService.clearUser(); // Xóa thông tin user
         Navigator.pushNamedAndRemoveUntil(
+          // ignore: use_build_context_synchronously
           context,
           '/',
           (route) => false, // Xóa hết stack
@@ -58,6 +66,25 @@ class _NavDrawerState extends State<NavDrawer> with TickerProviderStateMixin {
     } catch (e) {
       showToast(e.toString());
     } finally {}
+  }
+
+  Future<void> _fetchUser() async {
+    final apiService = getIt<ApiService>();
+    final user = await apiService.getStoredUser();
+    setState(() {
+      _user = user;
+      if (_user != null) {
+        _conversationsFuture = _fetchConversations();
+      }
+    });
+  }
+
+  Future<List<Conversation>> _fetchConversations() async {
+    final chatApi = getIt<ChatApi>();
+    final conversations = await chatApi.fetchConversations(
+        AssistantId.GPT_4O_MINI, AssistantModel.DIFY);
+    _conversationIds = conversations.map((c) => c.id).toList();
+    return conversations;
   }
 
   @override
@@ -187,22 +214,36 @@ class _NavDrawerState extends State<NavDrawer> with TickerProviderStateMixin {
 
             // Chat history section
             Expanded(
-              child: ListView.builder(
-                itemCount: 1,
-                itemBuilder: (context, index) {
-                  return ListTile(
-                    leading: const Icon(Icons.message),
-                    title: Text('History $index'),
-                    onTap: () {
-                      widget.onHistoryTap(
-                          index); // Gọi callback khi bấm vào lịch sử chat
-                      Navigator.pop(context);
-                    },
-                  );
+              child: FutureBuilder<List<Conversation>>(
+                future: _conversationsFuture,
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(child: CircularProgressIndicator());
+                  } else if (snapshot.hasError) {
+                    return const Center(
+                        child: Text('Error loading conversations'));
+                  } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                    return const Center(child: Text('No conversations found'));
+                  } else {
+                    final conversations = snapshot.data!;
+                    return ListView.builder(
+                      itemCount: conversations.length,
+                      itemBuilder: (context, index) {
+                        final conversation = conversations[index];
+                        return ListTile(
+                          leading: const Icon(Icons.message),
+                          title: Text(conversation.title),
+                          onTap: () {
+                            widget.onHistoryTap(_conversationIds[index]);
+                            Navigator.pop(context);
+                          },
+                        );
+                      },
+                    );
+                  }
                 },
               ),
             ),
-
             const Divider(),
 
             // Account section

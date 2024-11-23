@@ -9,11 +9,13 @@ class ApiEndpoints {
   static const String me = 'auth/me';
 
   // Chat
-
+  static const String chatHistory =
+      'ai-chat/conversations/{conversationId}/messages';
+  static const String chatSend = 'ai-chat/messages';
+  static const String chatConversation = 'ai-chat/conversations';
 
   // Prompt
   static const String prompts = 'prompts';
   static const String promptById = 'prompts/{id}';
   static const String promptFavorite = 'prompts/{id}/favorite';
-
 }

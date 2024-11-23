@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:jarvis_ktk/data/models/chat.dart';
+import 'package:jarvis_ktk/data/network/chat_api.dart';
 import 'package:jarvis_ktk/pages/email_reply/email_reply_page.dart';
 import 'package:jarvis_ktk/pages/personal/my_bot.dart';
 import 'package:jarvis_ktk/pages/preview_bot/preview_bot.dart';
 import 'package:jarvis_ktk/pages/personal/knowledge.dart';
 import 'package:jarvis_ktk/pages/preview_bot/publish_bot.dart';
+import 'package:jarvis_ktk/services/service_locator.dart';
 import 'package:jarvis_ktk/widgets/nav_drawer.dart';
 import 'package:provider/provider.dart';
 import 'chat/chat_app_bar.dart';
@@ -20,8 +23,7 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   // Variable to track which screen is being displayed in the body
-  Widget _currentBody = ChatBody();
-  PreferredSizeWidget _currentAppBar = ChatAppBar();
+  Widget _currentBody = const ChatBody();
   final GlobalKey<ScaffoldState> _scaffoldKey =
       GlobalKey<ScaffoldState>(); // Correct key placement
   String _currentSelectedItem = 'Chat'; // Thêm biến để theo dõi mục đang chọn
@@ -34,9 +36,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   void _changeAppBar(PreferredSizeWidget newAppBar) {
-    setState(() {
-      _currentAppBar = newAppBar;
-    });
+    setState(() {});
   }
 
   // Thêm method để thay đổi selected item
@@ -46,27 +46,52 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
-  void _handleHistoryTap(int index) {
-    // Tạo đoạn chat mẫu dựa trên index
-    final List<Map<String, dynamic>> sampleMessages = [
-      {
-        'text': 'Hello, how can I help you today?',
-        'isUser': false,
-        'timestamp': DateTime.now(),
-        'avatar': 'assets/bot_avatar.jpg',
-      },
-      {
-        'text': 'I need some information about your services.',
+  List<Map<String, dynamic>> _convertHistoryMessages(
+      List<ChatHistory> historyChatMessages) {
+    List<Map<String, dynamic>> convertedMessages = [];
+    for (var message in historyChatMessages) {
+      convertedMessages.add({
+        'text': message.query,
         'isUser': true,
-        'timestamp': DateTime.now(),
+        'timestamp': DateTime.fromMillisecondsSinceEpoch(message.createdAt),
         'avatar': 'assets/user_avatar.jpg',
-      },
-    ];
+      });
+      convertedMessages.add({
+        'text': message.answer,
+        'isUser': false,
+        'timestamp': DateTime.fromMillisecondsSinceEpoch(message.createdAt),
+        'avatar': 'assets/ai_avatar.png',
+      });
+    }
+    return convertedMessages;
+  }
+
+  void _handleHistoryTap(String conversationId, String assistantId) async {
+    // Lấy lịch sử chat từ loadConversationHistory
+    final chatApi = getIt<ChatApi>();
+    List<ChatHistory> historyChatMessages =
+        await chatApi.loadConversationHistory(
+            conversationId,
+            AssistantId.values.firstWhere((e) => e.name == assistantId),
+            AssistantModel.DIFY);
+
+    // Chuyển đổi lịch sử chat thành định dạng cần thiết
+    List<Map<String, dynamic>> nowMessages =
+        _convertHistoryMessages(historyChatMessages);
 
     // Chuyển đến màn hình Chat
     _changeSelectedItem('Chat');
-    _changeBody(ChatBody(isHistory: true, historyChatMessages: sampleMessages));
-    _changeAppBar(ChatAppBar());
+    _changeBody(ChatBody(
+      isHistory: true,
+      historyChatMessages: nowMessages,
+      conversationId: conversationId,
+    ));
+    _changeAppBar(ChatAppBar(onAgentChanged: _handleAgentChanged));
+  }
+
+  void _handleAgentChanged(String agentId) {
+    final chatModel = Provider.of<ChatModel>(context, listen: false);
+    chatModel.setSelectedAgent(agentId);
   }
 
   @override
@@ -75,7 +100,7 @@ class _HomePageState extends State<HomePage> {
       create: (context) => ChatModel(),
       child: Scaffold(
         key: _scaffoldKey, // Associate the Scaffold with the GlobalKey
-        appBar: _currentAppBar,
+        appBar: ChatAppBar(onAgentChanged: _handleAgentChanged),
         drawer: NavDrawer(
           initialSelectedItem:
               _currentSelectedItem, // Truyền selected item hiện tại
@@ -84,8 +109,8 @@ class _HomePageState extends State<HomePage> {
             // Change body content based on the selected item
             switch (selectedItem) {
               case 'Chat':
-                _changeBody(ChatBody());
-                _changeAppBar(ChatAppBar());
+                _changeBody(const ChatBody());
+                _changeAppBar(ChatAppBar(onAgentChanged: _handleAgentChanged));
                 break;
               case 'Personal':
                 _changeBody(const Center(child: Text('Personal Chat')));
@@ -117,7 +142,10 @@ class _HomePageState extends State<HomePage> {
 
             Navigator.pop(context); // Close the drawer after selecting an item
           },
-          onHistoryTap: _handleHistoryTap, // Thêm callback cho lịch sử chat
+          onHistoryTap: (conversationId) => _handleHistoryTap(
+            conversationId,
+            Provider.of<ChatModel>(context, listen: false).selectedAgent,
+          ),
         ),
         body: Stack(
           children: [
