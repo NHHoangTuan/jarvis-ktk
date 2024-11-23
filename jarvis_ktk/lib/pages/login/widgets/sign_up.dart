@@ -157,7 +157,7 @@ class _SignUpViewState extends State<SignUpView> {
           ),
           const SizedBox(height: 16),
           TextFormField(
-            controller: _passwordController,
+            controller: _retypePasswordController,
             obscureText: _obscureText,
             decoration: InputDecoration(
               labelText: 'Retype Password',
