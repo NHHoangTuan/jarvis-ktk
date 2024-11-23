@@ -29,6 +29,7 @@ class ChatBody extends StatefulWidget {
 class _ChatBodyState extends State<ChatBody> {
   late TextEditingController _messageController;
   late FocusNode _messageFocusNode;
+  List<Map<String, dynamic>>? _historyChatMessages;
 
   @override
   void initState() {
@@ -110,6 +111,7 @@ class _ChatBodyState extends State<ChatBody> {
     final messages = widget.isHistory
         ? widget.historyChatMessages ?? []
         : chatModel.messages;
+    ();
 
     return Stack(
       children: [
