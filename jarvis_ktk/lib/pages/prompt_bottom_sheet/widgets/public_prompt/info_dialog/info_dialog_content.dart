@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../../models/prompt.dart';
+import '../../../../../data/models/prompt.dart';
 
 class InfoDialogContent extends StatelessWidget {
   const InfoDialogContent({super.key, required this.prompt});
@@ -9,12 +9,11 @@ class InfoDialogContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      height: 300,
-      child: Column(
+    return Wrap(children: [
+      Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('${prompt.category} - ${prompt.author}',
+          Text('${prompt.category} - ${prompt.userName}',
               style: const TextStyle(fontSize: 16)),
           if (prompt.description != null)
             Text(
@@ -25,10 +24,10 @@ class InfoDialogContent extends StatelessWidget {
           const Text("Prompt",
               style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
           const SizedBox(height: 8),
-          PromptTextBox(promptText: prompt.prompt),
+          PromptTextBox(promptText: prompt.content),
         ],
       ),
-    );
+    ]);
   }
 }
 
@@ -113,13 +112,15 @@ class _InfoDialogTitleState extends State<InfoDialogTitle> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(
-          widget.prompt.name,
-          style: const TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.bold,
+        Expanded(
+          child: Text(
+            widget.prompt.title,
+            style: const TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+            ),
+            maxLines: null,
           ),
-          maxLines: 1,
         ),
         Row(
           mainAxisSize: MainAxisSize.min,

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import '../../../models/knowledge.dart';
+import 'package:jarvis_ktk/data/models/knowledge.dart';
 
 class UnitInfoDialog extends StatelessWidget {
   final Unit unit;
@@ -19,7 +19,7 @@ class UnitInfoDialog extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Source: ${unit.source}'),
+          Text('Source: ${unit.source.title}'),
           const SizedBox(height: 8),
           Text('Size: ${unit.size}'),
           const SizedBox(height: 8),

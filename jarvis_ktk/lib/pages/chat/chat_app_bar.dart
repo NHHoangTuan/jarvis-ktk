@@ -7,9 +7,9 @@ class ChatAppBar extends StatelessWidget implements PreferredSizeWidget {
   @override
   final Size preferredSize;
 
-  ChatAppBar({Key? key})
-      : preferredSize = Size.fromHeight(kToolbarHeight),
-        super(key: key);
+  const ChatAppBar({super.key, required this.onAgentChanged})
+      : preferredSize = const Size.fromHeight(kToolbarHeight);
+  final Function(String) onAgentChanged;
 
   @override
   Widget build(BuildContext context) {
@@ -32,6 +32,7 @@ class ChatAppBar extends StatelessWidget implements PreferredSizeWidget {
                   aiAgents: chatModel.aiAgents,
                   onChanged: (value) {
                     chatModel.setSelectedAgent(value!);
+                    onAgentChanged(value);
                   },
                 ),
               ],
@@ -80,6 +81,7 @@ class ChatAppBar extends StatelessWidget implements PreferredSizeWidget {
           onSelected: (String choice) {
             if (choice == 'New Chat') {
               chatModel.clearMessages();
+              chatModel.resetConversationId();
             }
           },
           itemBuilder: (BuildContext context) {

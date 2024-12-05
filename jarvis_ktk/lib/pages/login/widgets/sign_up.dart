@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:jarvis_ktk/data/network/auth_api.dart';
 import 'package:jarvis_ktk/utils/colors.dart';
+
+import '../../../services/service_locator.dart';
 
 class SignUpView extends StatefulWidget {
   final VoidCallback onLoginPressed;
@@ -14,7 +18,95 @@ class _SignUpViewState extends State<SignUpView> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _retypePasswordController =
+      TextEditingController();
   bool _obscureText = true; // Biến trạng thái để quản lý việc ẩn/hiện mật khẩu
+  bool _retypeObscureText =
+      true; // Biến trạng thái để quản lý việc ẩn/hiện mật khẩu
+
+  bool _isLoading = false;
+  String? _errorMessage;
+
+  bool _validateInputs() {
+    if (_emailController.text.isEmpty ||
+        _usernameController.text.isEmpty ||
+        _passwordController.text.isEmpty) {
+      setState(() => _errorMessage = "All fields are required");
+      return false;
+    }
+    if (!_emailController.text.contains('@')) {
+      setState(() => _errorMessage = "Invalid email format");
+      return false;
+    }
+    if (_passwordController.text != _retypePasswordController.text) {
+      setState(() => _errorMessage = "Passwords do not match");
+      return false;
+    }
+    setState(() => _errorMessage = null);
+    return true;
+  }
+
+  Future<void> _handleSignUp() async {
+    if (!_validateInputs()) {
+      showToast(_errorMessage!);
+      return;
+    }
+
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
+
+    try {
+      final authApi = getIt<AuthApi>();
+      final response = await authApi.signUp(
+        _usernameController.text,
+        _passwordController.text,
+        _emailController.text,
+      );
+
+      if (response.statusCode == 201) {
+        // Chuyển về màn login sau khi đăng ký thành công
+        showToast("Registration successful. Please login.");
+        widget.onLoginPressed();
+      } else {
+        // Parse error message từ response data
+        final details = response.data['details'] as List;
+        if (details.isNotEmpty) {
+          final issue = details[0]['issue'] as String;
+          setState(() => _errorMessage = issue);
+          showToast(_errorMessage!);
+        }
+      }
+    } catch (e) {
+      setState(() => _errorMessage = "Registration failed. Please try again.");
+      showToast(_errorMessage!);
+    } finally {
+      setState(() => _isLoading = false);
+    }
+  }
+
+  void showToast(String message) {
+    Fluttertoast.showToast(
+        msg: message,
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.BOTTOM,
+        timeInSecForIosWeb: 1,
+        backgroundColor: Colors.blueGrey.shade900,
+        textColor: Colors.white,
+        fontSize: 16.0);
+  }
+
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    // Giải phóng các controller để tránh memory leak
+    _emailController.dispose();
+    _usernameController.dispose();
+    _passwordController.dispose();
+    _retypePasswordController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -66,6 +158,28 @@ class _SignUpViewState extends State<SignUpView> {
             ),
           ),
           const SizedBox(height: 16),
+          TextFormField(
+            controller: _retypePasswordController,
+            obscureText: _retypeObscureText,
+            decoration: InputDecoration(
+              labelText: 'Retype Password',
+              hintText: 'Retype your password',
+              border:
+                  OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+              suffixIcon: IconButton(
+                icon: Icon(
+                  _retypeObscureText ? Icons.visibility_off : Icons.visibility,
+                ),
+                onPressed: () {
+                  setState(() {
+                    _retypeObscureText =
+                        !_retypeObscureText; // Thay đổi trạng thái ẩn/hiện mật khẩu
+                  });
+                },
+              ),
+            ),
+          ),
+          const SizedBox(height: 16),
           Container(
             width: double.infinity,
             decoration: BoxDecoration(
@@ -81,14 +195,21 @@ class _SignUpViewState extends State<SignUpView> {
                 backgroundColor: Colors.transparent,
                 shadowColor: Colors.transparent,
               ),
-              onPressed: () {
-                // Xử lý đăng ký
-              },
-              child: const Text('Register',
-                  style: TextStyle(
-                      fontSize: 18,
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold)),
+              onPressed: _isLoading ? null : _handleSignUp,
+              child: _isLoading
+                  ? const SizedBox(
+                      height: 20,
+                      width: 20,
+                      child: CircularProgressIndicator(
+                        color: Colors.white,
+                        strokeWidth: 2,
+                      ),
+                    )
+                  : const Text('Register',
+                      style: TextStyle(
+                          fontSize: 18,
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold)),
             ),
           ),
           const SizedBox(height: 16),

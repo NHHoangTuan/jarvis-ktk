@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:jarvis_ktk/data/models/knowledge.dart';
 import 'package:jarvis_ktk/utils/colors.dart';
 
-import '../../models/knowledge.dart';
 import '../knowledge_info_page.dart';
 
 class AddKnowledgePreviewBot extends StatefulWidget {

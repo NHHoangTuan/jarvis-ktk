@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 
-import '../../../models/prompt.dart';
+import '../../../../../data/models/prompt.dart';
 import 'info_dialog_content.dart';
 
 class InfoDialog extends StatelessWidget {
-  const InfoDialog({super.key, required this.prompt});
+  final void Function(PublicPrompt) onUsePrompt;
+
+  const InfoDialog({super.key, required this.prompt, required this.onUsePrompt});
 
   final PublicPrompt prompt;
 
@@ -27,18 +29,19 @@ class InfoDialog extends StatelessWidget {
 
       actions: [
         UsePromptButton(onPressed: () {
-          // Handle "Use Prompt" action
+          onUsePrompt(prompt);
+          Navigator.of(context)..pop()..pop();
         }),
       ],
     );
   }
 }
 
-void showInfoDialog(BuildContext context, PublicPrompt prompt) {
+void showInfoDialog(BuildContext context, PublicPrompt prompt, void Function(PublicPrompt) onUsePrompt){
   showDialog(
     context: context,
     builder: (BuildContext context) {
-      return InfoDialog(prompt: prompt);
+      return InfoDialog(prompt: prompt, onUsePrompt: onUsePrompt);
     },
   );
 }

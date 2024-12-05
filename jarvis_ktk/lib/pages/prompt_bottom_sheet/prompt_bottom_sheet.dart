@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:jarvis_ktk/data/models/prompt.dart';
 
 import 'widgets/app_bar.dart';
 import 'widgets/my_prompt/my_prompt_content.dart';
 import 'widgets/public_prompt/public_prompt_content.dart';
 import 'widgets/tab_bar.dart';
 
-void showPromptBottomSheet(BuildContext context) {
+void showPromptBottomSheet(BuildContext context, {required void Function(Prompt) onClick}) {
   showModalBottomSheet(
     context: context,
     backgroundColor: Colors.white,
@@ -13,12 +14,14 @@ void showPromptBottomSheet(BuildContext context) {
       borderRadius: BorderRadius.vertical(top: Radius.circular(25.0)),
     ),
     isScrollControlled: true,
-    builder: (context) => const PromptBottomSheet(),
+    builder: (context) => PromptBottomSheet(onClick: onClick),
   );
 }
 
 class PromptBottomSheet extends StatefulWidget {
-  const PromptBottomSheet({super.key});
+  final void Function(Prompt) onClick;
+
+  const PromptBottomSheet({super.key, required this.onClick});
 
   @override
   State<PromptBottomSheet> createState() => _PromptBottomSheetState();
@@ -27,6 +30,8 @@ class PromptBottomSheet extends StatefulWidget {
 class _PromptBottomSheetState extends State<PromptBottomSheet>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
+  final GlobalKey<PublicPromptContentState> _publicPromptKey = GlobalKey<PublicPromptContentState>();
+  final GlobalKey<MyPromptContentState> _myPromptKey = GlobalKey<MyPromptContentState>();
 
   @override
   void initState() {
@@ -50,7 +55,7 @@ class _PromptBottomSheetState extends State<PromptBottomSheet>
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const PromptAppBar(),
+            PromptAppBar(myPromptKey: _myPromptKey, publicPromptKey: _publicPromptKey),
             PromptTabBar(
               tabController: _tabController,
             ),
@@ -58,9 +63,9 @@ class _PromptBottomSheetState extends State<PromptBottomSheet>
               height: 500,
               child: TabBarView(
                 controller: _tabController,
-                children: const [
-                  MyPromptContent(),
-                  PublicPromptContent(),
+                children: [
+                  MyPromptContent(key: _myPromptKey, onClick: widget.onClick),
+                  PublicPromptContent(key: _publicPromptKey, onClick: widget.onClick),
                 ],
               ),
             ),

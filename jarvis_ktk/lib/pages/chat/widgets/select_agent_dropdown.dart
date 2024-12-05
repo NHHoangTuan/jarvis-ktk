@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:jarvis_ktk/utils/colors.dart';
 
+import '../../../utils/resized_image.dart';
+
 class SelectAgentDropdown extends StatelessWidget {
   final String selectedAgent;
   final List<Map<String, String>> aiAgents;
@@ -24,10 +26,7 @@ class SelectAgentDropdown extends StatelessWidget {
               (item) => Row(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  CircleAvatar(
-                    backgroundImage: AssetImage(item['avatar']!),
-                    radius: 10,
-                  ),
+                  ResizedImage(imagePath: item['avatar']!, width: 18, height: 18, isRound: true,),
                   const SizedBox(width: 6),
                   Text(
                     item['name']!,
@@ -44,10 +43,7 @@ class SelectAgentDropdown extends StatelessWidget {
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      CircleAvatar(
-                        backgroundImage: AssetImage(item['avatar']!),
-                        radius: 9,
-                      ),
+                      ResizedImage(imagePath: item['avatar']!, width: 18, height: 18, isRound: true,),
                       const SizedBox(width: 6),
                       Text(
                         item['name']!,

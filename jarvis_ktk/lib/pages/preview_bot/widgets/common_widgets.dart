@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:jarvis_ktk/utils/resized_image.dart';
 import '../../../utils/colors.dart';
 import 'unit/dialog/add_unit_content.dart';
 
@@ -8,7 +9,7 @@ class HeaderText extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListTile(
-      leading: Image.asset(selectedDataSource.imagePath, width: 18, height: 18),
+      leading: ResizedImage(imagePath: selectedDataSource.imagePath, width: 18, height: 18),
       title: Text(
         selectedDataSource.title,
         style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
