@@ -69,6 +69,11 @@ class ChatModel extends ChangeNotifier {
     notifyListeners();
   }
 
+  void updateMessage(int index, Map<String, dynamic> message) {
+    _messages[index] = message;
+    notifyListeners();
+  }
+
   void clearMessages() {
     _messages.clear();
     _showWelcomeMessage = true;
