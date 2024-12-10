@@ -61,77 +61,36 @@ class Conversation {
 enum AssistantId {
   CLAUDE_3_5_SONNET_20240620,
   CLAUDE_3_HAIKU_20240307,
-  GEMINI_15_FLASH_LATEST,
-  GEMINI_15_PRO_LATEST,
+  GEMINI_1_5_FLASH_LATEST,
+  GEMINI_1_5_PRO_LATEST,
   GPT_4O,
   GPT_4O_MINI
 }
 
-final assistantIdValues = EnumValues({
-  "claude-3-5-sonnet-20240620": AssistantId.CLAUDE_3_5_SONNET_20240620,
-  "claude-3-haiku-20240307": AssistantId.CLAUDE_3_HAIKU_20240307,
-  "gemini-1.5-flash-latest": AssistantId.GEMINI_15_FLASH_LATEST,
-  "gemini-1.5-pro-latest": AssistantId.GEMINI_15_PRO_LATEST,
-  "gpt-4o": AssistantId.GPT_4O,
-  "gpt-4o-mini": AssistantId.GPT_4O_MINI
-});
+extension AssistantIdExtension on AssistantId {
+  String get name {
+    switch (this) {
+      case AssistantId.CLAUDE_3_5_SONNET_20240620:
+        return "claude-3-5-sonnet-20240620";
+      case AssistantId.CLAUDE_3_HAIKU_20240307:
+        return "claude-3-haiku-20240307";
+      case AssistantId.GEMINI_1_5_FLASH_LATEST:
+        return "gemini-1.5-flash-latest";
+      case AssistantId.GEMINI_1_5_PRO_LATEST:
+        return "gemini-1.5-pro-latest";
+      case AssistantId.GPT_4O:
+        return "gpt-4o";
+      case AssistantId.GPT_4O_MINI:
+        return "gpt-4o-mini";
+      default:
+        return "";
+    }
+  }
+}
 
 ///Always is "dify"
 enum AssistantModel { DIFY }
 
-final assistantModelValues = EnumValues({"dify": AssistantModel.DIFY});
-
-class EnumValues<T> {
-  Map<String, T> map;
-  Map<T, String>? reverseMap;
-
-  EnumValues(this.map);
-
-  Map<T, String> get reverse {
-    reverseMap ??= map.map((k, v) => MapEntry(v, k));
-    return reverseMap!;
-  }
-}
-
-String toEnumString(dynamic enumValue) {
-  return enumValue
-      .toString()
-      .toLowerCase()
-      .replaceAll('_', '-')
-      .replaceAll('assistantid.', '');
-}
-
-extension EnumString on AssistantId {
-  String get name => toEnumString(this);
-}
-
-String toEnumStringDify(dynamic enumValue) {
-  if (enumValue
-      .toString()
-      .toLowerCase()
-      .replaceAll('assistantmodel.', '')
-      .contains('5')) {
-    return insertAfterCharacter(
-        enumValue.toString().toLowerCase().replaceAll('assistantmodel.', ''),
-        '5',
-        '.');
-  }
-  return enumValue.toString().toLowerCase().replaceAll('assistantmodel.', '');
-}
-
-extension EnumStringModel on AssistantModel {
-  String get name => toEnumStringDify(this);
-}
-
-String insertAfterCharacter(String input, String target, String insert) {
-  StringBuffer result = StringBuffer();
-
-  for (int i = 0; i < input.length; i++) {
-    result.write(input[i]);
-    if (input[i] == target) {
-      result.write(insert);
-    }
-  }
-
-  return result.toString();
+extension AssistantModelExtension on AssistantModel {
+  String get name => "dify";
 }

@@ -17,14 +17,10 @@ import 'widgets/message_bubble.dart';
 import 'widgets/welcome.dart';
 
 class ChatBody extends StatefulWidget {
-  final bool isHistory;
-  final List<Map<String, dynamic>>? historyChatMessages;
   final String? conversationId;
 
   const ChatBody({
     super.key,
-    this.isHistory = false,
-    this.historyChatMessages,
     this.conversationId,
   });
 
@@ -93,8 +89,8 @@ class _ChatBodyState extends State<ChatBody> {
       (agent) => agent['id'] == chatModel.selectedAgent,
     );
 
-    final int tokensToDeduct = int.parse(selectedAI['tokens']!);
-    chatModel.setTokenCount(chatModel.tokenCount - tokensToDeduct);
+    //final int tokensToDeduct = int.parse(selectedAI['tokens']!);
+    //chatModel.setTokenCount(chatModel.tokenCount - tokensToDeduct);
 
     final userMessage = _messageController.text;
 
@@ -122,10 +118,9 @@ class _ChatBodyState extends State<ChatBody> {
     try {
       final response = await chatApi.sendMessage({
         'content': userMessage,
-        if (widget.conversationId != null && widget.conversationId!.isNotEmpty)
-          "metadata": {
-            "conversation": {"id": widget.conversationId}
-          },
+        "metadata": {
+          "conversation": {"id": chatModel.conversationId},
+        },
         "assistant": {"id": chatModel.selectedAgent, "model": "dify"}
       });
 
@@ -175,6 +170,7 @@ class _ChatBodyState extends State<ChatBody> {
   @override
   Widget build(BuildContext context) {
     final chatModel = Provider.of<ChatModel>(context);
+    debugPrint("Chat model: ${chatModel.messages}");
     return Stack(
       children: [
         Column(

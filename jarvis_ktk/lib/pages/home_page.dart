@@ -27,6 +27,7 @@ class _HomePageState extends State<HomePage> {
   final GlobalKey<ScaffoldState> _scaffoldKey =
       GlobalKey<ScaffoldState>(); // Correct key placement
   String _currentSelectedItem = 'Chat'; // Thêm biến để theo dõi mục đang chọn
+  bool _isLoading = false;
 
   // Method to change the body content
   void _changeBody(Widget newBody) {
@@ -46,44 +47,54 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
-  List<Map<String, dynamic>> _convertHistoryMessages(
-      List<ChatHistory> historyChatMessages) {
-    List<Map<String, dynamic>> convertedMessages = [];
-    for (var message in historyChatMessages) {
-      convertedMessages.add({
-        'text': message.query,
-        'isUser': true,
-        'timestamp': DateTime.fromMillisecondsSinceEpoch(message.createdAt),
-        'avatar': 'assets/user_avatar.jpg',
-      });
-      convertedMessages.add({
-        'text': message.answer,
-        'isUser': false,
-        'timestamp': DateTime.fromMillisecondsSinceEpoch(message.createdAt),
-        'avatar': 'assets/ai_avatar.png',
+  void _handleHistoryTap(String conversationId, ChatModel chatModel) async {
+    setState(() {
+      _isLoading = true;
+    });
+    try {
+      // Lấy lịch sử chat từ loadConversationHistory
+      final chatApi = getIt<ChatApi>();
+      List<ChatHistory> historyChatMessages =
+          await chatApi.loadConversationHistory(
+              conversationId,
+              AssistantId.values
+                  .firstWhere((e) => e.name == chatModel.selectedAgent),
+              AssistantModel.DIFY);
+
+      // Chuyển đổi lịch sử chat thành định dạng cần thiết
+      final aiAgent = chatModel.aiAgents
+          .firstWhere((ai) => ai['id'] == chatModel.selectedAgent);
+
+      chatModel.clearMessages();
+      for (final item in historyChatMessages) {
+        chatModel.addMessage({
+          'text': item.query,
+          'isUser': true,
+          'timestamp': DateTime.now(),
+          'avatar': 'assets/user_avatar.jpg',
+        });
+
+        chatModel.addMessage({
+          'text': item.answer,
+          'isUser': false,
+          'timestamp': DateTime.now(),
+          'avatar': aiAgent['avatar'],
+        });
+      }
+
+      chatModel.hideWelcomeMessage();
+      chatModel.setConversationId(conversationId);
+    } catch (e) {
+      debugPrint("Error when handle history tap: $e");
+    } finally {
+      setState(() {
+        _isLoading = false;
       });
     }
-    return convertedMessages;
-  }
-
-  void _handleHistoryTap(String conversationId, String assistantId) async {
-    // Lấy lịch sử chat từ loadConversationHistory
-    final chatApi = getIt<ChatApi>();
-    List<ChatHistory> historyChatMessages =
-        await chatApi.loadConversationHistory(
-            conversationId,
-            AssistantId.values.firstWhere((e) => e.name == assistantId),
-            AssistantModel.DIFY);
-
-    // Chuyển đổi lịch sử chat thành định dạng cần thiết
-    List<Map<String, dynamic>> nowMessages =
-        _convertHistoryMessages(historyChatMessages);
 
     // Chuyển đến màn hình Chat
     _changeSelectedItem('Chat');
     _changeBody(ChatBody(
-      isHistory: true,
-      historyChatMessages: nowMessages,
       conversationId: conversationId,
     ));
     _changeAppBar(ChatAppBar(onAgentChanged: _handleAgentChanged));
@@ -98,69 +109,79 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
       create: (context) => ChatModel(),
-      child: Scaffold(
-        key: _scaffoldKey, // Associate the Scaffold with the GlobalKey
-        appBar: ChatAppBar(onAgentChanged: _handleAgentChanged),
-        drawer: NavDrawer(
-          initialSelectedItem:
-              _currentSelectedItem, // Truyền selected item hiện tại
-          onItemTap: (selectedItem) {
-            _changeSelectedItem(selectedItem); // Cập nhật selected item
-            // Change body content based on the selected item
-            switch (selectedItem) {
-              case 'Chat':
-                _changeBody(const ChatBody());
-                _changeAppBar(ChatAppBar(onAgentChanged: _handleAgentChanged));
-                break;
-              case 'Personal':
-                _changeBody(const Center(child: Text('Personal Chat')));
-                _changeAppBar(AppBar(title: const Text('Personal Chat')));
-                break;
-              case 'Email Reply':
-                _changeBody(const EmailReplyPage());
-                _changeAppBar(const EmailReplyAppBar());
-                break;
-              case 'My Bot': // Handle My Bot case
-                _changeBody(MyBotPage(
-                  onApply: () {
-                    _changeBody(PreviewBotPage(
-                      onPublish: () {
-                        _changeBody(const PublishBotPage());
-                        _changeAppBar(AppBar(title: const Text('Publish Bot')));
-                      },
-                    ));
-                    _changeAppBar(AppBar(title: const Text('Preview Bot')));
-                  },
-                ));
-                _changeAppBar(AppBar(title: const Text('My Bot')));
-                break;
-              case 'Knowledge': // Handle Knowledge case
-                _changeBody(const KnowledgePage());
-                _changeAppBar(AppBar(title: const Text('Knowledge')));
-                break;
-            }
+      child: Stack(children: [
+        Scaffold(
+          key: _scaffoldKey, // Associate the Scaffold with the GlobalKey
+          appBar: ChatAppBar(onAgentChanged: _handleAgentChanged),
+          drawer: NavDrawer(
+            initialSelectedItem:
+                _currentSelectedItem, // Truyền selected item hiện tại
+            onItemTap: (selectedItem) {
+              _changeSelectedItem(selectedItem); // Cập nhật selected item
+              // Change body content based on the selected item
+              switch (selectedItem) {
+                case 'Chat':
+                  _changeBody(const ChatBody());
+                  _changeAppBar(
+                      ChatAppBar(onAgentChanged: _handleAgentChanged));
+                  break;
+                case 'Personal':
+                  _changeBody(const Center(child: Text('Personal Chat')));
+                  _changeAppBar(AppBar(title: const Text('Personal Chat')));
+                  break;
+                case 'Email Reply':
+                  _changeBody(const EmailReplyPage());
+                  _changeAppBar(const EmailReplyAppBar());
+                  break;
+                case 'My Bot': // Handle My Bot case
+                  _changeBody(MyBotPage(
+                    onApply: () {
+                      _changeBody(PreviewBotPage(
+                        onPublish: () {
+                          _changeBody(const PublishBotPage());
+                          _changeAppBar(
+                              AppBar(title: const Text('Publish Bot')));
+                        },
+                      ));
+                      _changeAppBar(AppBar(title: const Text('Preview Bot')));
+                    },
+                  ));
+                  _changeAppBar(AppBar(title: const Text('My Bot')));
+                  break;
+                case 'Knowledge': // Handle Knowledge case
+                  _changeBody(const KnowledgePage());
+                  _changeAppBar(AppBar(title: const Text('Knowledge')));
+                  break;
+              }
 
-            Navigator.pop(context); // Close the drawer after selecting an item
-          },
-          onHistoryTap: (conversationId) => _handleHistoryTap(
-            conversationId,
-            Provider.of<ChatModel>(context, listen: false).selectedAgent,
+              Navigator.pop(
+                  context); // Close the drawer after selecting an item
+            },
+            onHistoryTap: _handleHistoryTap, // Thêm callback cho lịch sử chat
+          ),
+          body: Stack(
+            children: [
+              _currentBody, // Display the currently selected body content
+              // Swipe area to open drawer
+              GestureDetector(
+                onHorizontalDragEnd: (details) {
+                  if (details.primaryVelocity! > 0) {
+                    _scaffoldKey.currentState!.openDrawer();
+                  }
+                },
+              ),
+            ],
           ),
         ),
-        body: Stack(
-          children: [
-            _currentBody, // Display the currently selected body content
-            // Swipe area to open drawer
-            GestureDetector(
-              onHorizontalDragEnd: (details) {
-                if (details.primaryVelocity! > 0) {
-                  _scaffoldKey.currentState!.openDrawer();
-                }
-              },
+        // Thêm loading overlay
+        if (_isLoading)
+          Container(
+            color: Colors.black.withOpacity(0.5),
+            child: const Center(
+              child: CircularProgressIndicator(),
             ),
-          ],
-        ),
-      ),
+          ),
+      ]),
     );
   }
 }

@@ -3,7 +3,9 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:jarvis_ktk/data/models/chat.dart';
 import 'package:jarvis_ktk/data/network/chat_api.dart';
+import 'package:jarvis_ktk/pages/chat/chat_model.dart';
 import 'package:jarvis_ktk/utils/resized_image.dart';
+import 'package:provider/provider.dart';
 
 import '../data/models/user.dart';
 import '../data/network/api_service.dart';
@@ -13,7 +15,8 @@ import '../services/service_locator.dart';
 class NavDrawer extends StatefulWidget {
   final Function(String) onItemTap;
   final String initialSelectedItem;
-  final Function(String) onHistoryTap; // Thêm callback cho lịch sử chat
+  final Function(String, ChatModel)
+      onHistoryTap; // Thêm callback cho lịch sử chat
 
   @override
   // ignore: library_private_types_in_public_api
@@ -89,6 +92,7 @@ class _NavDrawerState extends State<NavDrawer> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
+    ChatModel chatModel = Provider.of<ChatModel>(context);
     return SafeArea(
       child: Drawer(
         width: MediaQuery.of(context).size.width * 0.7,
@@ -234,7 +238,8 @@ class _NavDrawerState extends State<NavDrawer> with TickerProviderStateMixin {
                           leading: const Icon(Icons.message),
                           title: Text(conversation.title),
                           onTap: () {
-                            widget.onHistoryTap(_conversationIds[index]);
+                            widget.onHistoryTap(
+                                _conversationIds[index], chatModel);
                             Navigator.pop(context);
                           },
                         );
