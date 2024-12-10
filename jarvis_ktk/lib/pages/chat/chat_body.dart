@@ -11,6 +11,7 @@ import 'package:jarvis_ktk/data/network/prompt_api.dart';
 import 'package:jarvis_ktk/services/service_locator.dart';
 import 'package:provider/provider.dart';
 
+import '../../services/cache_service.dart';
 import '../prompt_bottom_sheet/prompt_bottom_sheet.dart';
 import 'chat_model.dart';
 import 'widgets/message_bubble.dart';
@@ -139,6 +140,8 @@ class _ChatBodyState extends State<ChatBody> {
         };
         // Cập nhật dữ liệu vào ChatModel
         chatModel.updateMessage(chatModel.messages.length - 1, newMessage);
+        CacheService.setCurrentHistoryLength(
+            CacheService.getCurrentHistoryLength() + 1);
       } else {
         // Parse error message từ response data
         final details = response.data['details'] as List;
