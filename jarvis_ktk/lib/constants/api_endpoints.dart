@@ -18,4 +18,7 @@ class ApiEndpoints {
   static const String prompts = 'prompts';
   static const String promptById = 'prompts/{id}';
   static const String promptFavorite = 'prompts/{id}/favorite';
+
+  // Token
+  static const String tokenUsage = 'tokens/usage';
 }

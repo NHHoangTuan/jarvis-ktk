@@ -36,7 +36,6 @@ class _ChatBodyState extends State<ChatBody> {
   late FocusNode _messageFocusNode;
   bool _showPromptList = false;
   User? _user;
-  //List<Map<String, dynamic>>? _historyChatMessages;
 
   bool _isLoading = false;
 
@@ -46,17 +45,19 @@ class _ChatBodyState extends State<ChatBody> {
     _messageController = TextEditingController();
     _messageFocusNode = FocusNode();
     _messageController.addListener(_handleSlashAction);
-    _initializeUser();
-    _promptsFuture = getIt<PromptApi>().getPrompts();
+    _initialize();
   }
 
-  Future<void> _initializeUser() async {
+  Future<void> _initialize() async {
     final userJson = await _storage.read(key: 'user');
     if (userJson != null) {
       final Map<String, dynamic> userMap = jsonDecode(userJson);
       setState(() {
         _user = User.fromJson(userMap);
       });
+    }
+    if (_user != null) {
+      _promptsFuture = getIt<PromptApi>().getPrompts();
     }
   }
 
@@ -68,7 +69,7 @@ class _ChatBodyState extends State<ChatBody> {
   }
 
   void _handleSlashAction() {
-    if (_messageController.text.startsWith('/')) {
+    if (_messageController.text.startsWith('/') && _user != null) {
       setState(() {
         _showPromptList = true;
       });
@@ -89,9 +90,6 @@ class _ChatBodyState extends State<ChatBody> {
     final selectedAI = chatModel.aiAgents.firstWhere(
       (agent) => agent['id'] == chatModel.selectedAgent,
     );
-
-    //final int tokensToDeduct = int.parse(selectedAI['tokens']!);
-    //chatModel.setTokenCount(chatModel.tokenCount - tokensToDeduct);
 
     final userMessage = _messageController.text;
 
@@ -128,6 +126,7 @@ class _ChatBodyState extends State<ChatBody> {
       if (response.statusCode == 200) {
         var remainingUsage = response.data['remainingUsage'];
         chatModel.setTokenCount(remainingUsage);
+        CacheService.updateAvailableTokenUsage(remainingUsage);
 
         var conversationId = response.data['conversationId'];
         chatModel.setConversationId(conversationId);
@@ -148,6 +147,10 @@ class _ChatBodyState extends State<ChatBody> {
         if (details.isNotEmpty) {
           final issue = details[0]['issue'] as String;
           showToast(issue);
+
+          // Xóa tin nhắn cuối cùng nếu có lỗi
+          chatModel.removeMessage(chatModel.messages.length - 1);
+          chatModel.removeMessage(chatModel.messages.length - 1);
         }
       }
     } catch (e) {
@@ -173,7 +176,6 @@ class _ChatBodyState extends State<ChatBody> {
   @override
   Widget build(BuildContext context) {
     final chatModel = Provider.of<ChatModel>(context);
-    debugPrint("Chat model: ${chatModel.messages}");
     return Stack(
       children: [
         Column(

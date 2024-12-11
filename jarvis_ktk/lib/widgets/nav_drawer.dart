@@ -55,7 +55,7 @@ class _NavDrawerState extends State<NavDrawer> with TickerProviderStateMixin {
       if (response.statusCode == 200) {
         await apiService.clearTokens(); // Xóa tokens
         await apiService.clearUser(); // Xóa thông tin user
-        CacheService.clearCache(); // Xóa cache
+        CacheService.clearAllCache(); // Xóa cache
         Navigator.pushNamedAndRemoveUntil(
           // ignore: use_build_context_synchronously
           context,

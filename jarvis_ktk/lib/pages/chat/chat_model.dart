@@ -1,12 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:jarvis_ktk/data/models/chat.dart';
+import 'package:jarvis_ktk/services/service_locator.dart';
+
+import '../../data/network/token_api.dart';
 
 class ChatModel extends ChangeNotifier {
   String _selectedAgent = AssistantId.GPT_4O_MINI.name;
-  int _tokenCount = 1000;
+  int _tokenCount = 0;
   final List<Map<String, dynamic>> _messages = [];
   bool _showWelcomeMessage = true;
   String _conversationId = '';
+  final tokenApi = getIt<TokenApi>();
 
   final List<Map<String, String>> _aiAgents = [
     {
@@ -71,6 +75,11 @@ class ChatModel extends ChangeNotifier {
 
   void updateMessage(int index, Map<String, dynamic> message) {
     _messages[index] = message;
+    notifyListeners();
+  }
+
+  void removeMessage(int index) {
+    _messages.removeAt(index);
     notifyListeners();
   }
 
