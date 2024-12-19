@@ -7,6 +7,7 @@ class MessageBubble extends StatelessWidget {
   final bool isUser;
   final DateTime timestamp;
   final String avatar;
+  final bool isLoading;
 
   const MessageBubble({
     super.key,
@@ -14,6 +15,7 @@ class MessageBubble extends StatelessWidget {
     required this.isUser,
     required this.timestamp,
     required this.avatar,
+    this.isLoading = false,
   });
 
   @override
@@ -25,7 +27,8 @@ class MessageBubble extends StatelessWidget {
             isUser ? MainAxisAlignment.end : MainAxisAlignment.start,
         children: [
           if (!isUser)
-            ResizedImage(imagePath: avatar, width: 32, height: 32, isRound: true),
+            ResizedImage(
+                imagePath: avatar, width: 32, height: 32, isRound: true),
           const SizedBox(width: 8),
           Flexible(
             child: Container(
@@ -44,12 +47,23 @@ class MessageBubble extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    text,
-                    style: TextStyle(
-                      color: isUser ? Colors.white : Colors.black,
-                      fontSize: 16,
-                    ),
+                  Container(
+                    child: isLoading
+                        ? const SizedBox(
+                            height: 20,
+                            width: 20,
+                            child: CircularProgressIndicator(
+                              color: Colors.blueGrey,
+                              strokeWidth: 2,
+                            ),
+                          )
+                        : Text(
+                            text,
+                            style: TextStyle(
+                              color: isUser ? Colors.white : Colors.black,
+                              fontSize: 16,
+                            ),
+                          ),
                   ),
                   const SizedBox(height: 4),
                   Text(
@@ -65,7 +79,8 @@ class MessageBubble extends StatelessWidget {
           ),
           const SizedBox(width: 8),
           if (isUser)
-            ResizedImage(imagePath: avatar, width: 32, height: 32, isRound: true),
+            ResizedImage(
+                imagePath: avatar, width: 32, height: 32, isRound: true),
         ],
       ),
     );

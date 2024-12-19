@@ -3,7 +3,10 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:jarvis_ktk/data/models/chat.dart';
 import 'package:jarvis_ktk/data/network/chat_api.dart';
+import 'package:jarvis_ktk/pages/chat/chat_model.dart';
+import 'package:jarvis_ktk/services/cache_service.dart';
 import 'package:jarvis_ktk/utils/resized_image.dart';
+import 'package:provider/provider.dart';
 
 import '../data/models/user.dart';
 import '../data/network/api_service.dart';
@@ -13,7 +16,8 @@ import '../services/service_locator.dart';
 class NavDrawer extends StatefulWidget {
   final Function(String) onItemTap;
   final String initialSelectedItem;
-  final Function(String) onHistoryTap; // Thêm callback cho lịch sử chat
+  final Function(String, ChatModel)
+      onHistoryTap; // Thêm callback cho lịch sử chat
 
   @override
   // ignore: library_private_types_in_public_api
@@ -29,9 +33,8 @@ class NavDrawer extends StatefulWidget {
 class _NavDrawerState extends State<NavDrawer> with TickerProviderStateMixin {
   bool _showPersonalOptions = false;
   late String _selectedItem;
-  late Future<List<Conversation>> _conversationsFuture = Future.value([]);
-  List<String> _conversationIds = [];
-  User? _user;
+
+  final chatApi = getIt<ChatApi>();
 
   @override
   void initState() {
@@ -41,7 +44,6 @@ class _NavDrawerState extends State<NavDrawer> with TickerProviderStateMixin {
     if (_selectedItem == 'My Bot' || _selectedItem == 'Knowledge') {
       _showPersonalOptions = true;
     }
-    _fetchUser();
   }
 
   // Handle login
@@ -53,6 +55,7 @@ class _NavDrawerState extends State<NavDrawer> with TickerProviderStateMixin {
       if (response.statusCode == 200) {
         await apiService.clearTokens(); // Xóa tokens
         await apiService.clearUser(); // Xóa thông tin user
+        CacheService.clearAllCache(); // Xóa cache
         Navigator.pushNamedAndRemoveUntil(
           // ignore: use_build_context_synchronously
           context,
@@ -68,27 +71,9 @@ class _NavDrawerState extends State<NavDrawer> with TickerProviderStateMixin {
     } finally {}
   }
 
-  Future<void> _fetchUser() async {
-    final apiService = getIt<ApiService>();
-    final user = await apiService.getStoredUser();
-    setState(() {
-      _user = user;
-      if (_user != null) {
-        _conversationsFuture = _fetchConversations();
-      }
-    });
-  }
-
-  Future<List<Conversation>> _fetchConversations() async {
-    final chatApi = getIt<ChatApi>();
-    final conversations = await chatApi.fetchConversations(
-        AssistantId.GPT_4O_MINI, AssistantModel.DIFY);
-    _conversationIds = conversations.map((c) => c.id).toList();
-    return conversations;
-  }
-
   @override
   Widget build(BuildContext context) {
+    ChatModel chatModel = Provider.of<ChatModel>(context);
     return SafeArea(
       child: Drawer(
         width: MediaQuery.of(context).size.width * 0.7,
@@ -214,8 +199,8 @@ class _NavDrawerState extends State<NavDrawer> with TickerProviderStateMixin {
 
             // Chat history section
             Expanded(
-              child: FutureBuilder<List<Conversation>>(
-                future: _conversationsFuture,
+              child: FutureBuilder<List<Conversation>?>(
+                future: CacheService.getCachedConversations(chatApi),
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
                     return const Center(child: CircularProgressIndicator());
@@ -234,7 +219,7 @@ class _NavDrawerState extends State<NavDrawer> with TickerProviderStateMixin {
                           leading: const Icon(Icons.message),
                           title: Text(conversation.title),
                           onTap: () {
-                            widget.onHistoryTap(_conversationIds[index]);
+                            widget.onHistoryTap(conversation.id, chatModel);
                             Navigator.pop(context);
                           },
                         );

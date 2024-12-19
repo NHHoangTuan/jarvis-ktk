@@ -58,6 +58,7 @@ class _SignInViewState extends State<SignInView> {
       if (response.statusCode == 200) {
         // Get user info after login
         await authApi.getUserInfo();
+
         // Navigate to home page
         Navigator.pushNamedAndRemoveUntil(context, '/home', (route) => false);
       } else {

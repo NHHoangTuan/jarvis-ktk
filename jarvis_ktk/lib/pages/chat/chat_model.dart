@@ -1,12 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:jarvis_ktk/data/models/chat.dart';
+import 'package:jarvis_ktk/services/service_locator.dart';
+
+import '../../data/network/token_api.dart';
 
 class ChatModel extends ChangeNotifier {
   String _selectedAgent = AssistantId.GPT_4O_MINI.name;
-  int _tokenCount = 1000;
+  int _tokenCount = 0;
   final List<Map<String, dynamic>> _messages = [];
   bool _showWelcomeMessage = true;
   String _conversationId = '';
+  final tokenApi = getIt<TokenApi>();
 
   final List<Map<String, String>> _aiAgents = [
     {
@@ -19,25 +23,25 @@ class ChatModel extends ChangeNotifier {
       'id': AssistantId.CLAUDE_3_5_SONNET_20240620.name,
       'name': 'claude-3-5-sonnet',
       'avatar': 'assets/claude-3-5-sonnet.webp',
-      'tokens': '1'
+      'tokens': '3'
     },
     {
-      'id': AssistantId.GEMINI_15_FLASH_LATEST.name,
+      'id': AssistantId.GEMINI_1_5_FLASH_LATEST.name,
       'name': 'gemini-1.5-flash',
       'avatar': 'assets/gemini.png',
       'tokens': '1'
     },
     {
-      'id': AssistantId.GEMINI_15_PRO_LATEST.name,
+      'id': AssistantId.GEMINI_1_5_PRO_LATEST.name,
       'name': 'gemini-1.5-pro',
       'avatar': 'assets/gemini.png',
-      'tokens': '1'
+      'tokens': '5'
     },
     {
       'id': AssistantId.GPT_4O.name,
       'name': 'gpt-4o',
       'avatar': 'assets/gpt-4o.webp',
-      'tokens': '1'
+      'tokens': '5'
     },
     {
       'id': AssistantId.GPT_4O_MINI.name,
@@ -69,9 +73,20 @@ class ChatModel extends ChangeNotifier {
     notifyListeners();
   }
 
+  void updateMessage(int index, Map<String, dynamic> message) {
+    _messages[index] = message;
+    notifyListeners();
+  }
+
+  void removeMessage(int index) {
+    _messages.removeAt(index);
+    notifyListeners();
+  }
+
   void clearMessages() {
     _messages.clear();
     _showWelcomeMessage = true;
+    _conversationId = '';
     notifyListeners();
   }
 

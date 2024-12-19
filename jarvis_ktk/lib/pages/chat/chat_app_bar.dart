@@ -1,15 +1,47 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../../data/models/token_usage.dart';
+import '../../data/network/token_api.dart';
+import '../../services/cache_service.dart';
+import '../../services/service_locator.dart';
 import 'chat_model.dart';
 import 'widgets/select_agent_dropdown.dart';
 
-class ChatAppBar extends StatelessWidget implements PreferredSizeWidget {
+class ChatAppBar extends StatefulWidget implements PreferredSizeWidget {
+  State<ChatAppBar> createState() => _ChatAppBarState();
+
   @override
   final Size preferredSize;
 
   const ChatAppBar({super.key, required this.onAgentChanged})
       : preferredSize = const Size.fromHeight(kToolbarHeight);
   final Function(String) onAgentChanged;
+}
+
+class _ChatAppBarState extends State<ChatAppBar> {
+  final tokenApi = getIt<TokenApi>();
+  StreamController<TokenUsage?> _tokenUsageController =
+      StreamController<TokenUsage?>.broadcast();
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    _loadInitialTokens();
+  }
+
+  Future<void> _loadInitialTokens() async {
+    final tokens = await CacheService.getCachedTokenUsage(tokenApi);
+    _tokenUsageController.add(tokens);
+  }
+
+  Future<void> _refreshTokens() async {
+    if (_tokenUsageController.isClosed) return;
+    final tokens = await CacheService.getCachedTokenUsage(tokenApi);
+    _tokenUsageController.add(tokens);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -32,7 +64,7 @@ class ChatAppBar extends StatelessWidget implements PreferredSizeWidget {
                   aiAgents: chatModel.aiAgents,
                   onChanged: (value) {
                     chatModel.setSelectedAgent(value!);
-                    onAgentChanged(value);
+                    widget.onAgentChanged(value);
                   },
                 ),
               ],
@@ -43,33 +75,23 @@ class ChatAppBar extends StatelessWidget implements PreferredSizeWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
-                Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: Colors.blue.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const Icon(
-                        Icons.local_fire_department,
-                        color: Colors.orange,
-                        size: 20,
-                      ),
-                      const SizedBox(width: 4),
-                      Text(
-                        '${chatModel.tokenCount}',
-                        style: const TextStyle(
-                          color: Colors.blue,
-                          fontSize: 15,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
+                StreamBuilder<TokenUsage?>(
+                    stream: _tokenUsageController.stream,
+                    initialData: null,
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return const CircularProgressIndicator();
+                      }
+
+                      if (snapshot.data?.availableTokens != null &&
+                          snapshot.data?.availableTokens !=
+                              chatModel.tokenCount) {
+                        _refreshTokens();
+                      }
+
+                      final tokenCount = snapshot.data?.availableTokens ?? 0;
+                      return TokenDisplay(tokenCount: tokenCount);
+                    })
               ],
             ),
           ),
@@ -100,6 +122,48 @@ class ChatAppBar extends StatelessWidget implements PreferredSizeWidget {
           ),
         ),
       ],
+    );
+  }
+
+  @override
+  void dispose() {
+    _tokenUsageController.close();
+    super.dispose();
+  }
+}
+
+class TokenDisplay extends StatelessWidget {
+  final int tokenCount;
+
+  const TokenDisplay({required this.tokenCount});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: Colors.blue.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Icon(
+            Icons.local_fire_department,
+            color: Colors.orange,
+            size: 20,
+          ),
+          const SizedBox(width: 4),
+          Text(
+            '$tokenCount',
+            style: const TextStyle(
+              color: Colors.blue,
+              fontSize: 15,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

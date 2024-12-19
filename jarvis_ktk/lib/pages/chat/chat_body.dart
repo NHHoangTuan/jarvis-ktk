@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:jarvis_ktk/data/models/prompt.dart';
 import 'package:jarvis_ktk/data/models/user.dart';
 import 'package:jarvis_ktk/data/network/chat_api.dart';
@@ -10,20 +11,17 @@ import 'package:jarvis_ktk/data/network/prompt_api.dart';
 import 'package:jarvis_ktk/services/service_locator.dart';
 import 'package:provider/provider.dart';
 
+import '../../services/cache_service.dart';
 import '../prompt_bottom_sheet/prompt_bottom_sheet.dart';
 import 'chat_model.dart';
 import 'widgets/message_bubble.dart';
 import 'widgets/welcome.dart';
 
 class ChatBody extends StatefulWidget {
-  final bool isHistory;
-  final List<Map<String, dynamic>>? historyChatMessages;
   final String? conversationId;
 
   const ChatBody({
     super.key,
-    this.isHistory = false,
-    this.historyChatMessages,
     this.conversationId,
   });
 
@@ -38,7 +36,8 @@ class _ChatBodyState extends State<ChatBody> {
   late FocusNode _messageFocusNode;
   bool _showPromptList = false;
   User? _user;
-  List<Map<String, dynamic>>? _historyChatMessages;
+
+  bool _isLoading = false;
 
   @override
   void initState() {
@@ -46,17 +45,19 @@ class _ChatBodyState extends State<ChatBody> {
     _messageController = TextEditingController();
     _messageFocusNode = FocusNode();
     _messageController.addListener(_handleSlashAction);
-    _initializeUser();
-    _promptsFuture = getIt<PromptApi>().getPrompts();
+    _initialize();
   }
 
-  Future<void> _initializeUser() async {
+  Future<void> _initialize() async {
     final userJson = await _storage.read(key: 'user');
     if (userJson != null) {
       final Map<String, dynamic> userMap = jsonDecode(userJson);
       setState(() {
         _user = User.fromJson(userMap);
       });
+    }
+    if (_user != null) {
+      _promptsFuture = getIt<PromptApi>().getPrompts();
     }
   }
 
@@ -68,7 +69,7 @@ class _ChatBodyState extends State<ChatBody> {
   }
 
   void _handleSlashAction() {
-    if (_messageController.text.startsWith('/')) {
+    if (_messageController.text.startsWith('/') && _user != null) {
       setState(() {
         _showPromptList = true;
       });
@@ -80,112 +81,125 @@ class _ChatBodyState extends State<ChatBody> {
   }
 
   Future<void> _sendMessage(ChatModel chatModel) async {
-    if (_messageController.text
-        .trim()
-        .isNotEmpty) {
-      final selectedAI = chatModel.aiAgents.firstWhere(
-            (agent) => agent['id'] == chatModel.selectedAgent,
-      );
+    if (_messageController.text.trim().isEmpty) return;
 
-      final int tokensToDeduct = int.parse(selectedAI['tokens']!);
-      chatModel.setTokenCount(chatModel.tokenCount - tokensToDeduct);
+    setState(() {
+      _isLoading = true;
+    });
 
-      final userMessage = _messageController.text;
+    final selectedAI = chatModel.aiAgents.firstWhere(
+      (agent) => agent['id'] == chatModel.selectedAgent,
+    );
 
-      final chatApi = getIt<ChatApi>();
+    final userMessage = _messageController.text;
 
-      // Gửi tin nhắn qua API và nhận phản hồi
-      try {
-        final response = await chatApi.sendMessage({
-          'content': userMessage,
-          if (widget.conversationId != null &&
-              widget.conversationId!.isNotEmpty)
-            "metadata": {
-              "conversation": {"id": widget.conversationId}
-            },
-          "assistant": {"id": chatModel.selectedAgent, "model": "dify"}
-        });
+    chatModel.addMessage({
+      'text': userMessage,
+      'isUser': true,
+      'timestamp': DateTime.now(),
+      'avatar': 'assets/user_avatar.jpg',
+    });
 
-        if (response.statusCode == 200) {
-          chatModel.addMessage({
-            'text': userMessage,
-            'isUser': true,
-            'timestamp': DateTime.now(),
-            'avatar': 'assets/user_avatar.jpg',
-          });
+    chatModel.addMessage({
+      'text': '',
+      'isUser': false,
+      'timestamp': DateTime.now(),
+      'avatar': selectedAI['avatar'],
+    });
 
-          chatModel.addMessage({
-            'text': response.data['message'],
-            'isUser': false,
-            'timestamp': DateTime.now(),
-            'avatar': selectedAI['avatar'],
-          });
+    _messageController.clear();
+    _messageFocusNode.unfocus();
+    chatModel.hideWelcomeMessage();
 
-          var remainingUsage = response.data['remainingUsage'];
-          chatModel.setTokenCount(remainingUsage);
+    final chatApi = getIt<ChatApi>();
 
-          var conversationId = response.data['conversationId'];
-          chatModel.setConversationId(conversationId);
-        } else {
-          throw Exception('Failed to send message (Chat body)');
+    // Gửi tin nhắn qua API và nhận phản hồi
+    try {
+      final response = await chatApi.sendMessage({
+        'content': userMessage,
+        "metadata": {
+          "conversation": {"id": chatModel.conversationId},
+        },
+        "assistant": {"id": chatModel.selectedAgent, "model": "dify"}
+      });
+
+      if (response.statusCode == 200) {
+        var remainingUsage = response.data['remainingUsage'];
+        chatModel.setTokenCount(remainingUsage);
+        CacheService.updateAvailableTokenUsage(remainingUsage);
+
+        var conversationId = response.data['conversationId'];
+        chatModel.setConversationId(conversationId);
+
+        final newMessage = {
+          'text': response.data['message'],
+          'isUser': false,
+          'timestamp': DateTime.now(),
+          'avatar': selectedAI['avatar'],
+        };
+        // Cập nhật dữ liệu vào ChatModel
+        chatModel.updateMessage(chatModel.messages.length - 1, newMessage);
+        CacheService.setCurrentHistoryLength(
+            CacheService.getCurrentHistoryLength() + 1);
+      } else {
+        // Parse error message từ response data
+        final details = response.data['details'] as List;
+        if (details.isNotEmpty) {
+          final issue = details[0]['issue'] as String;
+          showToast(issue);
+
+          // Xóa tin nhắn cuối cùng nếu có lỗi
+          chatModel.removeMessage(chatModel.messages.length - 1);
+          chatModel.removeMessage(chatModel.messages.length - 1);
         }
-      } catch (e) {
-        return;
       }
-
-      _messageController.clear();
-      _messageFocusNode.unfocus();
-      chatModel.hideWelcomeMessage();
+    } catch (e) {
+      debugPrint("Error sending message: $e");
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
     }
+  }
+
+  void showToast(String message) {
+    Fluttertoast.showToast(
+        msg: message,
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.BOTTOM,
+        timeInSecForIosWeb: 1,
+        backgroundColor: Colors.blueGrey.shade900,
+        textColor: Colors.white,
+        fontSize: 16.0);
   }
 
   @override
   Widget build(BuildContext context) {
     final chatModel = Provider.of<ChatModel>(context);
-
-    // Quyết định danh sách tin nhắn sẽ hiển thị
-    final messages = widget.isHistory
-        ? widget.historyChatMessages ?? []
-        : chatModel.messages;
-    ();
-
     return Stack(
       children: [
         Column(
           children: [
             Expanded(
-              child: widget.isHistory
-                  ? ListView.builder(
-                reverse: true,
-                padding: const EdgeInsets.all(16),
-                itemCount: messages.length,
-                itemBuilder: (context, index) {
-                  final message = messages[messages.length - 1 - index];
-                  return MessageBubble(
-                    text: message['text'],
-                    isUser: message['isUser'],
-                    timestamp: message['timestamp'],
-                    avatar: message['avatar'],
-                  );
-                },
-              )
-                  : chatModel.showWelcomeMessage
+              child: chatModel.showWelcomeMessage
                   ? const WelcomeMessage()
                   : ListView.builder(
-                reverse: true,
-                padding: const EdgeInsets.all(16),
-                itemCount: chatModel.messages.length,
-                itemBuilder: (context, index) {
-                  final message = chatModel.messages[
-                  chatModel.messages.length - 1 - index];
-                  return MessageBubble(
-                    text: message['text'],
-                    isUser: message['isUser'],
-                    timestamp: message['timestamp'],
-                    avatar: message['avatar'],
-                  );
-                },
-              ),
+                      reverse: true,
+                      padding: const EdgeInsets.all(16),
+                      itemCount: chatModel.messages.length,
+                      itemBuilder: (context, index) {
+                        final message = chatModel
+                            .messages[chatModel.messages.length - 1 - index];
+                        return MessageBubble(
+                          text: message['text'],
+                          isUser: message['isUser'],
+                          timestamp: message['timestamp'],
+                          avatar: message['avatar'],
+                          isLoading:
+                              !message['isUser'] && index == 0 && _isLoading,
+                        );
+                      },
+                    ),
             ),
             if (_showPromptList)
               FutureBuilder<List<Prompt>>(
@@ -206,9 +220,9 @@ class _ChatBodyState extends State<ChatBody> {
                       return true;
                     }).toList();
                     final myPrompts =
-                    filteredPrompts.whereType<MyPrompt>().toList();
+                        filteredPrompts.whereType<MyPrompt>().toList();
                     final publicPrompts =
-                    filteredPrompts.whereType<PublicPrompt>().toList();
+                        filteredPrompts.whereType<PublicPrompt>().toList();
                     return SizedBox(
                       height: 200,
                       child: ListView(
@@ -217,10 +231,9 @@ class _ChatBodyState extends State<ChatBody> {
                             const ListTile(
                               title: Text('My Prompts',
                                   style:
-                                  TextStyle(fontWeight: FontWeight.bold)),
+                                      TextStyle(fontWeight: FontWeight.bold)),
                             ),
-                            ...myPrompts.map((prompt) =>
-                                ListTile(
+                            ...myPrompts.map((prompt) => ListTile(
                                   title: Text(prompt.title),
                                   onTap: () {
                                     _messageController.text = prompt.content;
@@ -234,10 +247,9 @@ class _ChatBodyState extends State<ChatBody> {
                             const ListTile(
                               title: Text('Public Prompts',
                                   style:
-                                  TextStyle(fontWeight: FontWeight.bold)),
+                                      TextStyle(fontWeight: FontWeight.bold)),
                             ),
-                            ...publicPrompts.map((prompt) =>
-                                ListTile(
+                            ...publicPrompts.map((prompt) => ListTile(
                                   title: Text(prompt.title),
                                   onTap: () {
                                     _messageController.text = prompt.content;
@@ -261,8 +273,7 @@ class _ChatBodyState extends State<ChatBody> {
                   children: [
                     DropdownSearch<(IconData, String)>(
                       mode: Mode.custom,
-                      items: (f, cs) =>
-                      [
+                      items: (f, cs) => [
                         (Icons.image, 'Upload image'),
                         (Icons.photo_camera, 'Take a photo'),
                         (Icons.electric_bolt, 'Prompt'),
@@ -272,21 +283,20 @@ class _ChatBodyState extends State<ChatBody> {
                         fit: FlexFit.loose,
                         itemBuilder: (context, item, isDisabled, isSelected) =>
                             Padding(
-                              padding: const EdgeInsets.all(16.0),
-                              child: ListTile(
-                                leading: Icon(item.$1, color: Colors.black),
-                                title: Text(
-                                  item.$2,
-                                  style: const TextStyle(
-                                      color: Colors.black,
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.bold),
-                                ),
-                              ),
+                          padding: const EdgeInsets.all(16.0),
+                          child: ListTile(
+                            leading: Icon(item.$1, color: Colors.black),
+                            title: Text(
+                              item.$2,
+                              style: const TextStyle(
+                                  color: Colors.black,
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold),
                             ),
+                          ),
+                        ),
                       ),
-                      dropdownBuilder: (ctx, selectedItem) =>
-                      const Icon(
+                      dropdownBuilder: (ctx, selectedItem) => const Icon(
                         Icons.add_box_outlined,
                         color: Colors.black,
                       ),
