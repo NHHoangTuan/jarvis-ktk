@@ -15,9 +15,8 @@ class ChatAppBar extends StatefulWidget implements PreferredSizeWidget {
   @override
   final Size preferredSize;
 
-  const ChatAppBar({super.key, required this.onAgentChanged})
+  const ChatAppBar({super.key})
       : preferredSize = const Size.fromHeight(kToolbarHeight);
-  final Function(String) onAgentChanged;
 }
 
 class _ChatAppBarState extends State<ChatAppBar> {
@@ -64,7 +63,6 @@ class _ChatAppBarState extends State<ChatAppBar> {
                   aiAgents: chatModel.aiAgents,
                   onChanged: (value) {
                     chatModel.setSelectedAgent(value!);
-                    widget.onAgentChanged(value);
                   },
                 ),
               ],

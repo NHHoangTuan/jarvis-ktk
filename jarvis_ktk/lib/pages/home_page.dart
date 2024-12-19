@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:jarvis_ktk/data/models/chat.dart';
 import 'package:jarvis_ktk/data/network/chat_api.dart';
@@ -24,6 +25,7 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   // Variable to track which screen is being displayed in the body
   Widget _currentBody = const ChatBody();
+  PreferredSizeWidget _currentAppBar = const ChatAppBar();
   final GlobalKey<ScaffoldState> _scaffoldKey =
       GlobalKey<ScaffoldState>(); // Correct key placement
   String _currentSelectedItem = 'Chat'; // Thêm biến để theo dõi mục đang chọn
@@ -37,7 +39,9 @@ class _HomePageState extends State<HomePage> {
   }
 
   void _changeAppBar(PreferredSizeWidget newAppBar) {
-    setState(() {});
+    setState(() {
+      _currentAppBar = newAppBar;
+    });
   }
 
   // Thêm method để thay đổi selected item
@@ -97,13 +101,13 @@ class _HomePageState extends State<HomePage> {
     _changeBody(ChatBody(
       conversationId: conversationId,
     ));
-    _changeAppBar(ChatAppBar(onAgentChanged: _handleAgentChanged));
+    _changeAppBar(const ChatAppBar());
   }
 
-  void _handleAgentChanged(String agentId) {
-    final chatModel = Provider.of<ChatModel>(context, listen: false);
-    chatModel.setSelectedAgent(agentId);
-  }
+  // void _handleAgentChanged(String agentId) {
+  //   final chatModel = Provider.of<ChatModel>(context, listen: false);
+  //   chatModel.setSelectedAgent(agentId);
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -112,7 +116,7 @@ class _HomePageState extends State<HomePage> {
       child: Stack(children: [
         Scaffold(
           key: _scaffoldKey, // Associate the Scaffold with the GlobalKey
-          appBar: ChatAppBar(onAgentChanged: _handleAgentChanged),
+          appBar: _currentAppBar,
           drawer: NavDrawer(
             initialSelectedItem:
                 _currentSelectedItem, // Truyền selected item hiện tại
@@ -122,8 +126,7 @@ class _HomePageState extends State<HomePage> {
               switch (selectedItem) {
                 case 'Chat':
                   _changeBody(const ChatBody());
-                  _changeAppBar(
-                      ChatAppBar(onAgentChanged: _handleAgentChanged));
+                  _changeAppBar(ChatAppBar());
                   break;
                 case 'Personal':
                   _changeBody(const Center(child: Text('Personal Chat')));
