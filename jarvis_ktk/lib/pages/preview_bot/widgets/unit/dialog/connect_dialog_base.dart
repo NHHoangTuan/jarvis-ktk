@@ -6,15 +6,14 @@ import '../../common_widgets.dart';
 
 class ConnectDialogBase extends StatefulWidget {
   final List<ConnectDialogField> fields;
-  final void Function(Map<String, String?>)? onConnect;
 
-  const ConnectDialogBase({super.key, required this.fields, this.onConnect});
+  const ConnectDialogBase({super.key, required this.fields});
 
   @override
-  State<ConnectDialogBase> createState() => _ConnectDialogBaseState();
+  State<ConnectDialogBase> createState() => ConnectDialogBaseState();
 }
 
-class _ConnectDialogBaseState extends State<ConnectDialogBase> {
+class ConnectDialogBaseState extends State<ConnectDialogBase> {
   final Map<String, String?> fieldValues = {};
 
   @override
@@ -26,53 +25,53 @@ class _ConnectDialogBaseState extends State<ConnectDialogBase> {
         borderRadius: BorderRadius.circular(12),
         color: SimpleColors.babyBlue.withOpacity(0.1),
       ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
+      child:
+      SingleChildScrollView(
+        child: Stack(
         children: [
-          const HeaderText(),
-          const Divider(),
-          ...widget.fields.map((field) {
-            if (field is FilePickerField) {
-              return Column(
-                children: [
-                  TextFormTitle(title: '* ${field.title}:'),
-                  FilePickerWidget(
-                    selectedFile: fieldValues[field.key],
-                    onTap: () async {
-                      FilePickerResult? result =
+          Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const HeaderText(),
+              const Divider(),
+              ...widget.fields.map((field) {
+                if (field is FilePickerField) {
+                  return Column(
+                    children: [
+                      TextFormTitle(title: '* ${field.title}:'),
+                      FilePickerWidget(
+                        selectedFile: fieldValues[field.key],
+                        onTap: () async {
+                          FilePickerResult? result =
                           await FilePicker.platform.pickFiles();
-                      if (result != null) {
-                        setState(() {
-                          fieldValues[field.key] = result.files.single.path;
-                        });
-                      }
-                    },
-                  ),
-                ],
-              );
-            } else {
-              return Column(
-                children: [
-                  TextFormTitle(title: '* ${field.title}:'),
-                  PromptTextFormField(
-                    hintText: 'Enter ${field.hintText}',
-                    onChanged: (value) {
-                      fieldValues[field.key] = value;
-                    },
-                    hintMaxLines: 1,
-                  ),
-                ],
-              );
-            }
-          }),
-          TextButton(
-            onPressed: () {
-              widget.onConnect!(fieldValues);
-              Navigator.of(context).pop();
-            },
-            child: const Text('Connect'),
+                          if (result != null) {
+                            setState(() {
+                              fieldValues[field.key] = result.files.single.path;
+                            });
+                          }
+                        },
+                      ),
+                    ],
+                  );
+                } else {
+                  return Column(
+                    children: [
+                      TextFormTitle(title: '* ${field.title}:'),
+                      PromptTextFormField(
+                        hintText: 'Enter ${field.hintText}',
+                        onChanged: (value) {
+                          fieldValues[field.key] = value;
+                        },
+                        hintMaxLines: 1,
+                      ),
+                    ],
+                  );
+                }
+              }),
+            ],
           ),
         ],
+      ),
       ),
     );
   }

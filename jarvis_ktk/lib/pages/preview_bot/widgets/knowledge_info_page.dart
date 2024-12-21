@@ -49,12 +49,10 @@ class _KnowledgeInfoPageState extends State<KnowledgeInfoPage> {
           } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
             return const EmptyKnowledgeScreen();
           } else {
-            return Expanded(
-              child: UnitList(
+            return UnitList(
                 knowledgeId: widget.knowledge.id,
                 unitList: snapshot.data!,
                 onUnitAction: _onUnitOperation,
-              ),
             );
           }
         },

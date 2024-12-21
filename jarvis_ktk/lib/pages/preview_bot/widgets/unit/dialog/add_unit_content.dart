@@ -1,27 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:jarvis_ktk/data/models/knowledge.dart';
 import 'package:jarvis_ktk/data/models/mock_data.dart';
-import 'package:jarvis_ktk/data/network/knowledge_api.dart';
-import 'package:jarvis_ktk/services/service_locator.dart';
 
 import 'connect_dialog_base.dart';
 
 DataSource selectedDataSource = dataSourceOptions[0];
 
 class AddUnitContent extends StatelessWidget {
-  final String knowledgeId;
-  final void Function() onConnect;
+  final GlobalKey<ConnectDialogBaseState> connectDialogKey;
 
-  const AddUnitContent({super.key, required this.knowledgeId, required this.onConnect});
+  const AddUnitContent({super.key, required this.connectDialogKey});
 
   @override
   Widget build(BuildContext context) {
     final Map<String, Widget> dialogMap = {
-      'Local files': FileUploadDialog(knowledgeId: knowledgeId, onConnect: onConnect,),
-      'Website': const WebsiteConnectDialog(),
+      'Local files': FileUploadDialog(connectDialogKey: connectDialogKey,),
+      'Website': WebsiteConnectDialog(connectDialogKey: connectDialogKey,),
       'Google Drive': const GoogleDriveConnectDialog(),
-      'Slack': const SlackConnectDialog(),
-      'Confluence': const ConfluenceConnectDialog(),
+      'Slack': SlackConnectDialog(connectDialogKey: connectDialogKey,),
+      'Confluence': ConfluenceConnectDialog(connectDialogKey: connectDialogKey,),
     };
 
     return dialogMap[selectedDataSource.title] ?? const SizedBox();
@@ -29,20 +26,14 @@ class AddUnitContent extends StatelessWidget {
 }
 
 class FileUploadDialog extends StatelessWidget {
-  final String knowledgeId;
-  final void Function() onConnect;
+  final GlobalKey<ConnectDialogBaseState> connectDialogKey;
 
-  const FileUploadDialog({super.key, required this.knowledgeId, required this.onConnect});
-
-  Future<void> _onConnect(Map<String, dynamic> fields) async {
-    await getIt<KnowledgeApi>().uploadLocalFile(knowledgeId, fields['selectedFile']);
-    onConnect();
-  }
+  const FileUploadDialog({super.key, required this.connectDialogKey});
 
   @override
   Widget build(BuildContext context) {
     return ConnectDialogBase(
-      onConnect: _onConnect,
+      key: connectDialogKey,
       fields: [
         FilePickerField(key: 'selectedFile', title: 'Upload local file'),
       ],
@@ -51,13 +42,14 @@ class FileUploadDialog extends StatelessWidget {
 }
 
 class WebsiteConnectDialog extends StatelessWidget {
-  const WebsiteConnectDialog({super.key});
+  final GlobalKey<ConnectDialogBaseState> connectDialogKey;
 
-
+  const WebsiteConnectDialog({super.key, required this.connectDialogKey});
 
   @override
   Widget build(BuildContext context) {
     return ConnectDialogBase(
+      key: connectDialogKey,
       fields: [
         ConnectDialogField(key: 'unitName', title: 'Name', hintText: 'name'),
         ConnectDialogField(key: 'webUrl', title: 'Website URL', hintText: 'website URL'),
@@ -81,11 +73,14 @@ class GoogleDriveConnectDialog extends StatelessWidget {
 }
 
 class SlackConnectDialog extends StatelessWidget {
-  const SlackConnectDialog({super.key});
+  final GlobalKey<ConnectDialogBaseState> connectDialogKey;
+
+  const SlackConnectDialog({super.key, required this.connectDialogKey});
 
   @override
   Widget build(BuildContext context) {
     return ConnectDialogBase(
+      key: connectDialogKey,
       fields: [
         ConnectDialogField(key: 'unitName', title: 'Name', hintText: 'name'),
         ConnectDialogField(key: 'slackWorkspace', title: 'Slack Workspace URL', hintText: 'slack workspace URL'),
@@ -96,11 +91,14 @@ class SlackConnectDialog extends StatelessWidget {
 }
 
 class ConfluenceConnectDialog extends StatelessWidget {
-  const ConfluenceConnectDialog({super.key});
+  final GlobalKey<ConnectDialogBaseState> connectDialogKey;
+
+  const ConfluenceConnectDialog({super.key, required this.connectDialogKey});
 
   @override
   Widget build(BuildContext context) {
     return ConnectDialogBase(
+      key: connectDialogKey,
       fields: [
         ConnectDialogField(key: 'unitName', title: 'Name', hintText: 'name'),
         ConnectDialogField(key: 'wikiPageUrl', title: 'Wiki Page URL', hintText: 'wiki page URL'),

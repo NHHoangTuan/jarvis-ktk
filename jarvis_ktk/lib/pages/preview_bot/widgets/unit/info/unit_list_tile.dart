@@ -48,7 +48,7 @@ class UnitListTile extends StatelessWidget {
                     ),
                   ),
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                    padding: const EdgeInsets.all(0.0),
                     width: 32.0,
                     height: 32.0,
                     child: IconButton(

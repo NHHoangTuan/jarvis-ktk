@@ -164,8 +164,67 @@ class KnowledgeApi {
       pathVars: {'id': knowledgeId},
     );
 
-    if (response.statusCode != 200) {
+    if (response.statusCode != 201) {
       throw Exception('Failed to upload local file');
+    }
+  }
+
+  Future<void> uploadFromWebsite(String knowledgeId, String name, String webUrl) async {
+    final response = await _knowledgeApiService.post(
+      ApiEndpoints.webUnit,
+      data: {'unitName': name, 'webUrl': webUrl},
+      pathVars: {'id': knowledgeId},
+    );
+
+    if (response.statusCode != 201) {
+      throw Exception('Failed to upload data from website');
+    }
+  }
+
+  Future<void> uploadFromGoogleDrive(String knowledgeId, String name, String googleDriveCredential) async {
+    final response = await _knowledgeApiService.post(
+      ApiEndpoints.googleDriveUnit,
+      data: {'name': name, 'googleDriveCredential': googleDriveCredential},
+      pathVars: {'id': knowledgeId},
+    );
+
+    if (response.statusCode != 201) {
+      throw Exception('Failed to upload data from Google Drive');
+    }
+  }
+
+  Future<void> uploadFromSlack(String knowledgeId, String name, String slackWorkspace, String slackBotToken) async {
+    final response = await _knowledgeApiService.post(
+      ApiEndpoints.slackUnit,
+      data: {'unitName': name, 'slackWorkspace': slackWorkspace, 'slackBotToken': slackBotToken},
+      pathVars: {'id': knowledgeId},
+    );
+
+    if (response.statusCode != 201) {
+      throw Exception('Failed to upload data from Slack');
+    }
+  }
+
+  Future<void> uploadFromConfluence(
+      String knowledgeId,
+      String name,
+      String wikiPageUrl,
+      String confluenceUsername,
+      String confluenceAccessToken,
+      ) async {
+    final response = await _knowledgeApiService.post(
+      ApiEndpoints.confluenceUnit,
+      data: {
+        'unitName': name,
+        'wikiPageUrl': wikiPageUrl,
+        'confluenceUsername': confluenceUsername,
+        'confluenceAccessToken': confluenceAccessToken,
+      },
+      pathVars: {'id': knowledgeId},
+    );
+
+    if (response.statusCode != 201) {
+      throw Exception('Failed to upload data from Confluence');
     }
   }
 
