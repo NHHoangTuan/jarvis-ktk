@@ -6,8 +6,9 @@ import '../../common_widgets.dart';
 
 class ConnectDialogBase extends StatefulWidget {
   final List<ConnectDialogField> fields;
+  final void Function(Map<String, String?>)? onConnect;
 
-  const ConnectDialogBase({super.key, required this.fields});
+  const ConnectDialogBase({super.key, required this.fields, this.onConnect});
 
   @override
   State<ConnectDialogBase> createState() => _ConnectDialogBaseState();
@@ -42,7 +43,7 @@ class _ConnectDialogBaseState extends State<ConnectDialogBase> {
                           await FilePicker.platform.pickFiles();
                       if (result != null) {
                         setState(() {
-                          fieldValues[field.key] = result.files.single.name;
+                          fieldValues[field.key] = result.files.single.path;
                         });
                       }
                     },
@@ -64,6 +65,13 @@ class _ConnectDialogBaseState extends State<ConnectDialogBase> {
               );
             }
           }),
+          TextButton(
+            onPressed: () {
+              widget.onConnect!(fieldValues);
+              Navigator.of(context).pop();
+            },
+            child: const Text('Connect'),
+          ),
         ],
       ),
     );

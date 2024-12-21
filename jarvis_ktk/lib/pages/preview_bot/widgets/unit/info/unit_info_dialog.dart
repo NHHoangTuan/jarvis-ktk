@@ -10,7 +10,7 @@ class UnitInfoDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // Format the date
-    final String formattedDate = DateFormat.yMMMd().format(unit.creationDate);
+    final String formattedDate = DateFormat.yMMMd().format(unit.createdAt);
 
 
     return AlertDialog(
@@ -19,7 +19,7 @@ class UnitInfoDialog extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Source: ${unit.source.title}'),
+          Text('Source: ${unit.name}'),
           const SizedBox(height: 8),
           Text('Size: ${unit.size}'),
           const SizedBox(height: 8),
@@ -30,8 +30,8 @@ class UnitInfoDialog extends StatelessWidget {
               const Text('Enabled:'),
               const SizedBox(width: 4),
               Icon(
-                unit.isEnabled ? Icons.check_circle : Icons.cancel,
-                color: unit.isEnabled ? Colors.green : Colors.red,
+                unit.status ? Icons.check_circle : Icons.cancel,
+                color: unit.status ? Colors.green : Colors.red,
                 size: 16,
               ),
             ],

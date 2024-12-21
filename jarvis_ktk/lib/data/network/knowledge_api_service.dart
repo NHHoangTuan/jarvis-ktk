@@ -1,20 +1,15 @@
-import 'dart:convert';
-
 import 'package:dio/dio.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:fluttertoast/fluttertoast.dart';
-import 'package:jarvis_ktk/data/models/user.dart';
-import 'package:jarvis_ktk/main.dart';
-import 'package:jarvis_ktk/routes/app_routes.dart';
+import 'package:jarvis_ktk/services/service_locator.dart';
 
 import '../../constants/api_endpoints.dart';
+import 'knowledge_api.dart';
 
-class ApiService {
+class KnowledgeApiService {
   final Dio _dio = Dio();
   final FlutterSecureStorage _storage = const FlutterSecureStorage();
 
-  ApiService() {
+  KnowledgeApiService() {
     _initializeInterceptors();
     _setDioOptions();
   }
@@ -32,7 +27,7 @@ class ApiService {
 
   Future<void> _handleRequest(
       RequestOptions options, RequestInterceptorHandler handler) async {
-    String? token = await _storage.read(key: 'accessToken');
+    String? token = await _storage.read(key: 'kbAccessToken');
     if (token != null) {
       options.headers['Authorization'] = 'Bearer $token';
     }
@@ -45,26 +40,21 @@ class ApiService {
       final newAccessToken = await _refreshAccessToken();
       if (newAccessToken != null) {
         error.requestOptions.headers['Authorization'] =
-            'Bearer $newAccessToken';
+        'Bearer $newAccessToken';
         await saveAccessToken(newAccessToken);
         final newResponse = await _retryRequest(error.requestOptions);
         return handler.resolve(newResponse);
-      } else {
-        Fluttertoast.showToast(
-          msg: 'Session expired. Please login again.',
-          toastLength: Toast.LENGTH_SHORT,
-          gravity: ToastGravity.BOTTOM,
-          timeInSecForIosWeb: 3,
-          backgroundColor: Colors.black.withOpacity(0.8),
-          textColor: Colors.white,
-          fontSize: 16.0,
-        );
-        await clearTokens();
-        await clearUser();
-        navigatorKey.currentState?.pushNamedAndRemoveUntil(
-          AppRoutes.login,
-          (route) => false,
-        );
+      }
+      else {
+        final response = await getIt<KnowledgeApi>().signIn();
+        if (response.statusCode == 200) {
+          final newAccessToken = response.data['token']['accessToken'];
+          error.requestOptions.headers['Authorization'] =
+          'Bearer $newAccessToken';
+          await saveAccessToken(newAccessToken);
+          final newResponse = await _retryRequest(error.requestOptions);
+          return handler.resolve(newResponse);
+        }
       }
     }
     handler.next(error);
@@ -92,13 +82,13 @@ class ApiService {
 
   Future<String?> _refreshAccessToken() async {
     try {
-      String? refreshToken = await _storage.read(key: 'refreshToken');
+      String? refreshToken = await _storage.read(key: 'kbRefreshToken');
       if (refreshToken == null) return null;
       final response = await get(ApiEndpoints.refreshToken,
-          params: {'refreshToken': refreshToken});
+          params: {'kbRefreshToken': refreshToken});
       if (response.statusCode == 200) {
-        String newAccessToken = response.data['token']['accessToken'];
-        await _storage.write(key: 'accessToken', value: newAccessToken);
+        String newAccessToken = response.data['token']['kbAccessToken'];
+        await _storage.write(key: 'kbAccessToken', value: newAccessToken);
         return newAccessToken;
       }
       return null;
@@ -108,50 +98,50 @@ class ApiService {
   }
 
   Future<Response> get(
-    String endpoint, {
-    Map<String, dynamic>? params,
-    Map<String, dynamic>? pathVars,
-  }) async {
+      String endpoint, {
+        Map<String, dynamic>? params,
+        Map<String, dynamic>? pathVars,
+      }) async {
     String url = _constructUrl(endpoint, pathVars);
     return _dio.get(url, queryParameters: params);
   }
 
   Future<Response> post(
-    String endpoint, {
-    dynamic data,
-    Map<String, dynamic>? params,
-    Map<String, dynamic>? pathVars,
-  }) async {
+      String endpoint, {
+        dynamic data,
+        Map<String, dynamic>? params,
+        Map<String, dynamic>? pathVars,
+      }) async {
     String url = _constructUrl(endpoint, pathVars);
     return _dio.post(url, data: data, queryParameters: params);
   }
 
   Future<Response> put(
-    String endpoint, {
-    dynamic data,
-    Map<String, dynamic>? params,
-    Map<String, dynamic>? pathVars,
-  }) async {
+      String endpoint, {
+        dynamic data,
+        Map<String, dynamic>? params,
+        Map<String, dynamic>? pathVars,
+      }) async {
     String url = _constructUrl(endpoint, pathVars);
     return _dio.put(url, data: data, queryParameters: params);
   }
 
   Future<Response> patch(
-    String endpoint, {
-    dynamic data,
-    Map<String, dynamic>? params,
-    Map<String, dynamic>? pathVars,
-  }) async {
+      String endpoint, {
+        dynamic data,
+        Map<String, dynamic>? params,
+        Map<String, dynamic>? pathVars,
+      }) async {
     String url = _constructUrl(endpoint, pathVars);
     return _dio.patch(url, data: data, queryParameters: params);
   }
 
   Future<Response> delete(
-    String endpoint, {
-    dynamic data,
-    Map<String, dynamic>? params,
-    Map<String, dynamic>? pathVars,
-  }) async {
+      String endpoint, {
+        dynamic data,
+        Map<String, dynamic>? params,
+        Map<String, dynamic>? pathVars,
+      }) async {
     String url = _constructUrl(endpoint, pathVars);
     return _dio.delete(url, data: data, queryParameters: params);
   }
@@ -160,35 +150,20 @@ class ApiService {
     pathVars?.forEach((key, value) {
       endpoint = endpoint.replaceAll('{$key}', value.toString());
     });
-    return '${ApiEndpoints.baseUrl}/$endpoint';
+    return '${ApiEndpoints.knowledgeBaseUrl}/$endpoint';
   }
 
   Future<void> saveAccessToken(String accessToken) async {
-    await _storage.write(key: 'accessToken', value: accessToken);
+    await _storage.write(key: 'kbAccessToken', value: accessToken);
   }
 
   Future<void> saveTokens(String accessToken, String refreshToken) async {
-    await _storage.write(key: 'accessToken', value: accessToken);
-    await _storage.write(key: 'refreshToken', value: refreshToken);
+    await _storage.write(key: 'kbAccessToken', value: accessToken);
+    await _storage.write(key: 'kbRefreshToken', value: refreshToken);
   }
 
   Future<void> clearTokens() async {
-    await _storage.delete(key: 'accessToken');
-    await _storage.delete(key: 'refreshToken');
-  }
-
-  Future<void> saveUser(User user) async {
-    final userJson = jsonEncode(user.toJson());
-    await _storage.write(key: 'user', value: userJson);
-  }
-
-  Future<void> clearUser() async {
-    await _storage.delete(key: 'user');
-  }
-
-  Future<User?> getStoredUser() async {
-    final userJson = await _storage.read(key: 'user');
-    if (userJson == null) return null;
-    return User.fromJson(jsonDecode(userJson));
+    await _storage.delete(key: 'kbAccessToken');
+    await _storage.delete(key: 'kbRefreshToken');
   }
 }

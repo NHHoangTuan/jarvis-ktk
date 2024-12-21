@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:jarvis_ktk/data/models/knowledge.dart';
+import 'package:jarvis_ktk/data/network/knowledge_api.dart';
+import 'package:jarvis_ktk/services/service_locator.dart';
 
 import 'unit/dialog/add_unit_dialog.dart';
 import 'unit/info/empty_knowledge_screen.dart';
@@ -15,18 +17,17 @@ class KnowledgeInfoPage extends StatefulWidget {
 }
 
 class _KnowledgeInfoPageState extends State<KnowledgeInfoPage> {
-  late List<Unit> _unitList;
+  late Future<List<Unit>> _unitList;
 
   @override
   void initState() {
     super.initState();
-    _unitList = widget.knowledge.unitList;
+    _unitList = getIt<KnowledgeApi>().getUnitList(widget.knowledge.id);
   }
 
-  void _onUnitDeleted() {
+  void _onUnitOperation() {
     setState(() {
-      _unitList =
-          widget.knowledge.unitList;
+      _unitList = getIt<KnowledgeApi>().getUnitList(widget.knowledge.id);
     });
   }
 
@@ -34,18 +35,30 @@ class _KnowledgeInfoPageState extends State<KnowledgeInfoPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: KnowledgeInfoAppBar(
-        title: widget.knowledge.title,
-        onClick: () {},
+        title: widget.knowledge.knowledgeName,
+        knowledgeId: widget.knowledge.id,
+        onClick: _onUnitOperation,
       ),
-      body: _unitList.isEmpty
-          ? const EmptyKnowledgeScreen()
-          : Expanded(
+      body: FutureBuilder<List<Unit>>(
+        future: _unitList,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          } else if (snapshot.hasError) {
+            return Center(child: Text('Error: ${snapshot.error}'));
+          } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+            return const EmptyKnowledgeScreen();
+          } else {
+            return Expanded(
               child: UnitList(
-                unitList: _unitList,
-                onUnitDeleted:
-                    _onUnitDeleted,
+                knowledgeId: widget.knowledge.id,
+                unitList: snapshot.data!,
+                onUnitAction: _onUnitOperation,
               ),
-            ),
+            );
+          }
+        },
+      ),
     );
   }
 }
@@ -54,12 +67,13 @@ class KnowledgeInfoAppBar extends StatelessWidget
     implements PreferredSizeWidget {
   final String title;
   final void Function() onClick;
+  final String knowledgeId;
 
   @override
   final Size preferredSize;
 
   const KnowledgeInfoAppBar(
-      {super.key, required this.title, required this.onClick})
+      {super.key, required this.title, required this.onClick, required this.knowledgeId})
       : preferredSize = const Size.fromHeight(kToolbarHeight);
 
   @override
@@ -73,7 +87,7 @@ class KnowledgeInfoAppBar extends StatelessWidget
             width: 80,
             height: 25,
             child: TextButton.icon(
-              onPressed: () => showAddUnitDialog(context),
+              onPressed: () => showAddUnitDialog(context, knowledgeId, onClick),
               style: TextButton.styleFrom(
                 padding: EdgeInsets.zero,
                 backgroundColor: Colors.blue,

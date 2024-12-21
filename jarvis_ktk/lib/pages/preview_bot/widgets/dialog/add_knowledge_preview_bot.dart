@@ -82,7 +82,7 @@ class _AddKnowledgePreviewBotState extends State<AddKnowledgePreviewBot> {
                   title: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(widget.knowledgeList[index].title,
+                      Text(widget.knowledgeList[index].knowledgeName,
                           style: const TextStyle(
                               fontWeight: FontWeight.bold, fontSize: 16)),
                       Row(

@@ -50,7 +50,7 @@ class _FilterButtonsState extends State<FilterButtons> {
 
           for (var filter in allFilters) {
             String filterText = filter.toString().split('.').last;
-            double textWidth = filterText.length * 8.0;
+            double textWidth = filterText.length * 10.0;
             double totalChipWidth = textWidth + chipPadding * 2;
 
             if (currentRowWidth + totalChipWidth + chipSpacing + iconWidth < availableWidth) {

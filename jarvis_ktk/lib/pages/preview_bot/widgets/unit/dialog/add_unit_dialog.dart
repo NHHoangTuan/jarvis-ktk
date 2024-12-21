@@ -7,7 +7,10 @@ import 'add_unit_title.dart';
 import 'data_source_dialog_content.dart';
 
 class AddUnitDialog extends StatefulWidget {
-  const AddUnitDialog({super.key});
+  final String knowledgeId;
+  final void Function() onClick;
+
+  const AddUnitDialog({super.key, required this.knowledgeId, required this.onClick});
 
   @override
   State<AddUnitDialog> createState() => _AddUnitDialogState();
@@ -49,7 +52,7 @@ class _AddUnitDialogState extends State<AddUnitDialog> {
           controller: _pageController,
           children: [
             DataSourceDialogContent(onSelected: _onSelected),
-            const AddUnitContent(),
+            AddUnitContent(knowledgeId: widget.knowledgeId, onConnect: widget.onClick),
           ],
         ),
       ),
@@ -83,11 +86,11 @@ class _AddUnitDialogState extends State<AddUnitDialog> {
   }
 }
 
-void showAddUnitDialog(BuildContext context) {
+void showAddUnitDialog(BuildContext context, String knowledgeId, void Function() onClick){
   showDialog(
     context: context,
     builder: (BuildContext context) {
-      return const AddUnitDialog();
+      return AddUnitDialog(knowledgeId: knowledgeId, onClick: onClick);
     },
   );
 }
