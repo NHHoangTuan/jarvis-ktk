@@ -84,12 +84,15 @@ class KnowledgeApiService {
     try {
       String? refreshToken = await _storage.read(key: 'kbRefreshToken');
       if (refreshToken == null) return null;
-      final response = await get(ApiEndpoints.refreshToken,
-          params: {'kbRefreshToken': refreshToken});
+
+      final Dio dio = Dio();
+      final response = await dio.get(
+        ApiEndpoints.refreshToken,
+        queryParameters: {'kbRefreshToken': refreshToken},
+      );
+
       if (response.statusCode == 200) {
-        String newAccessToken = response.data['token']['kbAccessToken'];
-        await _storage.write(key: 'kbAccessToken', value: newAccessToken);
-        return newAccessToken;
+        return response.data['token']['kbAccessToken'];
       }
       return null;
     } catch (e) {

@@ -16,7 +16,7 @@ class KnowledgeApi {
   Future<Response> signIn() async {
     final response = await _knowledgeApiService.post(
       ApiEndpoints.kbSignIn,
-      data: {'token': _storage.read(key: 'accessToken')},
+      data: {'token': await _storage.read(key: 'accessToken')},
     );
 
     if (response.statusCode == 200) {
