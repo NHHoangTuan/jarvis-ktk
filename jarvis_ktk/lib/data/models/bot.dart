@@ -27,8 +27,8 @@ class Bot {
   final String openAiThreadIdPlay;
   final String openAiVectorStoreId;
   final bool isDefault;
-  final String createdBy;
-  final String updatedBy;
+  final String? createdBy;
+  final String? updatedBy;
   final bool isFavorite;
   final String createdAt;
   final String updatedAt;
@@ -52,4 +52,44 @@ class Bot {
     required this.deletedAt,
     required this.id,
   });
+
+  factory Bot.fromJson(Map<String, dynamic> json) {
+    return Bot(
+      openAiAssistantId: json['openAiAssistantId'],
+      userId: json['userId'],
+      assistantName: json['assistantName'],
+      instructions: json['instructions'] ?? '',
+      description: json['description'] ?? '',
+      openAiThreadIdPlay: json['openAiThreadIdPlay'],
+      openAiVectorStoreId: json['openAiVectorStoreId'],
+      isDefault: json['isDefault'],
+      createdBy: json['createdBy'] ?? '',
+      updatedBy: json['updatedBy'] ?? '',
+      isFavorite: json['isFavorite'],
+      createdAt: json['createdAt'],
+      updatedAt: json['updatedAt'],
+      deletedAt: json['deletedAt'] ?? '',
+      id: json['id'],
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'openAiAssistantId': openAiAssistantId,
+      'userId': userId,
+      'assistantName': assistantName,
+      'instructions': instructions,
+      'description': description,
+      'openAiThreadIdPlay': openAiThreadIdPlay,
+      'openAiVectorStoreId': openAiVectorStoreId,
+      'isDefault': isDefault,
+      'createdBy': createdBy,
+      'updatedBy': updatedBy,
+      'isFavorite': isFavorite,
+      'createdAt': createdAt,
+      'updatedAt': updatedAt,
+      'deletedAt': deletedAt,
+      'id': id,
+    };
+  }
 }

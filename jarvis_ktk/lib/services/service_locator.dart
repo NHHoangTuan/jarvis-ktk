@@ -1,4 +1,5 @@
 import 'package:get_it/get_it.dart';
+import 'package:jarvis_ktk/data/network/bot_api.dart';
 import 'package:jarvis_ktk/data/network/email_api.dart';
 import 'package:jarvis_ktk/data/network/knowledge_api_service.dart';
 import 'package:jarvis_ktk/data/network/api_service.dart';
@@ -19,4 +20,5 @@ void setupLocator() {
   getIt.registerCachedFactory(() => EmailApi(getIt<ApiService>()));
   getIt.registerCachedFactory(() => TokenApi(getIt<ApiService>()));
   getIt.registerCachedFactory(() => KnowledgeApi(getIt<KnowledgeApiService>()));
+  getIt.registerCachedFactory(() => BotApi(getIt<KnowledgeApiService>()));
 }
