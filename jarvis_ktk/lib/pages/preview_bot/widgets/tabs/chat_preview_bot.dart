@@ -34,6 +34,8 @@ class _ChatAreaState extends State<ChatArea>
   final List<ChatMessage> _messages = [];
   final ScrollController _scrollController = ScrollController();
 
+  final FocusNode _chatFocusNode = FocusNode();
+
   void _sendMessage() {
     if (_controller.text.isEmpty) return;
 
@@ -67,74 +69,84 @@ class _ChatAreaState extends State<ChatArea>
   }
 
   @override
+  void dispose() {
+    _chatFocusNode.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     super.build(context); // Call super.build to ensure keep-alive functionality
-    return Column(
-      children: <Widget>[
-        Expanded(
-          child: _messages.isEmpty
-              ? const Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      CircleAvatar(
-                        radius: 30,
-                        child: Icon(Icons.android, size: 30),
-                      ),
-                      SizedBox(height: 10),
-                      Text(
-                        "Bot",
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 18,
+    return GestureDetector(
+      onTap: () => FocusScope.of(context).requestFocus(FocusNode()),
+      child: Column(
+        children: <Widget>[
+          Expanded(
+            child: _messages.isEmpty
+                ? const Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        CircleAvatar(
+                          radius: 30,
+                          child: Icon(Icons.android, size: 30),
                         ),
-                      ),
-                      SizedBox(height: 10),
-                      Text(
-                        "Start a conversation with the assistant by typing a message in the input box below",
-                        textAlign: TextAlign.center,
-                        style: TextStyle(fontSize: 16),
-                      ),
-                    ],
+                        SizedBox(height: 10),
+                        Text(
+                          "Bot",
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 18,
+                          ),
+                        ),
+                        SizedBox(height: 10),
+                        Text(
+                          "Start a conversation with the assistant by typing a message in the input box below",
+                          textAlign: TextAlign.center,
+                          style: TextStyle(fontSize: 16),
+                        ),
+                      ],
+                    ),
+                  )
+                : ListView.builder(
+                    controller: _scrollController,
+                    itemCount: _messages.length,
+                    itemBuilder: (context, index) {
+                      return _messages[index];
+                    },
                   ),
-                )
-              : ListView.builder(
-                  controller: _scrollController,
-                  itemCount: _messages.length,
-                  itemBuilder: (context, index) {
-                    return _messages[index];
+          ),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Row(
+              children: <Widget>[
+                IconButton(
+                  icon: const Icon(Icons.sms),
+                  onPressed: () {
+                    setState(() {
+                      _messages.clear();
+                    });
                   },
                 ),
-        ),
-        Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Row(
-            children: <Widget>[
-              IconButton(
-                icon: const Icon(Icons.sms),
-                onPressed: () {
-                  setState(() {
-                    _messages.clear();
-                  });
-                },
-              ),
-              Expanded(
-                child: TextField(
-                  controller: _controller,
-                  decoration: const InputDecoration(
-                    hintText: "Type your message...",
-                    border: OutlineInputBorder(),
+                Expanded(
+                  child: TextField(
+                    controller: _controller,
+                    focusNode: _chatFocusNode,
+                    decoration: const InputDecoration(
+                      hintText: "Type your message...",
+                      border: OutlineInputBorder(),
+                    ),
                   ),
                 ),
-              ),
-              IconButton(
-                icon: const Icon(Icons.send),
-                onPressed: _sendMessage,
-              ),
-            ],
+                IconButton(
+                  icon: const Icon(Icons.send),
+                  onPressed: _sendMessage,
+                ),
+              ],
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 

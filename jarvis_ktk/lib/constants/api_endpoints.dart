@@ -1,8 +1,11 @@
 class ApiEndpoints {
   static const String baseUrl = 'https://api.dev.jarvis.cx/api/v1';
+  static const String knowledgeBaseUrl =
+      'https://knowledge-api.dev.jarvis.cx/kb-core/v1';
 
   // Auth
   static const String signIn = 'auth/sign-in';
+  static const String kbSignIn = 'auth/external-sign-in';
   static const String signUp = 'auth/sign-up';
   static const String refreshToken = 'auth/refresh';
   static const String signOut = 'auth/sign-out';
@@ -21,4 +24,11 @@ class ApiEndpoints {
 
   // Token
   static const String tokenUsage = 'tokens/usage';
+
+  // Knowledge Base
+
+  //// AI Assistant
+
+  static const String createAssistant = '/kb-core/v1/ai-assistant';
+  static const String getAssistants = '/kb-core/v1/ai-assistant';
 }

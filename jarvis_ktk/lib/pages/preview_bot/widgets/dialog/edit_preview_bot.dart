@@ -1,10 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:jarvis_ktk/utils/colors.dart';
 
 class EditPreviewBotPage extends StatefulWidget {
-  final VoidCallback onApply; // Thêm callback
-
-  const EditPreviewBotPage({super.key, required this.onApply});
+  const EditPreviewBotPage({super.key});
 
   @override
   // ignore: library_private_types_in_public_api
@@ -12,25 +9,22 @@ class EditPreviewBotPage extends StatefulWidget {
 }
 
 class _EditPreviewBotPageState extends State<EditPreviewBotPage> {
-  final TextEditingController _botNameController = TextEditingController();
-  final TextEditingController _descriptionController = TextEditingController();
+  final _botNameController = TextEditingController();
+  final _descriptionController = TextEditingController();
   int _botNameCharCount = 0;
   int _descriptionCharCount = 0;
+
+  final ScrollController _descriptionScrollController = ScrollController();
+  final ValueNotifier<bool> _isTitleNotEmpty = ValueNotifier(false);
 
   @override
   void initState() {
     super.initState();
+    _botNameController.addListener(() {
+      _isTitleNotEmpty.value = _botNameController.text.isNotEmpty;
+    });
     _botNameController.addListener(_updateBotNameCharCount);
     _descriptionController.addListener(_updateDescriptionCharCount);
-  }
-
-  @override
-  void dispose() {
-    _botNameController.removeListener(_updateBotNameCharCount);
-    _descriptionController.removeListener(_updateDescriptionCharCount);
-    _botNameController.dispose();
-    _descriptionController.dispose();
-    super.dispose();
   }
 
   void _updateBotNameCharCount() {
@@ -45,121 +39,118 @@ class _EditPreviewBotPageState extends State<EditPreviewBotPage> {
     });
   }
 
+  void _submitData() {
+    Navigator.of(context).pop();
+    // Chuyển đến preview bot page
+    Navigator.pushNamed(context, '/previewbot');
+  }
+
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    _botNameController.removeListener(_updateBotNameCharCount);
+    _descriptionController.removeListener(_updateDescriptionCharCount);
+    _botNameController.dispose();
+    _descriptionController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            RichText(
-              text: const TextSpan(
-                children: [
-                  TextSpan(
-                    text: '*',
-                    style: TextStyle(color: Colors.red),
-                  ),
-                  TextSpan(
-                    text: ' Bot Name',
-                    style: TextStyle(color: Colors.black),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 8),
-            TextField(
-              controller: _botNameController,
-              maxLength: 50,
-              decoration: InputDecoration(
-                hintText: 'Enter bot name',
-                counterText: '$_botNameCharCount/50',
-                filled: true,
-                fillColor: Colors.white, // Set background color to white
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8.0),
-                  borderSide: BorderSide(
-                    color: Colors.black
-                        .withOpacity(0.2), // Set border opacity to 0.2
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(height: 16),
-            const Text('Description'),
-            const SizedBox(height: 8),
-            TextField(
-              controller: _descriptionController,
-              maxLength: 2000,
-              maxLines: 5,
-              decoration: InputDecoration(
-                hintText: 'Enter description',
-                counterText: '$_descriptionCharCount/2000',
-                filled: true,
-                fillColor: Colors.white, // Set background color to white
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8.0),
-                  borderSide: BorderSide(
-                    color: Colors.black
-                        .withOpacity(0.2), // Set border opacity to 0.2
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(height: 16),
-            const Text('Profile Avatar'),
-            const SizedBox(height: 8),
-            GestureDetector(
-              onTap: () {
-                // Handle image upload
-              },
-              child: Container(
-                width: 100,
-                height: 100,
-                decoration: BoxDecoration(
-                  color: Colors.grey[300],
-                  borderRadius: BorderRadius.circular(8.0),
-                ),
-                child: const Icon(Icons.add_a_photo),
-              ),
-            ),
-            const Spacer(),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
+    return Material(
+      child: Padding(
+        padding: EdgeInsets.only(
+          bottom: MediaQuery.of(context).viewInsets.bottom,
+        ),
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(16, 32, 16, 16),
+          child: Form(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
               children: [
-                TextButton(
-                  onPressed: () {
-                    Navigator.of(context).pop(); // Đóng dialog
-                  },
-                  style: TextButton.styleFrom(
-                    side: const BorderSide(
-                        color: SimpleColors.navyBlue), // Add border
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10.0),
-                    ),
+                const Text(
+                  'Create Bot',
+                  style: TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
                   ),
-                  child: const Text('Cancel'),
                 ),
-                const SizedBox(width: 8),
-                TextButton(
-                  onPressed: () {
-                    widget.onApply(); // Gọi callback khi nhấn nút Apply
-                    Navigator.of(context).pop(); // Đóng dialog
+                const SizedBox(height: 16.0),
+                TextFormField(
+                  controller: _botNameController,
+                  decoration: InputDecoration(
+                    labelText: 'Bot Name',
+                    counterText: '$_botNameCharCount/50',
+                    border: const OutlineInputBorder(),
+                  ),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please enter bot name';
+                    }
+                    return null;
                   },
-                  style: TextButton.styleFrom(
-                    backgroundColor: SimpleColors.navyBlue, // Background color
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10.0),
+                ),
+                const SizedBox(height: 16.0),
+                Scrollbar(
+                  controller: _descriptionScrollController,
+                  child: SingleChildScrollView(
+                    controller: _descriptionScrollController,
+                    child: TextFormField(
+                      controller: _descriptionController,
+                      decoration: InputDecoration(
+                        labelText: 'Description',
+                        counterText: '$_descriptionCharCount/2000',
+                        border: const OutlineInputBorder(),
+                      ),
+                      maxLines: 3, // Allow multiple lines
+                      keyboardType: TextInputType.multiline,
                     ),
                   ),
-                  child: const Text(
-                    'Apply',
-                    style: TextStyle(color: Colors.white),
+                ),
+                const SizedBox(height: 16.0),
+                GestureDetector(
+                  onTap: () {
+                    // Handle image upload
+                  },
+                  child: Container(
+                    width: 100,
+                    height: 100,
+                    decoration: BoxDecoration(
+                      color: Colors.grey[300],
+                      borderRadius: BorderRadius.circular(8.0),
+                    ),
+                    child: const Icon(Icons.add_a_photo),
                   ),
+                ),
+                const SizedBox(height: 32.0),
+                ValueListenableBuilder<bool>(
+                  valueListenable: _isTitleNotEmpty,
+                  builder: (context, isTitleNotEmpty, child) {
+                    return Ink(
+                      decoration: ShapeDecoration(
+                        color: isTitleNotEmpty
+                            ? Colors.blue[100]
+                            : Colors.grey[350],
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16.0),
+                        ),
+                      ),
+                      child: TextButton(
+                        onPressed: isTitleNotEmpty ? _submitData : null,
+                        child: const Text(
+                          'Apply',
+                          style: TextStyle(
+                            color: Colors.black,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    );
+                  },
                 ),
               ],
             ),
-          ],
+          ),
         ),
       ),
     );

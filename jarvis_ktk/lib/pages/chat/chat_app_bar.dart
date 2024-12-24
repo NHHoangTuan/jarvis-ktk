@@ -49,6 +49,7 @@ class _ChatAppBarState extends State<ChatAppBar> {
     return AppBar(
       elevation: 0,
       backgroundColor: Colors.blue[50],
+      scrolledUnderElevation: 0,
       titleSpacing: 0,
       title: Row(
         mainAxisSize: MainAxisSize.min,
