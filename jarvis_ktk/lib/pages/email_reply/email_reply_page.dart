@@ -1,29 +1,11 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
+import 'package:jarvis_ktk/data/models/email_reply.dart';
+import 'package:jarvis_ktk/data/network/email_api.dart';
+import 'package:jarvis_ktk/pages/email_reply/reply_draft_page.dart';
+import 'package:jarvis_ktk/services/service_locator.dart';
 
 import 'widgets/chat_input.dart';
 import 'widgets/chat_message.dart';
-import 'widgets/empty_chat_screen.dart';
-
-// List chat demo UI
-const List<String> predefinedMessages = [
-  '''
-Hey everyone,
-
-Hope you're all doing well!
-
-I'm excited to share that I'm planning a little getaway this weekend. I'm thinking of heading to the beach to relax and soak up some sun. I'll probably spend most of my time swimming, reading, and enjoying the delicious seafood. 
-
-Let me know if any of you are interested in joining me! It would be great to catch up and have some fun. 
-
-Best,
-[Your name]
-''',
-  "Cảm ơn",
-  "Chúc mừng",
-  "Vui vẻ",
-];
 
 class EmailReplyPage extends StatefulWidget {
   const EmailReplyPage({super.key});
@@ -38,6 +20,7 @@ class _EmailReplyPage extends State<EmailReplyPage>
   final TextEditingController _controller = TextEditingController();
   final List<ChatMessage> _messages = [];
   final ScrollController _scrollController = ScrollController();
+  late EmailReply lastEmailReply;
 
   void _sendMessage(String? action) {
     if (_controller.text.isEmpty && action == null) return;
@@ -49,26 +32,60 @@ class _EmailReplyPage extends State<EmailReplyPage>
     addMessage(_controller.text);
   }
 
-  void addMessage(String message) {
+  Future<void> _sendResponseEmail(EmailReply emailReply) async {
     setState(() {
       _messages.add(ChatMessage(
-        message: _controller.text,
+        message: _controller.text.isEmpty ? emailReply.email : _controller.text,
         isBot: false,
         onSendMessage: _sendMessage,
       ));
+    });
+
+    scrollToBottom();
+
+    if (_controller.text.isNotEmpty) {
+      emailReply.mainIdea = _controller.text;
       _controller.clear();
+    }
 
-      final random = Random();
-      final response =
-          predefinedMessages[random.nextInt(predefinedMessages.length)];
+    final result = await getIt<EmailApi>().responseEmail(emailReply);
+    emailReply.email = result.email;
+    lastEmailReply = emailReply;
 
+    setState(() {
       _messages.add(ChatMessage(
-        message: response,
+        message: result.email,
         isBot: true,
         onSendMessage: _sendMessage,
         isPreviousMessage: true,
       ));
     });
+
+    scrollToBottom();
+
+  }
+
+  void scrollToBottom() {
+    if (_scrollController.hasClients) {
+      final maxScrollExtent = _scrollController.position.maxScrollExtent;
+      _scrollController.animateTo(
+        maxScrollExtent + 200,
+        duration: const Duration(milliseconds: 500),
+        curve: Curves.easeOut,
+      );
+    } else {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _scrollController.animateTo(
+          _scrollController.position.maxScrollExtent + 200,
+          duration: const Duration(milliseconds: 500),
+          curve: Curves.easeOut,
+        );
+      });
+    }
+  }
+
+  void addMessage(String message) {
+    setState(() {});
 
     _scrollController.animateTo(
       _scrollController.position.maxScrollExtent + 200,
@@ -86,32 +103,32 @@ class _EmailReplyPage extends State<EmailReplyPage>
           children: <Widget>[
             Expanded(
               child: _messages.isEmpty
-                  ? const EmptyChatScreen()
+                  ? ReplyDraftScreen(onSendMessage: _sendResponseEmail)
                   : ListView.builder(
                       controller: _scrollController,
                       itemCount: _messages.length,
                       shrinkWrap: true,
                       itemBuilder: (context, index) {
-                        return  ChatMessage(
-                            message: _messages[index].message,
-                            isBot: _messages[index].isBot,
-                            onSendMessage: _messages[index].onSendMessage,
-                            isPreviousMessage: index == _messages.length - 1,
-
+                        return ChatMessage(
+                          message: _messages[index].message,
+                          isBot: _messages[index].isBot,
+                          onSendMessage: _messages[index].onSendMessage,
+                          isPreviousMessage: index == _messages.length - 1,
                         );
                       },
                     ),
             ),
             // chat input
-            ChatInput(
-              controller: _controller,
-              onSendMessage: () => _sendMessage(null),
-              onClearMessages: () {
-                setState(() {
-                  _messages.clear();
-                });
-              },
-            ),
+            if (_messages.isNotEmpty)
+              ChatInput(
+                controller: _controller,
+                onSendMessage: () => _sendResponseEmail(lastEmailReply),
+                onClearMessages: () {
+                  setState(() {
+                    _messages.clear();
+                  });
+                },
+              ),
           ],
         ));
   }

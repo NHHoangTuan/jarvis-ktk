@@ -1,31 +1,18 @@
+import 'package:json_annotation/json_annotation.dart';
+
+part 'token_usage.g.dart';
+
+@JsonSerializable()
 class TokenUsage {
   final int availableTokens;
   final int totalTokens;
   final bool unlimited;
 
-  TokenUsage({
-    required this.availableTokens,
-    required this.totalTokens,
-    required this.unlimited,
-  });
+  TokenUsage({required this.availableTokens, required this.totalTokens, required this.unlimited});
 
-  factory TokenUsage.fromJson(Map<String, dynamic> json) {
-    return TokenUsage(
-      availableTokens: json['availableTokens'],
-      totalTokens: json['totalTokens'],
-      unlimited: json['unlimited'],
-    );
-  }
+  factory TokenUsage.fromJson(Map<String, dynamic> json) => _$TokenUsageFromJson(json);
+  Map<String, dynamic> toJson() => _$TokenUsageToJson(this);
 
-  Map<String, dynamic> toJson() {
-    return {
-      'availableTokens': availableTokens,
-      'totalTokens': totalTokens,
-      'unlimited': unlimited,
-    };
-  }
-
-  // Set
   TokenUsage copyWith({
     int? availableTokens,
     int? totalTokens,

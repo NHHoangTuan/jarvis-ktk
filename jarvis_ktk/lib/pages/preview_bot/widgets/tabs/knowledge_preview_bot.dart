@@ -115,7 +115,7 @@ class _KnowledgePreviewBotPageState extends State<KnowledgePreviewBotPage>
                                 children: knowledgeList
                                     .map(
                                       (knowledge) => ListTile(
-                                        title: Text(knowledge.title),
+                                        title: Text(knowledge.knowledgeName),
                                         leading: const Icon(Icons.visibility),
                                         trailing: _showDeleteButtons
                                             ? IconButton(

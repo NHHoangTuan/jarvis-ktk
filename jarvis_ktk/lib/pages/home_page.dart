@@ -3,18 +3,19 @@ import 'package:flutter/material.dart';
 import 'package:jarvis_ktk/data/models/chat.dart';
 import 'package:jarvis_ktk/data/network/chat_api.dart';
 import 'package:jarvis_ktk/pages/email_reply/email_reply_page.dart';
+import 'package:jarvis_ktk/pages/personal/knowledge.dart';
 import 'package:jarvis_ktk/pages/personal/my_bot.dart';
 import 'package:jarvis_ktk/pages/personal/my_bot_app_bar.dart';
 import 'package:jarvis_ktk/pages/preview_bot/preview_bot.dart';
-import 'package:jarvis_ktk/pages/personal/knowledge.dart';
 import 'package:jarvis_ktk/pages/preview_bot/publish_bot.dart';
 import 'package:jarvis_ktk/services/service_locator.dart';
 import 'package:jarvis_ktk/widgets/nav_drawer.dart';
 import 'package:provider/provider.dart';
+
 import 'chat/chat_app_bar.dart';
 import 'chat/chat_body.dart';
-import 'email_reply/email_reply_app_bar.dart';
 import 'chat/chat_model.dart';
+import 'email_reply/email_reply_app_bar.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -113,68 +114,66 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
-      create: (context) => ChatModel(),
-      child: Stack(children: [
-        Scaffold(
-          key: _scaffoldKey, // Associate the Scaffold with the GlobalKey
-          appBar: _currentAppBar,
-          drawer: NavDrawer(
-            initialSelectedItem:
-                _currentSelectedItem, // Truyền selected item hiện tại
-            onItemTap: (selectedItem) {
-              _changeSelectedItem(selectedItem); // Cập nhật selected item
-              // Change body content based on the selected item
-              switch (selectedItem) {
-                case 'Chat':
-                  _changeBody(const ChatBody());
-                  _changeAppBar(ChatAppBar());
-                  break;
-                case 'Personal':
-                  _changeBody(const Center(child: Text('Personal Chat')));
-                  _changeAppBar(AppBar(title: const Text('Personal Chat')));
-                  break;
-                case 'Email Reply':
-                  _changeBody(const EmailReplyPage());
-                  _changeAppBar(const EmailReplyAppBar());
-                  break;
-                case 'My Bot': // Handle My Bot case
-                  _changeBody(const MyBotPage());
-                  _changeAppBar(const MyBotAppBar());
-                  break;
-                case 'Knowledge': // Handle Knowledge case
-                  _changeBody(const KnowledgePage());
-                  _changeAppBar(AppBar(title: const Text('Knowledge')));
-                  break;
-              }
+        create: (context) => ChatModel(),
+        child: Stack(children: [
+          Scaffold(
+            key: _scaffoldKey, // Associate the Scaffold with the GlobalKey
+            appBar: _currentAppBar,
+            drawer: NavDrawer(
+              initialSelectedItem:
+                  _currentSelectedItem, // Truyền selected item hiện tại
+              onItemTap: (selectedItem) {
+                _changeSelectedItem(selectedItem); // Cập nhật selected item
+                // Change body content based on the selected item
+                switch (selectedItem) {
+                  case 'Chat':
+                    _changeBody(const ChatBody());
+                    _changeAppBar(ChatAppBar());
+                    break;
+                  case 'Personal':
+                    _changeBody(const Center(child: Text('Personal Chat')));
+                    _changeAppBar(AppBar(title: const Text('Personal Chat')));
+                    break;
+                  case 'Email Reply':
+                    _changeBody(const EmailReplyPage());
+                    _changeAppBar(const EmailReplyAppBar());
+                    break;
+                  case 'My Bot': // Handle My Bot case
+                    _changeBody(const MyBotPage());
+                    _changeAppBar(const MyBotAppBar());
+                    break;
+                  case 'Knowledge': // Handle Knowledge case
+                    _changeBody(const KnowledgePage());
+                    _changeAppBar(AppBar(title: const Text('Knowledge')));
+                    break;
+                }
 
-              Navigator.pop(
-                  context); // Close the drawer after selecting an item
-            },
-            onHistoryTap: _handleHistoryTap, // Thêm callback cho lịch sử chat
-          ),
-          body: Stack(
-            children: [
-              _currentBody, // Display the currently selected body content
-              // Swipe area to open drawer
-              GestureDetector(
-                onHorizontalDragEnd: (details) {
-                  if (details.primaryVelocity! > 0) {
-                    _scaffoldKey.currentState!.openDrawer();
-                  }
-                },
-              ),
-            ],
-          ),
-        ),
-        // Thêm loading overlay
-        if (_isLoading)
-          Container(
-            color: Colors.black.withOpacity(0.5),
-            child: const Center(
-              child: CircularProgressIndicator(),
+                Navigator.pop(
+                    context); // Close the drawer after selecting an item
+              },
+              onHistoryTap: _handleHistoryTap, // Thêm callback cho lịch sử chat
+            ),
+            body: Stack(
+              children: [
+                _currentBody, // Display the currently selected body content
+                // Swipe area to open drawer
+                GestureDetector(
+                  onHorizontalDragEnd: (details) {
+                    if (details.primaryVelocity! > 500) {
+                      _scaffoldKey.currentState!.openDrawer();
+                    }
+                  },
+                ),
+                if (_isLoading)
+                  Container(
+                    color: Colors.black.withOpacity(0.5),
+                    child: const Center(
+                      child: CircularProgressIndicator(),
+                    ),
+                  ),
+              ],
             ),
           ),
-      ]),
-    );
+        ]));
   }
 }

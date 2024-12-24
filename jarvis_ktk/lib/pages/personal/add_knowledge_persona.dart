@@ -1,7 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:jarvis_ktk/data/network/knowledge_api.dart';
+import 'package:jarvis_ktk/services/service_locator.dart';
 
 class AddKnowledgePersonaPage extends StatefulWidget {
-  const AddKnowledgePersonaPage({super.key});
+  final VoidCallback onAdd;
+
+  const AddKnowledgePersonaPage({super.key, required this.onAdd});
 
   @override
   // ignore: library_private_types_in_public_api
@@ -67,7 +72,7 @@ class _AddKnowledgePersonaPageState extends State<AddKnowledgePersonaPage> {
                   children: [
                     TextButton(
                       onPressed: () {
-                        // Handle cancel action
+                        Navigator.of(context).pop();
                       },
                       style: TextButton.styleFrom(
                         foregroundColor: Colors.black,
@@ -82,7 +87,26 @@ class _AddKnowledgePersonaPageState extends State<AddKnowledgePersonaPage> {
                     const SizedBox(width: 8),
                     TextButton(
                       onPressed: () {
-                        // Handle confirm action
+                        try {
+                          getIt<KnowledgeApi>().createKnowledge(
+                            _nameController.text,
+                            _descriptionController.text,
+                          );
+                        }
+                        catch (e) {
+                          Fluttertoast.showToast(
+                            msg: e.toString(),
+                            toastLength: Toast.LENGTH_SHORT,
+                            gravity: ToastGravity.BOTTOM,
+                            timeInSecForIosWeb: 1,
+                            backgroundColor: Colors.red,
+                            textColor: Colors.white,
+                            fontSize: 16.0,
+                          );
+                          return;
+                        }
+                        widget.onAdd();
+                        Navigator.of(context).pop();
                       },
                       style: TextButton.styleFrom(
                         foregroundColor: Colors.white,

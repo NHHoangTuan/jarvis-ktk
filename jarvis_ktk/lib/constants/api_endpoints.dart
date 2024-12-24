@@ -22,6 +22,10 @@ class ApiEndpoints {
   static const String promptById = 'prompts/{id}';
   static const String promptFavorite = 'prompts/{id}/favorite';
 
+  // Email
+  static const String responseEmail = 'ai-email';
+  static const String suggestEmailIdeas = 'ai-email/reply-ideas';
+
   // Token
   static const String tokenUsage = 'tokens/usage';
 
@@ -29,6 +33,18 @@ class ApiEndpoints {
 
   //// AI Assistant
 
-  static const String createAssistant = '/kb-core/v1/ai-assistant';
-  static const String getAssistants = '/kb-core/v1/ai-assistant';
+  static const String createAssistant = 'ai-assistant';
+  static const String getAssistants = 'ai-assistant';
+  static const String knowledge = 'knowledge';
+  static const String knowledgeById = 'knowledge/{id}';
+  static const String knowledgeUnits = 'knowledge/{id}/units';
+  static const String knowledgeUnitById = 'knowledge/{id}/units/{unitId}';
+  static const String knowledgeUnitStatus = 'knowledge/units/{unitId}/status';
+
+  // Unit
+  static const String localFileUnit = 'knowledge/{id}/local-file';
+  static const String googleDriveUnit = 'knowledge/{id}/google-drive';
+  static const String slackUnit = 'knowledge/{id}/slack';
+  static const String confluenceUnit = 'knowledge/{id}/confluence';
+  static const String webUnit = 'knowledge/{id}/web';
 }

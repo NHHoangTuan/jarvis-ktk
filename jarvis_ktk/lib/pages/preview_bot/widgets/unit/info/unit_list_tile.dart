@@ -33,18 +33,22 @@ class UnitListTile extends StatelessWidget {
                     padding: const EdgeInsets.symmetric(horizontal: 4.0),
                     width: 32.0,
                     height: 32.0,
-                    child: ResizedImage(imagePath: unit.source.imagePath, width: 32, height: 32),
-                  ),
-                  Text(
-                    unit.name,
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
-                    maxLines: 1,
+                    child: ResizedImage(imagePath: dataSourceTypeToString(unit.type).imagePath , width: 32, height: 32),
                   ),
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                    constraints: const BoxConstraints(maxWidth: 200),
+                    child:
+                    Text(
+                      unit.name,
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                      maxLines: 1,
+                    ),
+                  ),
+                  Container(
+                    padding: const EdgeInsets.all(0.0),
                     width: 32.0,
                     height: 32.0,
                     child: IconButton(
@@ -66,14 +70,14 @@ class UnitListTile extends StatelessWidget {
                     child: IconButton(
                       alignment: Alignment.center,
                       icon: Icon(
-                        unit.isEnabled
+                        unit.status
                             ? Icons.check_box_rounded
                             : Icons.check_box_outline_blank_rounded,
-                        color: unit.isEnabled ? Colors.black : null,
+                        color: unit.status ? Colors.black : null,
                         size: 16,
                       ),
                       onPressed: () {
-                        onToggleEnabled(!unit.isEnabled);
+                        onToggleEnabled(!unit.status);
                       },
                     ),
                   ),
@@ -91,7 +95,7 @@ class UnitListTile extends StatelessWidget {
             ],
           ),
           Text(
-            'Source: ${unit.source.title}',
+            'Source: ${unit.name}',
             style: TextStyle(
               fontSize: 14,
               color: Colors.grey[600],
