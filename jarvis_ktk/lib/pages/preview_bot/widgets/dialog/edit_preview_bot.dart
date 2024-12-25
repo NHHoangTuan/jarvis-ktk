@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:provider/provider.dart';
 
 import '../../../../data/models/bot.dart';
@@ -18,6 +19,7 @@ class _EditPreviewBotPageState extends State<EditPreviewBotPage> {
   final _descriptionController = TextEditingController();
   int _botNameCharCount = 0;
   int _descriptionCharCount = 0;
+  bool _isLoading = false;
 
   final ScrollController _descriptionScrollController = ScrollController();
   final ValueNotifier<bool> _isTitleNotEmpty = ValueNotifier(false);
@@ -48,24 +50,46 @@ class _EditPreviewBotPageState extends State<EditPreviewBotPage> {
     });
   }
 
-  void _submitData() {
-    // if (_botNameController.text.isEmpty) {
-    //   return;
-    // }
+  void _submitData() async {
+    if (_botNameController.text.isEmpty) {
+      return;
+    }
 
-    // String botName = _botNameController.text;
-    // String botDescription = _descriptionController.text;
+    String botName = _botNameController.text;
+    String botDescription = _descriptionController.text;
 
-    // if (botDescription.isEmpty) {
-    //   botDescription = '';
-    // }
+    if (botDescription.isEmpty) {
+      botDescription = '';
+    }
 
-    // Provider.of<BotProvider>(context, listen: false)
-    //     .createBot(botName, botDescription);
+    // Thêm loading cho nút apply
+    // Chuyển sang trạng thái loading
+    setState(() {
+      _isLoading = true;
+    });
 
-    // Navigator.of(context).pop();
-    // // Chuyển đến preview bot page
-    // Navigator.pushNamed(context, '/previewbot');
+    await Provider.of<BotProvider>(context, listen: false)
+        .updateBot(widget.bot.id, botName, botDescription);
+
+    // Chuyển sang trạng thái không loading
+    setState(() {
+      _isLoading = false;
+    });
+
+    Navigator.of(context).pop();
+
+    showToast("Bot updated successfully");
+  }
+
+  void showToast(String message) {
+    Fluttertoast.showToast(
+        msg: message,
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.BOTTOM,
+        timeInSecForIosWeb: 1,
+        backgroundColor: Colors.blueGrey.shade900,
+        textColor: Colors.white,
+        fontSize: 16.0);
   }
 
   @override
@@ -158,14 +182,23 @@ class _EditPreviewBotPageState extends State<EditPreviewBotPage> {
                         ),
                       ),
                       child: TextButton(
-                        onPressed: isTitleNotEmpty ? _submitData : null,
-                        child: const Text(
-                          'Apply',
-                          style: TextStyle(
-                            color: Colors.black,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
+                        onPressed: _isLoading ? null : _submitData,
+                        child: _isLoading
+                            ? const SizedBox(
+                                height: 20,
+                                width: 20,
+                                child: CircularProgressIndicator(
+                                  color: Colors.white,
+                                  strokeWidth: 2,
+                                ),
+                              )
+                            : const Text(
+                                'Apply',
+                                style: TextStyle(
+                                  color: Colors.black,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
                       ),
                     );
                   },

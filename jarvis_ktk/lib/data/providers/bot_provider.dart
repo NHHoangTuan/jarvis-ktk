@@ -29,6 +29,15 @@ class BotProvider with ChangeNotifier {
     notifyListeners();
   }
 
+  Future<void> updateBot(
+      String botId, String botName, String botDescription) async {
+    final updatedBot = await _botApi.updateBot(botId, botName, botDescription);
+    final index = _bots.indexWhere((bot) => bot.id == botId);
+    _bots[index] = updatedBot;
+    _selectedBot = updatedBot;
+    notifyListeners();
+  }
+
   void selectBot(Bot bot) {
     _selectedBot = bot;
     notifyListeners();

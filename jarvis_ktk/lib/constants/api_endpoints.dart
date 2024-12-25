@@ -35,6 +35,7 @@ class ApiEndpoints {
 
   static const String createAssistant = 'ai-assistant';
   static const String getAssistants = 'ai-assistant';
+  static const String updateAssistant = 'ai-assistant/{assistantId}';
   static const String knowledge = 'knowledge';
   static const String knowledgeById = 'knowledge/{id}';
   static const String knowledgeUnits = 'knowledge/{id}/units';

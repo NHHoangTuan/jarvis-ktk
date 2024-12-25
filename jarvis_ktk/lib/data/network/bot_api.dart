@@ -51,6 +51,21 @@ class BotApi {
       return Bot.fromJson(response.data);
     }
 
-    throw Exception('Failed to create knowledge');
+    throw Exception('Failed to create BOT');
+  }
+
+  Future<Bot> updateBot(
+      String botId, String botName, String botDescription) async {
+    final response = await _knowledgeApiService.patch(
+      ApiEndpoints.updateAssistant,
+      pathVars: {'assistantId': botId},
+      data: {'assistantName': botName, 'description': botDescription},
+    );
+
+    if (response.statusCode == 200) {
+      return Bot.fromJson(response.data);
+    }
+
+    throw Exception('Failed to update BOT');
   }
 }

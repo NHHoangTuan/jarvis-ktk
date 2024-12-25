@@ -40,17 +40,21 @@ class _PreviewBotPageState extends State<PreviewBotPage> {
           appBar: AppBar(
             title: Row(
               children: [
-                Text(bot.assistantName), // Tên bot
-                const SizedBox(width: 5), // Khoảng cách giữa text và nút 'Edit'
-                IconButton(
-                  icon: const Icon(Icons.edit),
-                  onPressed: () => showCupertinoModalBottomSheet(
-                    expand: false,
-                    context: context,
-                    backgroundColor: Colors.transparent,
-                    builder: (context) => SingleChildScrollView(
-                        child: EditPreviewBotPage(bot: bot)), // Truyền bot vào
-                    enableDrag: false,
+                Expanded(flex: 8, child: Text(bot.assistantName)), // Tên bot
+                //const SizedBox(width: 5), // Khoảng cách giữa text và nút 'Edit'
+                Expanded(
+                  flex: 2,
+                  child: IconButton(
+                    icon: const Icon(Icons.edit),
+                    onPressed: () => showCupertinoModalBottomSheet(
+                      expand: false,
+                      context: context,
+                      backgroundColor: Colors.transparent,
+                      builder: (context) => SingleChildScrollView(
+                          child:
+                              EditPreviewBotPage(bot: bot)), // Truyền bot vào
+                      enableDrag: false,
+                    ),
                   ),
                 ),
               ],
