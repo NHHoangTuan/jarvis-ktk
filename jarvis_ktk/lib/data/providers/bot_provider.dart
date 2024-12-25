@@ -14,15 +14,20 @@ class BotProvider with ChangeNotifier {
   Bot? get selectedBot => _selectedBot;
 
   Future<void> loadBots() async {
-    _bots = await _botApi.getBotList();
+    _bots = await _botApi.getBotList(
+        order: 'DESC', orderField: 'createdAt', limit: 20);
     notifyListeners();
   }
 
-  // Future<void> createBot(Bot bot) async {
-  //   final newBot = await _botApi.createBot(bot);
-  //   _bots.add(newBot);
-  //   notifyListeners();
-  // }
+  Future<void> createBot(String botName, String botDescription) async {
+    final newBot = await _botApi.createBot(botName, botDescription);
+    _bots.add(newBot);
+    // Sắp xếp lại danh sách bot theo thời gian tạo mới nhất
+    _bots.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+    // Chọn bot mới tạo
+    _selectedBot = newBot;
+    notifyListeners();
+  }
 
   void selectBot(Bot bot) {
     _selectedBot = bot;

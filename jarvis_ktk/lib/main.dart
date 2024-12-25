@@ -28,10 +28,13 @@ class MainApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Jarvis KTK',
-      navigatorKey: navigatorKey,
-      debugShowCheckedModeBanner: false,
-      routes: AppRoutes.routes,
-    );
+        title: 'Jarvis KTK',
+        navigatorKey: navigatorKey,
+        debugShowCheckedModeBanner: false,
+        routes: AppRoutes.routes,
+        theme: ThemeData(
+          useMaterial3: true,
+          colorSchemeSeed: Colors.blue,
+        ));
   }
 }

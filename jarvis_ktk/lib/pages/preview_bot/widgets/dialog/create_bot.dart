@@ -1,23 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../../../../data/models/bot.dart';
 import '../../../../data/providers/bot_provider.dart';
 
-class EditPreviewBotPage extends StatefulWidget {
-  final Bot bot;
-  const EditPreviewBotPage({super.key, required this.bot});
+class CreateBotPage extends StatefulWidget {
+  const CreateBotPage({super.key});
 
   @override
   // ignore: library_private_types_in_public_api
-  _EditPreviewBotPageState createState() => _EditPreviewBotPageState();
+  _CreateBotPageState createState() => _CreateBotPageState();
 }
 
-class _EditPreviewBotPageState extends State<EditPreviewBotPage> {
+class _CreateBotPageState extends State<CreateBotPage> {
   final _botNameController = TextEditingController();
   final _descriptionController = TextEditingController();
   int _botNameCharCount = 0;
   int _descriptionCharCount = 0;
+  bool _isLoading = false;
 
   final ScrollController _descriptionScrollController = ScrollController();
   final ValueNotifier<bool> _isTitleNotEmpty = ValueNotifier(false);
@@ -25,15 +24,11 @@ class _EditPreviewBotPageState extends State<EditPreviewBotPage> {
   @override
   void initState() {
     super.initState();
-
     _botNameController.addListener(() {
       _isTitleNotEmpty.value = _botNameController.text.isNotEmpty;
     });
     _botNameController.addListener(_updateBotNameCharCount);
     _descriptionController.addListener(_updateDescriptionCharCount);
-
-    _botNameController.text = widget.bot.assistantName;
-    _descriptionController.text = widget.bot.description;
   }
 
   void _updateBotNameCharCount() {
@@ -48,24 +43,35 @@ class _EditPreviewBotPageState extends State<EditPreviewBotPage> {
     });
   }
 
-  void _submitData() {
-    // if (_botNameController.text.isEmpty) {
-    //   return;
-    // }
+  void _submitData() async {
+    if (_botNameController.text.isEmpty) {
+      return;
+    }
 
-    // String botName = _botNameController.text;
-    // String botDescription = _descriptionController.text;
+    String botName = _botNameController.text;
+    String botDescription = _descriptionController.text;
 
-    // if (botDescription.isEmpty) {
-    //   botDescription = '';
-    // }
+    if (botDescription.isEmpty) {
+      botDescription = '';
+    }
 
-    // Provider.of<BotProvider>(context, listen: false)
-    //     .createBot(botName, botDescription);
+    // Thêm loading cho nút apply
+    // Chuyển sang trạng thái loading
+    setState(() {
+      _isLoading = true;
+    });
 
-    // Navigator.of(context).pop();
-    // // Chuyển đến preview bot page
-    // Navigator.pushNamed(context, '/previewbot');
+    await Provider.of<BotProvider>(context, listen: false)
+        .createBot(botName, botDescription);
+
+    // Chuyển sang trạng thái không loading
+    setState(() {
+      _isLoading = false;
+    });
+
+    Navigator.of(context).pop();
+    // Chuyển đến preview bot page
+    Navigator.pushNamed(context, '/previewbot');
   }
 
   @override
@@ -91,7 +97,7 @@ class _EditPreviewBotPageState extends State<EditPreviewBotPage> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 const Text(
-                  'Edit Bot',
+                  'Create Bot',
                   style: TextStyle(
                     fontSize: 24,
                     fontWeight: FontWeight.bold,
@@ -158,14 +164,23 @@ class _EditPreviewBotPageState extends State<EditPreviewBotPage> {
                         ),
                       ),
                       child: TextButton(
-                        onPressed: isTitleNotEmpty ? _submitData : null,
-                        child: const Text(
-                          'Apply',
-                          style: TextStyle(
-                            color: Colors.black,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
+                        onPressed: _isLoading ? null : _submitData,
+                        child: _isLoading
+                            ? const SizedBox(
+                                height: 20,
+                                width: 20,
+                                child: CircularProgressIndicator(
+                                  color: Colors.white,
+                                  strokeWidth: 2,
+                                ),
+                              )
+                            : const Text(
+                                'Apply',
+                                style: TextStyle(
+                                  color: Colors.black,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
                       ),
                     );
                   },

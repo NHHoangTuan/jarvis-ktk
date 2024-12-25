@@ -40,4 +40,17 @@ class BotApi {
 
     return botList;
   }
+
+  Future<Bot> createBot(String botName, String botDescription) async {
+    final response = await _knowledgeApiService.post(
+      ApiEndpoints.createAssistant,
+      data: {'assistantName': botName, 'description': botDescription},
+    );
+
+    if (response.statusCode == 201) {
+      return Bot.fromJson(response.data);
+    }
+
+    throw Exception('Failed to create knowledge');
+  }
 }

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../preview_bot/widgets/dialog/edit_preview_bot.dart';
+import 'package:jarvis_ktk/pages/preview_bot/widgets/dialog/create_bot.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 
 class MyBotAppBar extends StatefulWidget implements PreferredSizeWidget {
@@ -25,17 +25,6 @@ class _MyBotAppBarState extends State<MyBotAppBar> {
         ],
       );
 
-  void _showCreateBotDialog() {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: _buildDialogHeader(),
-        content: EditPreviewBotPage(),
-      ),
-    );
-  }
-
   Widget _buildCreateBotButton() => SizedBox(
         height: 40,
         child: IconButton(
@@ -44,7 +33,7 @@ class _MyBotAppBarState extends State<MyBotAppBar> {
             context: context,
             backgroundColor: Colors.transparent,
             builder: (context) =>
-                const SingleChildScrollView(child: EditPreviewBotPage()),
+                const SingleChildScrollView(child: CreateBotPage()),
             enableDrag: false,
           ),
           icon: const Icon(
