@@ -35,7 +35,7 @@ class _EditPreviewBotPageState extends State<EditPreviewBotPage> {
     _descriptionController.addListener(_updateDescriptionCharCount);
 
     _botNameController.text = widget.bot.assistantName;
-    _descriptionController.text = widget.bot.description;
+    _descriptionController.text = widget.bot.description ?? '';
   }
 
   void _updateBotNameCharCount() {

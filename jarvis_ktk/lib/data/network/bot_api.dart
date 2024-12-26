@@ -81,4 +81,19 @@ class BotApi {
 
     throw Exception('Failed to delete BOT');
   }
+
+  Future<Bot> updatePromptBot(
+      String botId, String botName, String instructions) async {
+    final response = await _knowledgeApiService.patch(
+      ApiEndpoints.updateAssistant,
+      pathVars: {'assistantId': botId},
+      data: {'assistantName': botName, 'instructions': instructions},
+    );
+
+    if (response.statusCode == 200) {
+      return Bot.fromJson(response.data);
+    }
+
+    throw Exception('Failed to update prompt BOT');
+  }
 }

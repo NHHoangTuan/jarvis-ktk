@@ -22,8 +22,8 @@ class Bot {
   final String openAiAssistantId;
   final String userId;
   final String assistantName;
-  final String instructions;
-  final String description;
+  final String? instructions;
+  final String? description;
   final String openAiThreadIdPlay;
   final String openAiVectorStoreId;
   final bool isDefault;
@@ -32,7 +32,7 @@ class Bot {
   final bool isFavorite;
   final String createdAt;
   final String updatedAt;
-  final String deletedAt;
+  final String? deletedAt;
   final String id;
 
   Bot({

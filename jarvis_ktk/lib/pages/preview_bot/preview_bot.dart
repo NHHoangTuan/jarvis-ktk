@@ -20,14 +20,6 @@ class PreviewBotPage extends StatefulWidget {
 }
 
 class _PreviewBotPageState extends State<PreviewBotPage> {
-  final TextEditingController _controller = TextEditingController();
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
   @override
   Widget build(BuildContext context) {
     return Consumer<BotProvider>(builder: (context, botProvider, child) {
@@ -88,12 +80,11 @@ class _PreviewBotPageState extends State<PreviewBotPage> {
               ],
             ),
           ),
-          body: TabBarView(
+          body: const TabBarView(
             children: [
-              DevelopPreviewBotPage(
-                  controller: _controller), // Truyền controller vào
-              const ChatPreviewBotPage(),
-              const KnowledgePreviewBotPage(),
+              DevelopPreviewBotPage(), // Truyền controller vào
+              ChatPreviewBotPage(),
+              KnowledgePreviewBotPage(),
             ],
           ),
         ),
