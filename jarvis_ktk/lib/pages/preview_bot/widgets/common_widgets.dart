@@ -9,7 +9,8 @@ class HeaderText extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListTile(
-      leading: ResizedImage(imagePath: selectedDataSource.imagePath, width: 18, height: 18),
+      leading: ResizedImage(
+          imagePath: selectedDataSource.imagePath, width: 18, height: 18),
       title: Text(
         selectedDataSource.title,
         style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
@@ -92,8 +93,8 @@ class DeleteDialog extends StatelessWidget {
 
   static Future<bool?> show(
       {required BuildContext context,
-        required String title,
-        required String content}) {
+      required String title,
+      required String content}) {
     return showDialog<bool>(
       context: context,
       builder: (BuildContext context) {

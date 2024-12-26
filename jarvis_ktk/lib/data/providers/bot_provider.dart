@@ -38,6 +38,12 @@ class BotProvider with ChangeNotifier {
     notifyListeners();
   }
 
+  Future<void> deleteBot(String botId) async {
+    await _botApi.deleteBot(botId);
+    _bots.removeWhere((bot) => bot.id == botId);
+    notifyListeners();
+  }
+
   void selectBot(Bot bot) {
     _selectedBot = bot;
     notifyListeners();

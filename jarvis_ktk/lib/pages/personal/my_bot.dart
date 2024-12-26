@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:jarvis_ktk/pages/personal/widgets/confirm_delete_dialog.dart';
 import 'package:jarvis_ktk/pages/personal/widgets/type_dropdown.dart';
 import 'package:jarvis_ktk/utils/resized_image.dart';
 import 'package:provider/provider.dart';
@@ -24,7 +25,6 @@ class _MyBotPageState extends State<MyBotPage> {
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     _handleLoadBots();
   }
@@ -198,54 +198,71 @@ class _MyBotPageState extends State<MyBotPage> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Expanded(
-                        flex: 3,
-                        child: Text(bot.assistantName,
-                            style: const TextStyle(
-                                fontWeight: FontWeight.bold, fontSize: 16)),
+                      Text(bot.assistantName,
+                          style: const TextStyle(
+                              fontWeight: FontWeight.bold, fontSize: 16)),
+                      const SizedBox(
+                        height: 4,
                       ),
-                      Expanded(
-                        flex: 5,
-                        child: Text(formatDescription(bot.description),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            softWrap: false,
-                            style: const TextStyle(
-                                color: Colors.grey, fontSize: 14)),
-                      ),
-                      Expanded(
-                        flex: 2,
-                        child: Row(
-                          children: [
-                            const Icon(Icons.schedule,
-                                color: Colors.grey, size: 16),
-                            const SizedBox(width: 4),
-                            Text(formatDate(bot.createdAt),
-                                style: const TextStyle(
-                                    color: Colors.grey, fontSize: 13)),
-                          ],
-                        ),
-                      ),
+                      Text(formatDescription(bot.description),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          softWrap: false,
+                          style: const TextStyle(
+                              color: Colors.grey, fontSize: 14)),
                     ],
                   ),
                 ),
-                const SizedBox(width: 8),
                 Expanded(
-                  flex: 2,
-                  child: Container(
-                    alignment: Alignment.center,
-                    child: IconButton(
-                        icon: const Icon(Icons.star_outline), onPressed: () {}),
-                  ),
-                ),
-                Expanded(
-                    flex: 2,
-                    child: Container(
-                      alignment: Alignment.center,
-                      child: IconButton(
-                          icon: const Icon(Icons.delete_outline),
-                          onPressed: () {}),
-                    )),
+                    flex: 4,
+                    child: Column(
+                      children: [
+                        Row(
+                          children: [
+                            Expanded(
+                              flex: 2,
+                              child: Container(
+                                alignment: Alignment.center,
+                                child: IconButton(
+                                    icon: const Icon(Icons.star_outline),
+                                    onPressed: () {}),
+                              ),
+                            ),
+                            Expanded(
+                                flex: 2,
+                                child: Container(
+                                  alignment: Alignment.center,
+                                  child: IconButton(
+                                    icon: const Icon(Icons.delete_outline),
+                                    onPressed: () => ConfirmDeleteDialog.show(
+                                      context: context,
+                                      title: "Confirm",
+                                      content:
+                                          "Are you sure you want to delete this assistant? This action cannot be undone.",
+                                      onDelete: () => context
+                                          .read<BotProvider>()
+                                          .deleteBot(bot.id),
+                                    ),
+                                  ),
+                                )),
+                          ],
+                        ),
+                        Expanded(
+                          flex: 2,
+                          child: Row(
+                            children: [
+                              const Icon(Icons.schedule,
+                                  color: Colors.grey, size: 16),
+                              const SizedBox(width: 4),
+                              Text(formatDate(bot.createdAt),
+                                  style: const TextStyle(
+                                      color: Colors.grey, fontSize: 13)),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ))
+                //const SizedBox(width: 8),
               ],
             ),
           ),

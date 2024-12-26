@@ -68,4 +68,17 @@ class BotApi {
 
     throw Exception('Failed to update BOT');
   }
+
+  Future<void> deleteBot(String botId) async {
+    final response = await _knowledgeApiService.delete(
+      ApiEndpoints.deleteAssistant,
+      pathVars: {'assistantId': botId},
+    );
+
+    if (response.statusCode == 200) {
+      return;
+    }
+
+    throw Exception('Failed to delete BOT');
+  }
 }

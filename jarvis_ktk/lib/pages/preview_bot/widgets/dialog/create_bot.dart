@@ -69,9 +69,11 @@ class _CreateBotPageState extends State<CreateBotPage> {
       _isLoading = false;
     });
 
-    Navigator.of(context).pop();
-    // Chuyển đến preview bot page
-    Navigator.pushNamed(context, '/previewbot');
+    if (mounted) {
+      Navigator.of(context).pop();
+      // Chuyển đến preview bot page
+      Navigator.pushNamed(context, '/previewbot');
+    }
   }
 
   @override

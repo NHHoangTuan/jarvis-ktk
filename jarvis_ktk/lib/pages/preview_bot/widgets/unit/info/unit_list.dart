@@ -40,7 +40,7 @@ class _UnitListState extends State<UnitList> {
         context: context,
         title: 'Delete Unit',
         content:
-        'Are you sure you want to delete this unit? This action cannot be undone.',
+            'Are you sure you want to delete this unit? This action cannot be undone.',
       );
 
       if (confirmDelete == true) {
@@ -54,19 +54,18 @@ class _UnitListState extends State<UnitList> {
           _unitList.removeAt(index);
           _listKey.currentState?.removeItem(
             index,
-                (context, animation) =>
-                SizeTransition(
-                  sizeFactor: animation,
-                  child: Column(
-                    children: [
-                      UnitListTile(
-                          unit: unit,
-                          onDelete: () {},
-                          onToggleEnabled: (newValue) {}),
-                      const Divider(indent: 16.0, endIndent: 16.0),
-                    ],
-                  ),
-                ),
+            (context, animation) => SizeTransition(
+              sizeFactor: animation,
+              child: Column(
+                children: [
+                  UnitListTile(
+                      unit: unit,
+                      onDelete: () {},
+                      onToggleEnabled: (newValue) {}),
+                  const Divider(indent: 16.0, endIndent: 16.0),
+                ],
+              ),
+            ),
           );
         });
       }
