@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:jarvis_ktk/data/providers/knowledge_provider.dart';
 import 'package:jarvis_ktk/utils/colors.dart';
 import 'package:jarvis_ktk/pages/preview_bot/widgets/tabs/develop_preview_bot.dart';
 import 'package:jarvis_ktk/pages/preview_bot/widgets/tabs/chat_preview_bot.dart';
@@ -20,6 +21,12 @@ class PreviewBotPage extends StatefulWidget {
 }
 
 class _PreviewBotPageState extends State<PreviewBotPage> {
+  @override
+  void initState() {
+    super.initState();
+    context.read<KnowledgeProvider>().invalidateCache();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Consumer<BotProvider>(builder: (context, botProvider, child) {

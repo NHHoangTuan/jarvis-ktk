@@ -68,8 +68,13 @@ class _EditPreviewBotPageState extends State<EditPreviewBotPage> {
       _isLoading = true;
     });
 
+    dynamic data = {
+      'assistantName': botName,
+      'description': botDescription,
+    };
+
     await Provider.of<BotProvider>(context, listen: false)
-        .updateBot(widget.bot.id, botName, botDescription);
+        .updateBot(widget.bot.id, data);
 
     // Chuyển sang trạng thái không loading
     setState(() {

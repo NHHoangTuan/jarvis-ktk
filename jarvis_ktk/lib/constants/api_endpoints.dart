@@ -37,6 +37,12 @@ class ApiEndpoints {
   static const String getAssistants = 'ai-assistant';
   static const String updateAssistant = 'ai-assistant/{assistantId}';
   static const String deleteAssistant = 'ai-assistant/{assistantId}';
+  static const String importKnowledgeToAssistant =
+      'ai-assistant/{assistantId}/knowledges/{knowledgeId}';
+  static const String getImportedKnowledge =
+      'ai-assistant/{assistantId}/knowledges';
+  static const String deleteImportKnowledge =
+      'ai-assistant/{assistantId}/knowledges/{knowledgeId}';
   static const String knowledge = 'knowledge';
   static const String knowledgeById = 'knowledge/{id}';
   static const String knowledgeUnits = 'knowledge/{id}/units';

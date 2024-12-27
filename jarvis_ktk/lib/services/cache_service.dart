@@ -1,17 +1,22 @@
 import 'package:jarvis_ktk/data/models/chat.dart';
 import 'package:jarvis_ktk/data/models/token_usage.dart';
 import 'package:jarvis_ktk/services/service_locator.dart';
+import '../data/models/knowledge.dart';
 import '../data/network/api_service.dart';
 import '../data/network/chat_api.dart';
+import '../data/network/knowledge_api.dart';
 import '../data/network/token_api.dart';
 
 class CacheService {
   static Map<String, List<Conversation>> _cache = {};
   static Map<String, TokenUsage> _tokenCache = {};
+  static Map<String, List<Knowledge>> _knowledgeCache = {};
+  static DateTime? _lastKnowledgeFetch;
   static DateTime? _lastFetch;
   static DateTime? _lastTokenFetch;
   static const Duration _cacheValidity =
       Duration(minutes: 30); // Thời gian cache hiệu lực
+  static const Duration _knowledgesCacheValidity = Duration(minutes: 5);
 
   static int _historyLength = 0;
   static int _currentHistoryLength = 0;
@@ -94,6 +99,34 @@ class CacheService {
 
   static void setCurrentHistoryLength(int length) {
     _currentHistoryLength = length;
+  }
+
+  static Future<List<Knowledge>> getCachedKnowledges(
+      KnowledgeApi knowledgeApi) async {
+    // Check cache
+    if (_knowledgeCache.containsKey('knowledges') &&
+        _lastKnowledgeFetch != null) {
+      final difference = DateTime.now().difference(_lastKnowledgeFetch!);
+
+      if (difference < _knowledgesCacheValidity) {
+        return _knowledgeCache['knowledges']!;
+      }
+    }
+
+    // Nếu cache không tồn tại hoặc hết hạn, gọi API
+    final knowledges = await knowledgeApi.getKnowledgeList(
+        order: 'DESC', orderField: 'createdAt', limit: 20);
+
+    // Cập nhật cache
+    _knowledgeCache['knowledges'] = knowledges;
+    _lastKnowledgeFetch = DateTime.now();
+
+    return knowledges;
+  }
+
+  static void invalidateKnowledgeCache() {
+    _knowledgeCache.remove('knowledges');
+    _lastKnowledgeFetch = null;
   }
 
   static void clearAllCache() {

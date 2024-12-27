@@ -35,6 +35,9 @@ class Bot {
   final String? deletedAt;
   final String id;
 
+  // list chứa knowledgeId và knowledgeName
+  List<Map<String, dynamic>> knowledgeIdAndName = [];
+
   Bot({
     required this.openAiAssistantId,
     required this.userId,

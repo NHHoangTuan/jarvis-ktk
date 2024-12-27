@@ -46,8 +46,14 @@ class _DevelopPreviewBotPageState extends State<DevelopPreviewBotPage> {
         setState(() {
           _isLoading = true;
         });
-        await Provider.of<BotProvider>(context, listen: false).updatePromptBot(
-            bot.id, bot.assistantName, _editPromptController.text);
+
+        dynamic data = {
+          'assistantName': bot.assistantName,
+          'instructions': _editPromptController.text,
+        };
+
+        await Provider.of<BotProvider>(context, listen: false)
+            .updateBot(bot.id, data);
 
         setState(() {
           _isLoading = false;

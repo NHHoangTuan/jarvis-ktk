@@ -54,12 +54,11 @@ class BotApi {
     throw Exception('Failed to create BOT');
   }
 
-  Future<Bot> updateBot(
-      String botId, String botName, String botDescription) async {
+  Future<Bot> updateBot(String botId, dynamic data) async {
     final response = await _knowledgeApiService.patch(
       ApiEndpoints.updateAssistant,
       pathVars: {'assistantId': botId},
-      data: {'assistantName': botName, 'description': botDescription},
+      data: data,
     );
 
     if (response.statusCode == 200) {
@@ -82,18 +81,83 @@ class BotApi {
     throw Exception('Failed to delete BOT');
   }
 
-  Future<Bot> updatePromptBot(
-      String botId, String botName, String instructions) async {
-    final response = await _knowledgeApiService.patch(
-      ApiEndpoints.updateAssistant,
-      pathVars: {'assistantId': botId},
-      data: {'assistantName': botName, 'instructions': instructions},
+  Future<void> importKnowledgeToAssistant(
+      String assistantId, String knowledgeId) async {
+    final response = await _knowledgeApiService.post(
+      ApiEndpoints.importKnowledgeToAssistant,
+      pathVars: {'assistantId': assistantId, 'knowledgeId': knowledgeId},
     );
 
     if (response.statusCode == 200) {
-      return Bot.fromJson(response.data);
+      return;
     }
 
-    throw Exception('Failed to update prompt BOT');
+    throw Exception('Failed to import knowledge to assistant');
   }
+
+  Future<List<Map<String, String>>> getImportedKnowledges(
+    String assistantId, {
+    String? query,
+    String? order,
+    String? orderField,
+    int? offset,
+    int? limit,
+  }) async {
+    final params = {
+      if (query != null) 'query': query,
+      if (order != null) 'order': order,
+      if (orderField != null) 'orderField': orderField,
+      if (offset != null) 'offset': offset,
+      if (limit != null) 'limit': limit,
+    };
+
+    final response = await _knowledgeApiService.get(
+      ApiEndpoints.getImportedKnowledge,
+      params: params,
+      pathVars: {'assistantId': assistantId},
+    );
+
+    if (response.statusCode == 200) {
+      // Chuyển đổi dữ liệu response thành List<Map<String, String>>
+      final List<Map<String, String>> knowledgeList =
+          (response.data['data'] as List<dynamic>)
+              .map((item) => {
+                    'id': item['id'] as String,
+                    'knowledgeName': item['knowledgeName'] as String,
+                  })
+              .toList();
+      return knowledgeList;
+    }
+
+    throw Exception('Failed to get imported knowledge');
+  }
+
+  Future<void> deleteImportedKnowledge(
+      String assistantId, String knowledgeId) async {
+    final response = await _knowledgeApiService.delete(
+      ApiEndpoints.deleteImportKnowledge,
+      pathVars: {'assistantId': assistantId, 'knowledgeId': knowledgeId},
+    );
+
+    if (response.statusCode == 200) {
+      return;
+    }
+
+    throw Exception('Failed to remove imported knowledge');
+  }
+
+  // Future<Bot> updatePromptBot(
+  //     String botId, String botName, String instructions) async {
+  //   final response = await _knowledgeApiService.patch(
+  //     ApiEndpoints.updateAssistant,
+  //     pathVars: {'assistantId': botId},
+  //     data: {'assistantName': botName, 'instructions': instructions},
+  //   );
+
+  //   if (response.statusCode == 200) {
+  //     return Bot.fromJson(response.data);
+  //   }
+
+  //   throw Exception('Failed to update prompt BOT');
+  // }
 }

@@ -6,11 +6,13 @@ import '../network/bot_api.dart';
 class BotProvider with ChangeNotifier {
   final BotApi _botApi;
   List<Bot> _bots = [];
+  List<Map<String, dynamic>> _importedKnowledges = [];
   Bot? _selectedBot;
 
   BotProvider(this._botApi);
 
   List<Bot> get bots => _bots;
+  List<Map<String, dynamic>> get importedKnowledges => _importedKnowledges;
   Bot? get selectedBot => _selectedBot;
 
   Future<void> loadBots() async {
@@ -29,9 +31,8 @@ class BotProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> updateBot(
-      String botId, String botName, String botDescription) async {
-    final updatedBot = await _botApi.updateBot(botId, botName, botDescription);
+  Future<void> updateBot(String botId, dynamic data) async {
+    final updatedBot = await _botApi.updateBot(botId, data);
     final index = _bots.indexWhere((bot) => bot.id == botId);
     _bots[index] = updatedBot;
     _selectedBot = updatedBot;
@@ -44,13 +45,21 @@ class BotProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> updatePromptBot(
-      String botId, String botName, String botInstructions) async {
-    final updatedBot =
-        await _botApi.updatePromptBot(botId, botName, botInstructions);
-    final index = _bots.indexWhere((bot) => bot.id == botId);
-    _bots[index] = updatedBot;
-    _selectedBot = updatedBot;
+  Future<void> importKnowledgeToBot(String botId, String knowledgeId) async {
+    await _botApi.importKnowledgeToAssistant(botId, knowledgeId);
+    loadImportedKnowledges(botId);
+    notifyListeners();
+  }
+
+  Future<void> loadImportedKnowledges(String botId) async {
+    _importedKnowledges = await _botApi.getImportedKnowledges(botId);
+    notifyListeners();
+  }
+
+  Future<void> deleteImportedKnowledge(String botId, String knowledgeId) async {
+    await _botApi.deleteImportedKnowledge(botId, knowledgeId);
+    _importedKnowledges
+        .removeWhere((knowledge) => knowledge['id'] == knowledgeId);
     notifyListeners();
   }
 

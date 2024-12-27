@@ -21,7 +21,7 @@ class _MyBotPageState extends State<MyBotPage> {
   final FocusNode _searchFocusNode = FocusNode(); // Thêm FocusNode
 
   bool _isLoading = false;
-  String? _error;
+  bool _isLoadingFavorite = false;
 
   @override
   void initState() {
@@ -42,9 +42,7 @@ class _MyBotPageState extends State<MyBotPage> {
     try {
       await context.read<BotProvider>().loadBots();
     } catch (e) {
-      setState(() {
-        _error = e.toString();
-      });
+      debugPrint('Error loading bots: $e');
     } finally {
       setState(() {
         _isLoading = false;
@@ -52,18 +50,33 @@ class _MyBotPageState extends State<MyBotPage> {
     }
   }
 
+  Future<void> _handleFavoriteBot(Bot bot) async {
+    setState(() {
+      _isLoadingFavorite = true;
+    });
+    try {
+      debugPrint('Favorite bot: ${bot.isFavorite}');
+      dynamic data = {
+        'assistantName': bot.assistantName,
+        'isFavorite': !bot.isFavorite,
+      };
+      Provider.of<BotProvider>(context, listen: false).updateBot(bot.id, data);
+    } catch (e) {
+      debugPrint('Error favoriting bot: $e');
+    } finally {
+      setState(() {
+        _isLoadingFavorite = false;
+      });
+    }
+  }
+
   String formatDescription(String? description) {
     if (description == null) return '';
-
     // Kiểm tra vị trí của ký tự xuống dòng
     int newlineIndex = description.indexOf('\n');
-
-    // Nếu có \n, chỉ lấy phần trước \n và thêm dấu "..."
     if (newlineIndex != -1) {
       return description.substring(0, newlineIndex) + '...';
     }
-
-    // Nếu không có \n, trả về văn bản đầy đủ
     return description;
   }
 
@@ -125,21 +138,6 @@ class _MyBotPageState extends State<MyBotPage> {
                         return const Center(child: CircularProgressIndicator());
                       }
 
-                      if (_error != null) {
-                        return Center(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Text('Error: $_error'),
-                              ElevatedButton(
-                                onPressed: _handleLoadBots,
-                                child: const Text('Retry'),
-                              ),
-                            ],
-                          ),
-                        );
-                      }
-
                       if (botProvider.bots.isEmpty) {
                         return const Center(
                           child: Text('No bots found. Create your first bot!'),
@@ -186,7 +184,7 @@ class _MyBotPageState extends State<MyBotPage> {
                 const Expanded(
                   flex: 2,
                   child: ResizedImage(
-                    imagePath: 'assets/logo.png',
+                    imagePath: 'assets/chatbot.png',
                     height: 80,
                     width: 80,
                     isRound: true,
@@ -224,8 +222,13 @@ class _MyBotPageState extends State<MyBotPage> {
                               child: Container(
                                 alignment: Alignment.center,
                                 child: IconButton(
-                                    icon: const Icon(Icons.star_outline),
-                                    onPressed: () {}),
+                                    icon: bot.isFavorite
+                                        ? const Icon(Icons.star,
+                                            color: Colors.yellow)
+                                        : const Icon(Icons.star_outline),
+                                    onPressed: () => _isLoadingFavorite
+                                        ? null
+                                        : _handleFavoriteBot(bot)),
                               ),
                             ),
                             Expanded(
