@@ -4,20 +4,19 @@ part 'knowledge.g.dart';
 
 @JsonSerializable()
 class Knowledge {
-  final String knowledgeName;
+  String knowledgeName;
   final String userId;
   final String id;
-  final String description;
+  String description;
   final DateTime createdAt;
   final DateTime updatedAt;
   DateTime? deletedAt;
-  int numUnits = 0;
-  int totalSize = 0;
-  List<Unit> unitList;
+  int? numUnits;
+  int? totalSize;
 
   Knowledge(
       this.userId, this.id, this.description, this.createdAt, this.updatedAt,
-      {required this.knowledgeName, this.unitList = const []});
+      {required this.knowledgeName, this.deletedAt, this.numUnits, this.totalSize});
 
   factory Knowledge.fromJson(Map<String, dynamic> json) =>
       _$KnowledgeFromJson(json);
@@ -35,7 +34,8 @@ class Unit {
   final int size;
   final DateTime createdAt;
   final DateTime updatedAt;
-  final bool status;
+  bool status;
+  final Map<String, String> metadata;
 
   Unit(
       {required this.userId,
@@ -47,6 +47,7 @@ class Unit {
       required this.createdAt,
       required this.updatedAt,
       required this.status,
+      required this.metadata
       });
 
   factory Unit.fromJson(Map<String, dynamic> json) => _$UnitFromJson(json);

@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:jarvis_ktk/data/network/api_service.dart';
 import 'package:jarvis_ktk/services/service_locator.dart';
 
 import '../../constants/api_endpoints.dart';
@@ -36,27 +37,34 @@ class KnowledgeApiService {
 
   Future<void> _handleError(
       DioException error, ErrorInterceptorHandler handler) async {
-    if (error.response?.statusCode == 401) {
-      final newAccessToken = await _refreshAccessToken();
-      if (newAccessToken != null) {
-        error.requestOptions.headers['Authorization'] =
-        'Bearer $newAccessToken';
-        await saveAccessToken(newAccessToken);
-        final newResponse = await _retryRequest(error.requestOptions);
-        return handler.resolve(newResponse);
-      }
-      else {
-        final response = await getIt<KnowledgeApi>().signIn();
-        if (response.statusCode == 200) {
-          final newAccessToken = response.data['token']['accessToken'];
-          error.requestOptions.headers['Authorization'] =
-          'Bearer $newAccessToken';
-          await saveAccessToken(newAccessToken);
-          final newResponse = await _retryRequest(error.requestOptions);
-          return handler.resolve(newResponse);
-        }
-      }
+    if (error.response?.statusCode != 401) {
+      handler.next(error);
+      return;
     }
+
+    final newKbAccessToken = await _refreshAccessToken();
+    if (newKbAccessToken != null) {
+      error.requestOptions.headers['Authorization'] = 'Bearer $newKbAccessToken';
+      await saveAccessToken(newKbAccessToken);
+      final newResponse = await _retryRequest(error.requestOptions);
+      return handler.resolve(newResponse);
+    }
+
+    final response = await getIt<KnowledgeApi>().signIn();
+    if (response.statusCode == 200) {
+      final newAccessToken = response.data['token']['accessToken'];
+      error.requestOptions.headers['Authorization'] = 'Bearer $newAccessToken';
+      await saveAccessToken(newAccessToken);
+      final newResponse = await _retryRequest(error.requestOptions);
+      return handler.resolve(newResponse);
+    }
+
+    final newJarvisAccessToken = await getIt<ApiService>().refreshAccessToken();
+    if (newJarvisAccessToken != null) {
+      final newResponse = await _retryRequest(error.requestOptions);
+      return handler.resolve(newResponse);
+    }
+
     handler.next(error);
   }
 

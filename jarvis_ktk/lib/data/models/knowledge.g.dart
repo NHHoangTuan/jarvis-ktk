@@ -13,16 +13,12 @@ Knowledge _$KnowledgeFromJson(Map<String, dynamic> json) => Knowledge(
       DateTime.parse(json['createdAt'] as String),
       DateTime.parse(json['updatedAt'] as String),
       knowledgeName: json['knowledgeName'] as String,
-      unitList: (json['unitList'] as List<dynamic>?)
-              ?.map((e) => Unit.fromJson(e as Map<String, dynamic>))
-              .toList() ??
-          const [],
-    )
-      ..deletedAt = json['deletedAt'] == null
+      deletedAt: json['deletedAt'] == null
           ? null
-          : DateTime.parse(json['deletedAt'] as String)
-      ..numUnits = (json['numUnits'] as num).toInt()
-      ..totalSize = (json['totalSize'] as num).toInt();
+          : DateTime.parse(json['deletedAt'] as String),
+      numUnits: (json['numUnits'] as num?)?.toInt(),
+      totalSize: (json['totalSize'] as num?)?.toInt(),
+    );
 
 Map<String, dynamic> _$KnowledgeToJson(Knowledge instance) => <String, dynamic>{
       'knowledgeName': instance.knowledgeName,
@@ -34,7 +30,6 @@ Map<String, dynamic> _$KnowledgeToJson(Knowledge instance) => <String, dynamic>{
       'deletedAt': instance.deletedAt?.toIso8601String(),
       'numUnits': instance.numUnits,
       'totalSize': instance.totalSize,
-      'unitList': instance.unitList,
     };
 
 Unit _$UnitFromJson(Map<String, dynamic> json) => Unit(
@@ -47,6 +42,7 @@ Unit _$UnitFromJson(Map<String, dynamic> json) => Unit(
       createdAt: DateTime.parse(json['createdAt'] as String),
       updatedAt: DateTime.parse(json['updatedAt'] as String),
       status: json['status'] as bool,
+      metadata: Map<String, String>.from(json['metadata'] as Map),
     );
 
 Map<String, dynamic> _$UnitToJson(Unit instance) => <String, dynamic>{
@@ -59,6 +55,7 @@ Map<String, dynamic> _$UnitToJson(Unit instance) => <String, dynamic>{
       'createdAt': instance.createdAt.toIso8601String(),
       'updatedAt': instance.updatedAt.toIso8601String(),
       'status': instance.status,
+      'metadata': instance.metadata,
     };
 
 const _$DataSourceTypeEnumMap = {

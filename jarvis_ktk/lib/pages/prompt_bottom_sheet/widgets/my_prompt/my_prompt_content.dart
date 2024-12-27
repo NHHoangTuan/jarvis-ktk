@@ -10,6 +10,7 @@ import 'package:jarvis_ktk/utils/colors.dart';
 
 import '../../../../data/models/user.dart';
 import '../prompt_list.dart';
+import '../public_prompt/public_prompt_search_bar.dart';
 
 class MyPromptContent extends StatefulWidget {
   final void Function(Prompt) onClick;
@@ -24,12 +25,20 @@ class MyPromptContentState extends State<MyPromptContent> {
   late Future<List<Prompt>> _promptsFuture;
   final FlutterSecureStorage _storage = const FlutterSecureStorage();
   User? _user;
+  final TextEditingController _searchController = TextEditingController();
+  final FocusNode _searchFocusNode = FocusNode();
+  String _searchText = '';
 
   @override
   void initState() {
     super.initState();
     _initializeUser();
     _promptsFuture = getIt<PromptApi>().getPrompts();
+    _searchController.addListener(() {
+      setState(() {
+        _searchText = _searchController.text;
+      });
+    });
   }
 
   Future<void> _initializeUser() async {
@@ -48,55 +57,90 @@ class MyPromptContentState extends State<MyPromptContent> {
     });
   }
 
+  List<Prompt> _filterPrompts(List<Prompt> prompts) {
+    if (_searchText.isEmpty) {
+      return prompts;
+    }
+    return prompts.where((prompt) {
+      return prompt.title.toLowerCase().contains(_searchText.toLowerCase());
+    }).toList();
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    _searchFocusNode.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      body: FutureBuilder<List<Prompt>>(
-        future: _promptsFuture,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          } else if (snapshot.hasError) {
-            return Center(child: Text('Error: ${snapshot.error}'));
-          } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return const Center(child: Text('No prompts available'));
-          } else {
-            final prompts = snapshot.data!;
-            final filteredPrompts = prompts.where((prompt) {
-              if (prompt is PublicPrompt) {
-                return prompt.isFavorite || prompt.userId == _user?.id;
+      body: Column(
+        children: [
+          PublicPromptSearchBar(
+            onChanged: (text) {
+              if (_searchFocusNode.hasFocus) {
+                setState(() {
+                  _searchText = text;
+                });
               }
-              return true;
-            }).toList();
-            final myPrompts = filteredPrompts.whereType<MyPrompt>().toList();
-            final publicPrompts =
-                filteredPrompts.whereType<PublicPrompt>().toList();
+            },
+            controller: _searchController,
+          ),
+          Expanded(
+            child: FutureBuilder<List<Prompt>>(
+              future: _promptsFuture,
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                } else if (snapshot.hasError) {
+                  return Center(child: Text('Error: ${snapshot.error}'));
+                } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                  return const Center(child: Text('No prompts available'));
+                } else {
+                  final prompts = _filterPrompts(snapshot.data!);
+                  final filteredPrompts = prompts.where((prompt) {
+                    if (prompt is PublicPrompt) {
+                      return prompt.isFavorite || prompt.userId == _user?.id;
+                    }
+                    return true;
+                  }).toList();
+                  final myPrompts = filteredPrompts.whereType<MyPrompt>().toList();
+                  final publicPrompts = filteredPrompts.whereType<PublicPrompt>().toList();
 
-            return ListView(
-              children: [
-                PromptExpansionTileBox(text: 'My Prompts', promptListTiles: myPrompts.map((prompt) {
-                  return PromptListTile(
-                    anyPrompt: prompt,
-                    onDelete: refreshPrompts,
-                    onClick: widget.onClick,
+                  return ListView(
+                    children: [
+                      PromptExpansionTileBox(
+                        text: 'My Prompts',
+                        promptListTiles: myPrompts.map((prompt) {
+                          return PromptListTile(
+                            anyPrompt: prompt,
+                            onDelete: refreshPrompts,
+                            onClick: widget.onClick,
+                          );
+                        }).toList(),
+                        color: Colors.red,
+                      ),
+                      PromptExpansionTileBox(
+                        text: 'Public Prompts',
+                        promptListTiles: publicPrompts.map((prompt) {
+                          return PromptListTile(
+                            anyPrompt: prompt,
+                            onDelete: refreshPrompts,
+                            onClick: widget.onClick,
+                          );
+                        }).toList(),
+                        color: SimpleColors.mediumBlue,
+                      ),
+                    ],
                   );
-                }).toList(),
-                color: Colors.red,
-                ),
-                PromptExpansionTileBox(text: 'Public Prompts', promptListTiles: publicPrompts.map((prompt) {
-                  return PromptListTile(
-                    anyPrompt: prompt,
-                    onDelete: refreshPrompts,
-                    onClick: widget.onClick,
-                  );
-                }).toList(),
-                color: SimpleColors.mediumBlue,
-                ),
-              ],
-            );
-          }
-        },
+                }
+              },
+            ),
+          ),
+        ],
       ),
     );
   }

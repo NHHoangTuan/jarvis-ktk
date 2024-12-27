@@ -52,7 +52,7 @@ class KnowledgeApi {
     int? limit,
   }) async {
     final params = {
-      if (query != null) 'query': query,
+      if (query != null) 'q': query,
       if (order != null) 'order': order,
       if (orderField != null) 'orderField': orderField,
       if (offset != null) 'offset': offset,
@@ -72,7 +72,7 @@ class KnowledgeApi {
     return knowledgeList;
   }
 
-  Future<Knowledge> updateKnowledge(int knowledgeId, String knowledgeName, String description) async {
+  Future<Knowledge> updateKnowledge(String knowledgeId, String knowledgeName, String description) async {
     final response = await _knowledgeApiService.patch(
       ApiEndpoints.knowledgeById,
       pathVars: {'id': knowledgeId},
@@ -86,7 +86,7 @@ class KnowledgeApi {
     throw Exception('Failed to update knowledge');
   }
 
-  Future<void> deleteKnowledge(int knowledgeId) async {
+  Future<void> deleteKnowledge(String knowledgeId) async {
     final response = await _knowledgeApiService.delete(
       ApiEndpoints.knowledgeById,
       pathVars: {'id': knowledgeId},

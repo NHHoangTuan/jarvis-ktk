@@ -76,6 +76,7 @@ class _NewPromptDialogState extends State<NewPromptDialog> {
               ),
             );
           }
+          if (!context.mounted) return;
           Navigator.of(context).pop();
           setState(() {
             _isLoading = false;

@@ -3,8 +3,8 @@ import 'package:jarvis_ktk/utils/resized_image.dart';
 
 import '../../../../../utils/colors.dart';
 
-class EmptyKnowledgeScreen extends StatelessWidget {
-  const EmptyKnowledgeScreen({super.key});
+class EmptyUnitScreen extends StatelessWidget {
+  const EmptyUnitScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -24,7 +24,7 @@ class EmptyKnowledgeScreen extends StatelessWidget {
             ),
             SizedBox(height: 8),
             Text(
-              "Add a unit to store you data",
+              "Add a Unit to store your data",
               textAlign: TextAlign.center,
               style: TextStyle(fontSize: 14, color: SimpleColors.deepSkyBlue),
             ),

@@ -48,21 +48,30 @@ class _EmailReplyPage extends State<EmailReplyPage>
       _controller.clear();
     }
 
-    final result = await getIt<EmailApi>().responseEmail(emailReply);
-    emailReply.email = result.email;
-    lastEmailReply = emailReply;
+    try {
+      final result = await getIt<EmailApi>().responseEmail(emailReply);
+      emailReply.email = result.email;
+      lastEmailReply = emailReply;
 
-    setState(() {
-      _messages.add(ChatMessage(
-        message: result.email,
-        isBot: true,
-        onSendMessage: _sendMessage,
-        isPreviousMessage: true,
-      ));
-    });
-
+      setState(() {
+        _messages.add(ChatMessage(
+          message: result.email,
+          isBot: true,
+          onSendMessage: _sendMessage,
+          isPreviousMessage: true,
+        ));
+      });
+    } catch (e) {
+      setState(() {
+        _messages.add(ChatMessage(
+          message: e.toString(),
+          isBot: true,
+          onSendMessage: _sendMessage,
+          isPreviousMessage: true,
+        ));
+      });
+    }
     scrollToBottom();
-
   }
 
   void scrollToBottom() {
