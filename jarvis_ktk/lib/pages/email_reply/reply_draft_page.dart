@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:jarvis_ktk/data/models/email_reply.dart';
+import 'package:jarvis_ktk/utils/colors.dart';
 
 class ReplyDraftScreen extends StatefulWidget {
   final void Function(EmailReply emailReply) onSendMessage;
@@ -96,10 +97,10 @@ class _ReplyDraftScreenState extends State<ReplyDraftScreen> {
               ),
               ElevatedButton(
                 onPressed: () {
-                  // Logic for generating draft
                   _generateDraft();
                 },
                 style: ElevatedButton.styleFrom(
+                  backgroundColor: SimpleColors.lightBlue,
                     minimumSize: const Size(double.infinity, 50)),
                 child: const Text('Generate draft'),
               ),
@@ -198,7 +199,7 @@ class EmailStyleTitle extends StatelessWidget {
             spacing: 8.0,
             children: styles.map((style) {
               return ChoiceChip(
-                label: Text(style),
+                label: Text(style, style: const TextStyle(fontSize: 10)),
                 selected: selectedLanguage == style,
                 onSelected: (selected) {
                   if (selected) {

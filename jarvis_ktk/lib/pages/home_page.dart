@@ -12,7 +12,6 @@ import 'package:provider/provider.dart';
 import 'chat/chat_app_bar.dart';
 import 'chat/chat_body.dart';
 import 'chat/chat_model.dart';
-import 'email_reply/email_reply_app_bar.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -128,7 +127,6 @@ class _HomePageState extends State<HomePage> {
                     break;
                   case 'Email Reply':
                     _changeBody(const EmailReplyPage());
-                    _changeAppBar(const EmailReplyAppBar());
                     break;
                   case 'My Bot': // Handle My Bot case
                     _changeBody(const MyBotPage());
