@@ -4,7 +4,7 @@ import 'package:jarvis_ktk/data/network/knowledge_api.dart';
 import 'package:jarvis_ktk/services/service_locator.dart';
 
 import 'unit/dialog/add_unit_dialog.dart';
-import 'unit/info/empty_knowledge_screen.dart';
+import 'unit/info/empty_unit_screen.dart';
 import 'unit/info/unit_list.dart';
 
 class KnowledgeInfoPage extends StatefulWidget {
@@ -47,12 +47,11 @@ class _KnowledgeInfoPageState extends State<KnowledgeInfoPage> {
           } else if (snapshot.hasError) {
             return Center(child: Text('Error: ${snapshot.error}'));
           } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return const EmptyKnowledgeScreen();
+            return const EmptyUnitScreen();
           } else {
             return UnitList(
                 knowledgeId: widget.knowledge.id,
                 unitList: snapshot.data!,
-                onUnitAction: _onUnitOperation,
             );
           }
         },

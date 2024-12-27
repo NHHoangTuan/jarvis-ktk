@@ -48,8 +48,7 @@ class _NewPromptDialogContentState extends State<NewPromptDialogContent>
             PromptTabBar(
               tabController: _tabController,
             ),
-            SizedBox(
-              height: 430,
+            Expanded(
               child: TabBarView(
                 controller: _tabController,
                 children: [

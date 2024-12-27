@@ -41,32 +41,35 @@ class ApiService {
 
   Future<void> _handleError(
       DioException error, ErrorInterceptorHandler handler) async {
-    if (error.response?.statusCode == 401) {
-      final newAccessToken = await _refreshAccessToken();
-      if (newAccessToken != null) {
-        error.requestOptions.headers['Authorization'] =
-            'Bearer $newAccessToken';
-        await saveAccessToken(newAccessToken);
-        final newResponse = await _retryRequest(error.requestOptions);
-        return handler.resolve(newResponse);
-      } else {
-        Fluttertoast.showToast(
-          msg: 'Session expired. Please login again.',
-          toastLength: Toast.LENGTH_SHORT,
-          gravity: ToastGravity.BOTTOM,
-          timeInSecForIosWeb: 3,
-          backgroundColor: Colors.black.withOpacity(0.8),
-          textColor: Colors.white,
-          fontSize: 16.0,
-        );
-        await clearTokens();
-        await clearUser();
-        navigatorKey.currentState?.pushNamedAndRemoveUntil(
-          AppRoutes.login,
-          (route) => false,
-        );
-      }
+    if (error.response?.statusCode != 401) {
+      handler.next(error);
+      return;
     }
+
+    final newAccessToken = await refreshAccessToken();
+    if (newAccessToken != null) {
+      error.requestOptions.headers['Authorization'] = 'Bearer $newAccessToken';
+      await saveAccessToken(newAccessToken);
+      final newResponse = await _retryRequest(error.requestOptions);
+      return handler.resolve(newResponse);
+    }
+
+    Fluttertoast.showToast(
+      msg: 'Session expired. Please login again.',
+      toastLength: Toast.LENGTH_SHORT,
+      gravity: ToastGravity.BOTTOM,
+      timeInSecForIosWeb: 3,
+      backgroundColor: Colors.black.withOpacity(0.8),
+      textColor: Colors.white,
+      fontSize: 16.0,
+    );
+    await clearTokens();
+    await clearUser();
+    navigatorKey.currentState?.pushNamedAndRemoveUntil(
+      AppRoutes.login,
+          (route) => false,
+    );
+
     handler.next(error);
   }
 
@@ -90,7 +93,7 @@ class ApiService {
     };
   }
 
-  Future<String?> _refreshAccessToken() async {
+  Future<String?> refreshAccessToken() async {
     try {
       String? refreshToken = await _storage.read(key: 'refreshToken');
       if (refreshToken == null) return null;

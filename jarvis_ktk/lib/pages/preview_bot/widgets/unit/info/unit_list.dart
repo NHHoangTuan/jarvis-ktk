@@ -10,13 +10,9 @@ import 'unit_list_tile.dart';
 class UnitList extends StatefulWidget {
   final String knowledgeId;
   final List<Unit> unitList;
-  final VoidCallback onUnitAction;
 
   const UnitList(
-      {super.key,
-      required this.unitList,
-      required this.onUnitAction,
-      required this.knowledgeId});
+      {super.key, required this.unitList, required this.knowledgeId});
 
   @override
   State<UnitList> createState() => _UnitListState();
@@ -25,6 +21,7 @@ class UnitList extends StatefulWidget {
 class _UnitListState extends State<UnitList> {
   late List<Unit> _unitList;
   final GlobalKey<AnimatedListState> _listKey = GlobalKey<AnimatedListState>();
+  bool _isLoading = false;
 
   @override
   void initState() {
@@ -59,9 +56,10 @@ class _UnitListState extends State<UnitList> {
               child: Column(
                 children: [
                   UnitListTile(
-                      unit: unit,
-                      onDelete: () {},
-                      onToggleEnabled: (newValue) {}),
+                    unit: unit,
+                    onDelete: () {},
+                    onLoading: (isLoading) => _setLoading(isLoading),
+                  ),
                   const Divider(indent: 16.0, endIndent: 16.0),
                 ],
               ),
@@ -72,39 +70,41 @@ class _UnitListState extends State<UnitList> {
     }
   }
 
-  void _toggleUnitEnabled(Unit unit, bool newValue) {
+  void _setLoading(bool isLoading) {
     setState(() {
-      try {
-        getIt<KnowledgeApi>().updateUnitStatus(unit.id, newValue);
-        widget.onUnitAction();
-      } catch (e) {
-        Fluttertoast.showToast(msg: 'Failed to update unit status');
-      }
+      _isLoading = isLoading;
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedList(
-      key: _listKey,
-      initialItemCount: _unitList.length,
-      itemBuilder: (context, index, animation) {
-        final item = _unitList[index];
-        return SizeTransition(
-          sizeFactor: animation,
-          child: Column(
-            children: [
-              UnitListTile(
-                unit: item,
-                onDelete: () => _deleteUnit(item),
-                onToggleEnabled: (newValue) =>
-                    _toggleUnitEnabled(item, newValue),
+    return Stack(
+      children: [
+        AnimatedList(
+          key: _listKey,
+          initialItemCount: _unitList.length,
+          itemBuilder: (context, index, animation) {
+            final item = _unitList[index];
+            return SizeTransition(
+              sizeFactor: animation,
+              child: Column(
+                children: [
+                  UnitListTile(
+                    unit: item,
+                    onDelete: () => _deleteUnit(item),
+                    onLoading: (isLoading) => _setLoading(isLoading),
+                  ),
+                  const Divider(indent: 16.0, endIndent: 16.0),
+                ],
               ),
-              const Divider(indent: 16.0, endIndent: 16.0),
-            ],
+            );
+          },
+        ),
+        if (_isLoading)
+          const Center(
+            child: CircularProgressIndicator(),
           ),
-        );
-      },
+      ],
     );
   }
 }
