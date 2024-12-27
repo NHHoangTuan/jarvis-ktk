@@ -25,53 +25,57 @@ class ConnectDialogBaseState extends State<ConnectDialogBase> {
         borderRadius: BorderRadius.circular(12),
         color: SimpleColors.babyBlue.withOpacity(0.1),
       ),
-      child:
-      SingleChildScrollView(
+      child: SingleChildScrollView(
         child: Stack(
-        children: [
-          Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const HeaderText(),
-              const Divider(),
-              ...widget.fields.map((field) {
-                if (field is FilePickerField) {
-                  return Column(
-                    children: [
-                      TextFormTitle(title: '* ${field.title}:'),
-                      FilePickerWidget(
-                        selectedFile: fieldValues[field.key],
-                        onTap: () async {
-                          FilePickerResult? result =
-                          await FilePicker.platform.pickFiles();
-                          if (result != null) {
-                            setState(() {
-                              fieldValues[field.key] = result.files.single.path;
-                            });
-                          }
-                        },
-                      ),
-                    ],
-                  );
-                } else {
-                  return Column(
-                    children: [
-                      TextFormTitle(title: '* ${field.title}:'),
-                      PromptTextFormField(
-                        hintText: 'Enter ${field.hintText}',
-                        onChanged: (value) {
-                          fieldValues[field.key] = value;
-                        },
-                        hintMaxLines: 1,
-                      ),
-                    ],
-                  );
-                }
-              }),
-            ],
-          ),
-        ],
-      ),
+          children: [
+            Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const HeaderText(),
+                const Divider(),
+                ...widget.fields.map((field) {
+                  if (field is FilePickerField) {
+                    return Column(
+                      children: [
+                        TextFormTitle(title: '* ${field.title}:'),
+
+                        FilePickerWidget(
+                          selectedFile: fieldValues[field.key],
+                          onTap: () async {
+                            FilePickerResult? result = await FilePicker.platform.pickFiles(
+                              type: FileType.custom,
+                              allowedExtensions: [
+                                'c', 'cpp', 'docx', 'html', 'java', 'json', 'md', 'pdf', 'php', 'pptx', 'py', 'rb', 'tex', 'txt'
+                              ],
+                            );
+                            if (result != null) {
+                              setState(() {
+                                fieldValues[field.key] = result.files.single.path;
+                              });
+                            }
+                          },
+                        ),
+                      ],
+                    );
+                  } else {
+                    return Column(
+                      children: [
+                        TextFormTitle(title: '* ${field.title}:'),
+                        PromptTextFormField(
+                          hintText: 'Enter ${field.hintText}',
+                          onChanged: (value) {
+                            fieldValues[field.key] = value;
+                          },
+                          hintMaxLines: 1,
+                        ),
+                      ],
+                    );
+                  }
+                }),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -115,33 +119,34 @@ class FilePickerWidget extends StatelessWidget {
         child: Center(
           child: selectedFile == null
               ? const Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(Icons.cloud_upload, size: 40, color: Colors.blue),
-                    SizedBox(height: 8),
-                    Text(
-                      'Click this area to upload',
-                      style:
-                          TextStyle(fontSize: 16, color: SimpleColors.darkBlue),
-                    ),
-                  ],
-                )
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.cloud_upload, size: 40, color: Colors.blue),
+              SizedBox(height: 8),
+              Text(
+                'Click this area to upload',
+                style:
+                TextStyle(fontSize: 16, color: SimpleColors.darkBlue),
+              ),
+            ],
+          )
               : Center(
-                  child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      'Selected File: $selectedFile',
-                      style: const TextStyle(fontSize: 16, color: Colors.black),
-                    ),
-                    const SizedBox(height: 16),
-                    const Text(
-                      'Click to upload another file',
-                      style:
-                          TextStyle(fontSize: 16, color: SimpleColors.darkBlue),
-                    ),
-                  ],
-                )),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    // only show the file name
+                    selectedFile!.split('/').last,
+                    style: const TextStyle(fontSize: 16, color: Colors.black),
+                  ),
+                  const SizedBox(height: 16),
+                  const Text(
+                    'Click to upload another file',
+                    style:
+                    TextStyle(fontSize: 16, color: SimpleColors.darkBlue),
+                  ),
+                ],
+              )),
         ),
       ),
     );
