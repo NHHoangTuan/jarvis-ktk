@@ -1,4 +1,3 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:jarvis_ktk/data/models/chat.dart';
 import 'package:jarvis_ktk/data/network/chat_api.dart';
@@ -6,8 +5,6 @@ import 'package:jarvis_ktk/pages/email_reply/email_reply_page.dart';
 import 'package:jarvis_ktk/pages/personal/knowledge.dart';
 import 'package:jarvis_ktk/pages/personal/my_bot.dart';
 import 'package:jarvis_ktk/pages/personal/my_bot_app_bar.dart';
-import 'package:jarvis_ktk/pages/preview_bot/preview_bot.dart';
-import 'package:jarvis_ktk/pages/preview_bot/publish_bot.dart';
 import 'package:jarvis_ktk/services/service_locator.dart';
 import 'package:jarvis_ktk/widgets/nav_drawer.dart';
 import 'package:provider/provider.dart';
@@ -106,11 +103,6 @@ class _HomePageState extends State<HomePage> {
     _changeAppBar(const ChatAppBar());
   }
 
-  // void _handleAgentChanged(String agentId) {
-  //   final chatModel = Provider.of<ChatModel>(context, listen: false);
-  //   chatModel.setSelectedAgent(agentId);
-  // }
-
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
@@ -128,7 +120,7 @@ class _HomePageState extends State<HomePage> {
                 switch (selectedItem) {
                   case 'Chat':
                     _changeBody(const ChatBody());
-                    _changeAppBar(ChatAppBar());
+                    _changeAppBar(const ChatAppBar());
                     break;
                   case 'Personal':
                     _changeBody(const Center(child: Text('Personal Chat')));
