@@ -14,17 +14,6 @@ class MyBotAppBar extends StatefulWidget implements PreferredSizeWidget {
 }
 
 class _MyBotAppBarState extends State<MyBotAppBar> {
-  Widget _buildDialogHeader() => Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          const Text('Create Bot'),
-          IconButton(
-            icon: const Icon(Icons.close),
-            onPressed: () => Navigator.of(context).pop(),
-          ),
-        ],
-      );
-
   Widget _buildCreateBotButton() => SizedBox(
         height: 40,
         child: IconButton(

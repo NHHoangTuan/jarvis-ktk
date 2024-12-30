@@ -129,7 +129,6 @@ class _MyBotPageState extends State<MyBotPage> {
           Expanded(
             child: LayoutBuilder(
               builder: (context, constraints) {
-                final crossAxisCount = (constraints.maxWidth / 200).floor();
                 return RefreshIndicator(
                   onRefresh: _handleLoadBots,
                   child: Consumer<BotProvider>(
@@ -146,9 +145,9 @@ class _MyBotPageState extends State<MyBotPage> {
 
                       return GridView.builder(
                         padding: const EdgeInsets.all(8),
-                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount:
-                              crossAxisCount > 0 ? crossAxisCount : 1,
+                        gridDelegate:
+                            const SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 1,
                           crossAxisSpacing: 8,
                           mainAxisSpacing: 8,
                           childAspectRatio: 3 / 1,

@@ -1,4 +1,5 @@
 import 'package:jarvis_ktk/data/models/bot.dart';
+import 'package:jarvis_ktk/data/models/message.dart';
 import 'package:jarvis_ktk/data/network/knowledge_api_service.dart';
 
 import '../../constants/api_endpoints.dart';
@@ -146,18 +147,57 @@ class BotApi {
     throw Exception('Failed to remove imported knowledge');
   }
 
-  // Future<Bot> updatePromptBot(
-  //     String botId, String botName, String instructions) async {
-  //   final response = await _knowledgeApiService.patch(
-  //     ApiEndpoints.updateAssistant,
-  //     pathVars: {'assistantId': botId},
-  //     data: {'assistantName': botName, 'instructions': instructions},
-  //   );
+  Future<String> askAssistant(String assistantId, String message,
+      String openAiThreadId, String? additionalInstruction) async {
+    final response = await _knowledgeApiService.post(
+      ApiEndpoints.askAssistant,
+      pathVars: {'assistantId': assistantId},
+      data: {
+        "message": message,
+        "openAiThreadId": openAiThreadId,
+        "additionalInstruction": additionalInstruction ?? ''
+      },
+    );
 
-  //   if (response.statusCode == 200) {
-  //     return Bot.fromJson(response.data);
-  //   }
+    if (response.statusCode == 200) {
+      return response.data;
+    }
 
-  //   throw Exception('Failed to update prompt BOT');
-  // }
+    throw Exception('Failed to ask assistant');
+  }
+
+  Future<List<MessageData>> retrieveMessageOfThread(
+      String openAiThreadId) async {
+    final response = await _knowledgeApiService.get(
+      ApiEndpoints.retrieveMessageOfThread,
+      pathVars: {'openAiThreadId': openAiThreadId},
+    );
+
+    if (response.statusCode == 200) {
+      if (response.data is List) {
+        return (response.data as List<dynamic>)
+            .map((data) => MessageData.fromJson(data as Map<String, dynamic>))
+            .toList()
+            .reversed
+            .toList();
+      } else {
+        throw Exception('Invalid data format');
+      }
+    }
+
+    throw Exception('Failed to retrieve message of thread');
+  }
+
+  Future<Bot> updateAssistantWithNewThreadPlayground(String assistantId) async {
+    final response = await _knowledgeApiService.post(
+      ApiEndpoints.updateAssistantWithNewThreadPlayground,
+      data: {"assistantId": assistantId},
+    );
+
+    if (response.statusCode == 201) {
+      return Bot.fromJson(response.data);
+    }
+
+    throw Exception('Failed to update assistant with new thread playground');
+  }
 }

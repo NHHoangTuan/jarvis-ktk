@@ -43,6 +43,11 @@ class ApiEndpoints {
       'ai-assistant/{assistantId}/knowledges';
   static const String deleteImportKnowledge =
       'ai-assistant/{assistantId}/knowledges/{knowledgeId}';
+  static const String askAssistant = 'ai-assistant/{assistantId}/ask';
+  static const String updateAssistantWithNewThreadPlayground =
+      'ai-assistant/thread/playground';
+  static const String retrieveMessageOfThread =
+      'ai-assistant/thread/{openAiThreadId}/messages';
   static const String knowledge = 'knowledge';
   static const String knowledgeById = 'knowledge/{id}';
   static const String knowledgeUnits = 'knowledge/{id}/units';
