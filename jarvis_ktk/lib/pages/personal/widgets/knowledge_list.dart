@@ -22,6 +22,7 @@ class KnowledgeList extends StatefulWidget {
 
 class _KnowledgeListState extends State<KnowledgeList> {
   final GlobalKey<AnimatedListState> _listKey = GlobalKey<AnimatedListState>();
+  late final List<Knowledge> _knowledgeList;
 
   void _onKnowledgeTap(Knowledge knowledge) {
     navigatorKey.currentState!.pushNamed(
@@ -30,8 +31,16 @@ class _KnowledgeListState extends State<KnowledgeList> {
     );
   }
 
+  @override
+  void initState() {
+    super.initState();
+    _knowledgeList = widget.knowledgeList;
+    _knowledgeList.sort((a, b) => b.updatedAt.compareTo(a.updatedAt));
+  }
+  
+
   void _deleteKnowledge(Knowledge knowledge) async {
-    final int index = widget.knowledgeList.indexOf(knowledge);
+    final int index = _knowledgeList.indexOf(knowledge);
 
     if (index >= 0) {
       bool? confirmDelete = await DeleteDialog.show(
@@ -45,7 +54,7 @@ class _KnowledgeListState extends State<KnowledgeList> {
         setState(() {
           try {
             getIt<KnowledgeApi>()
-                .deleteKnowledge(widget.knowledgeList[index].id);
+                .deleteKnowledge(_knowledgeList[index].id);
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(
                 content: Text('Knowledge deleted'),
@@ -61,7 +70,7 @@ class _KnowledgeListState extends State<KnowledgeList> {
             return;
           }
           Navigator.of(context).pop();
-          widget.knowledgeList.removeAt(index);
+          _knowledgeList.removeAt(index);
           _listKey.currentState?.removeItem(
             index,
             (context, animation) => SizeTransition(
@@ -86,9 +95,9 @@ class _KnowledgeListState extends State<KnowledgeList> {
   Widget build(BuildContext context) {
     return AnimatedList(
         key: _listKey,
-        initialItemCount: widget.knowledgeList.length,
+        initialItemCount: _knowledgeList.length,
         itemBuilder: (context, index, animation) {
-          final item = widget.knowledgeList[index];
+          final item = _knowledgeList[index];
           return SizeTransition(
             sizeFactor: animation,
             child: Column(

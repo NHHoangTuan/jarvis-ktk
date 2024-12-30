@@ -22,31 +22,45 @@ class _EmailReplyPage extends State<EmailReplyPage>
   final ScrollController _scrollController = ScrollController();
   late EmailReply lastEmailReply;
 
-  void _sendMessage(String? action) {
-    if (_controller.text.isEmpty && action == null) return;
-
-    if (action != null) {
-      _controller.text = action;
-    }
-
-    addMessage(_controller.text);
+  void _onRetry(EmailReply emailReply) {
+    _sendResponseEmail(emailReply, retry: true);
   }
 
-  Future<void> _sendResponseEmail(EmailReply emailReply) async {
+  void _onAction(String action) async {
+    _controller.text = action;
+    _sendResponseEmail(lastEmailReply);
+  }
+
+  Future<void> _sendResponseEmail(EmailReply emailReply,
+      {bool retry = false}) async {
+    if (retry) {
+      _messages.removeAt(_messages.length - 1);
+    } else {
+      setState(() {
+        _messages.add(ChatMessage(
+          message:
+              _controller.text.isEmpty ? emailReply.email : _controller.text,
+          isBot: false,
+          onSendMessage: _onAction,
+        ));
+      });
+
+      scrollToBottom();
+
+      if (_controller.text.isNotEmpty) {
+        emailReply.mainIdea = _controller.text;
+        _controller.clear();
+      }
+    }
+
     setState(() {
       _messages.add(ChatMessage(
-        message: _controller.text.isEmpty ? emailReply.email : _controller.text,
-        isBot: false,
-        onSendMessage: _sendMessage,
+        message: "I'm currently working on your request. Please wait a moment.",
+        isBot: true,
+        onSendMessage: _onAction,
+        isPreviousMessage: true,
       ));
     });
-
-    scrollToBottom();
-
-    if (_controller.text.isNotEmpty) {
-      emailReply.mainIdea = _controller.text;
-      _controller.clear();
-    }
 
     try {
       final result = await getIt<EmailApi>().responseEmail(emailReply);
@@ -54,11 +68,13 @@ class _EmailReplyPage extends State<EmailReplyPage>
       lastEmailReply = emailReply;
 
       setState(() {
+        _messages.removeAt(_messages.length - 1);
         _messages.add(ChatMessage(
           message: result.email,
           isBot: true,
-          onSendMessage: _sendMessage,
+          onSendMessage: _onAction,
           isPreviousMessage: true,
+          onRetry: () => _onRetry(emailReply),
         ));
       });
     } catch (e) {
@@ -66,8 +82,9 @@ class _EmailReplyPage extends State<EmailReplyPage>
         _messages.add(ChatMessage(
           message: e.toString(),
           isBot: true,
-          onSendMessage: _sendMessage,
+          onSendMessage: _onAction,
           isPreviousMessage: true,
+          onRetry: () => _onRetry(emailReply),
         ));
       });
     }
@@ -93,52 +110,51 @@ class _EmailReplyPage extends State<EmailReplyPage>
     }
   }
 
-  void addMessage(String message) {
-    setState(() {});
-
-    _scrollController.animateTo(
-      _scrollController.position.maxScrollExtent + 200,
-      duration: const Duration(milliseconds: 500),
-      curve: Curves.easeOut,
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     super.build(context);
     return Scaffold(
         backgroundColor: Colors.white,
-        body: Column(
-          children: <Widget>[
-            Expanded(
-              child: _messages.isEmpty
-                  ? ReplyDraftScreen(onSendMessage: _sendResponseEmail)
-                  : ListView.builder(
-                      controller: _scrollController,
-                      itemCount: _messages.length,
-                      shrinkWrap: true,
-                      itemBuilder: (context, index) {
-                        return ChatMessage(
-                          message: _messages[index].message,
-                          isBot: _messages[index].isBot,
-                          onSendMessage: _messages[index].onSendMessage,
-                          isPreviousMessage: index == _messages.length - 1,
-                        );
-                      },
-                    ),
+        body: GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTap: () {
+            FocusScope.of(context).requestFocus(FocusNode());
+          },
+          child: SafeArea(
+            child: Column(
+              children: <Widget>[
+                Expanded(
+                  child: _messages.isEmpty
+                      ? ReplyDraftScreen(onSendMessage: _sendResponseEmail)
+                      : ListView.builder(
+                          controller: _scrollController,
+                          itemCount: _messages.length,
+                          shrinkWrap: true,
+                          itemBuilder: (context, index) {
+                            return ChatMessage(
+                              message: _messages[index].message,
+                              isBot: _messages[index].isBot,
+                              onSendMessage: _messages[index].onSendMessage,
+                              isPreviousMessage: index == _messages.length - 1,
+                              onRetry: _messages[index].onRetry,
+                            );
+                          },
+                        ),
+                ),
+                // chat input
+                if (_messages.isNotEmpty)
+                  ChatInput(
+                    controller: _controller,
+                    onSendMessage: () => _sendResponseEmail(lastEmailReply),
+                    onClearMessages: () {
+                      setState(() {
+                        _messages.clear();
+                      });
+                    },
+                  ),
+              ],
             ),
-            // chat input
-            if (_messages.isNotEmpty)
-              ChatInput(
-                controller: _controller,
-                onSendMessage: () => _sendResponseEmail(lastEmailReply),
-                onClearMessages: () {
-                  setState(() {
-                    _messages.clear();
-                  });
-                },
-              ),
-          ],
+          ),
         ));
   }
 
