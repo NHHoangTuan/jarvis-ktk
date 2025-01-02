@@ -1,23 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:jarvis_ktk/data/models/chat.dart';
 import 'package:jarvis_ktk/data/network/chat_api.dart';
-import 'package:jarvis_ktk/pages/chat/chat_model.dart';
+import 'package:jarvis_ktk/data/providers/bot_provider.dart';
+import 'package:jarvis_ktk/data/providers/chat_provider.dart';
 import 'package:jarvis_ktk/services/cache_service.dart';
 import 'package:jarvis_ktk/utils/resized_image.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:provider/provider.dart';
 
 import '../data/models/user.dart';
 import '../data/network/api_service.dart';
 import '../data/network/auth_api.dart';
+import '../data/network/knowledge_api_service.dart';
+import '../data/providers/token_provider.dart';
 import '../services/service_locator.dart';
 
 class NavDrawer extends StatefulWidget {
   final Function(String) onItemTap;
   final String initialSelectedItem;
-  final Function(String, ChatModel)
-      onHistoryTap; // Thêm callback cho lịch sử chat
 
   @override
   // ignore: library_private_types_in_public_api
@@ -25,7 +26,6 @@ class NavDrawer extends StatefulWidget {
   const NavDrawer({
     super.key,
     required this.onItemTap,
-    required this.onHistoryTap, // Thêm callback cho lịch sử chat
     this.initialSelectedItem = 'Chat',
   });
 }
@@ -33,6 +33,8 @@ class NavDrawer extends StatefulWidget {
 class _NavDrawerState extends State<NavDrawer> with TickerProviderStateMixin {
   bool _showPersonalOptions = false;
   late String _selectedItem;
+  bool _isLoadingHistory = false;
+  bool _isLoadingSignOut = false;
 
   final chatApi = getIt<ChatApi>();
 
@@ -44,17 +46,31 @@ class _NavDrawerState extends State<NavDrawer> with TickerProviderStateMixin {
     if (_selectedItem == 'My Bot' || _selectedItem == 'Knowledge') {
       _showPersonalOptions = true;
     }
+    _handleLoadConversations();
   }
 
   // Handle login
   Future<void> _handleSignOut() async {
+    setState(() {
+      _isLoadingSignOut = true;
+    });
     try {
       final authApi = getIt<AuthApi>();
       final response = await authApi.signOut();
       final apiService = getIt<ApiService>();
+      final knowledgeApiService = getIt<KnowledgeApiService>();
+
       if (response.statusCode == 200) {
         await apiService.clearTokens(); // Xóa tokens
         await apiService.clearUser(); // Xóa thông tin user
+        await knowledgeApiService.clearTokens(); // Xóa knowledge
+
+        if (mounted) {
+          Provider.of<ChatProvider>(context, listen: false).clearAll();
+          Provider.of<TokenProvider>(context, listen: false).clearAll();
+          Provider.of<BotProvider>(context, listen: false).clearAll();
+        }
+
         CacheService.clearAllCache(); // Xóa cache
         Navigator.pushNamedAndRemoveUntil(
           // ignore: use_build_context_synchronously
@@ -68,12 +84,30 @@ class _NavDrawerState extends State<NavDrawer> with TickerProviderStateMixin {
       }
     } catch (e) {
       showToast(e.toString());
-    } finally {}
+    } finally {
+      setState(() {
+        _isLoadingSignOut = false;
+      });
+    }
+  }
+
+  Future<void> _handleLoadConversations() async {
+    setState(() {
+      _isLoadingHistory = true;
+    });
+    try {
+      await context.read<ChatProvider>().loadConversations(null);
+    } catch (e) {
+      debugPrint('Error loading conversations: $e');
+    } finally {
+      setState(() {
+        _isLoadingHistory = false;
+      });
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    ChatModel chatModel = Provider.of<ChatModel>(context);
     return SafeArea(
       child: Drawer(
         width: MediaQuery.of(context).size.width * 0.7,
@@ -103,10 +137,12 @@ class _NavDrawerState extends State<NavDrawer> with TickerProviderStateMixin {
               physics: const NeverScrollableScrollPhysics(),
               children: [
                 ListTile(
-                  leading: const Icon(Icons.home),
+                  leading: const Icon(Icons.home_rounded),
                   title: const Text('Chat'),
                   tileColor: _selectedItem == 'Chat' ? Colors.grey[300] : null,
                   onTap: () {
+                    Provider.of<ChatProvider>(context, listen: false)
+                        .setTapHistory(false);
                     setState(() {
                       _selectedItem = 'Chat';
                       _showPersonalOptions = false;
@@ -115,7 +151,7 @@ class _NavDrawerState extends State<NavDrawer> with TickerProviderStateMixin {
                   },
                 ),
                 ListTile(
-                  leading: const Icon(Icons.person),
+                  leading: const Icon(Icons.person_rounded),
                   title: const Text('Personal'),
                   tileColor:
                       _selectedItem == 'Personal' ? Colors.grey[300] : null,
@@ -123,6 +159,8 @@ class _NavDrawerState extends State<NavDrawer> with TickerProviderStateMixin {
                       ? const Icon(Icons.arrow_drop_up)
                       : const Icon(Icons.arrow_drop_down),
                   onTap: () {
+                    Provider.of<ChatProvider>(context, listen: false)
+                        .setTapHistory(false);
                     setState(() {
                       _showPersonalOptions = !_showPersonalOptions;
                       _selectedItem = 'Personal';
@@ -151,6 +189,9 @@ class _NavDrawerState extends State<NavDrawer> with TickerProviderStateMixin {
                                   ? Colors.grey[300]
                                   : null,
                               onTap: () {
+                                Provider.of<ChatProvider>(context,
+                                        listen: false)
+                                    .setTapHistory(false);
                                 setState(() {
                                   _selectedItem = 'My Bot';
                                 });
@@ -167,6 +208,9 @@ class _NavDrawerState extends State<NavDrawer> with TickerProviderStateMixin {
                                   ? Colors.grey[300]
                                   : null,
                               onTap: () {
+                                Provider.of<ChatProvider>(context,
+                                        listen: false)
+                                    .setTapHistory(false);
                                 setState(() {
                                   _selectedItem = 'Knowledge';
                                 });
@@ -180,11 +224,13 @@ class _NavDrawerState extends State<NavDrawer> with TickerProviderStateMixin {
                   ),
                 ),
                 ListTile(
-                  leading: const Icon(Icons.email),
+                  leading: const Icon(Icons.email_rounded),
                   title: const Text('Email Reply'),
                   tileColor:
                       _selectedItem == 'Email Reply' ? Colors.grey[300] : null,
                   onTap: () {
+                    Provider.of<ChatProvider>(context, listen: false)
+                        .setTapHistory(false);
                     setState(() {
                       _selectedItem = 'Email Reply';
                       _showPersonalOptions = false;
@@ -199,35 +245,37 @@ class _NavDrawerState extends State<NavDrawer> with TickerProviderStateMixin {
 
             // Chat history section
             Expanded(
-              child: FutureBuilder<List<Conversation>?>(
-                future: CacheService.getCachedConversations(chatApi),
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return const Center(child: CircularProgressIndicator());
-                  } else if (snapshot.hasError) {
-                    return const Center(
-                        child: Text('Error loading conversations'));
-                  } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                    return const Center(child: Text('No conversations found'));
-                  } else {
-                    final conversations = snapshot.data!;
-                    return ListView.builder(
-                      itemCount: conversations.length,
-                      itemBuilder: (context, index) {
-                        final conversation = conversations[index];
-                        return ListTile(
-                          leading: const Icon(Icons.message),
-                          title: Text(conversation.title),
-                          onTap: () {
-                            widget.onHistoryTap(conversation.id, chatModel);
-                            Navigator.pop(context);
-                          },
-                        );
+              child: Consumer<ChatProvider>(
+                  builder: (context, chatProvider, snapshot) {
+                if (_isLoadingHistory) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+                if (chatProvider.conversations.isEmpty) {
+                  return const Center(
+                    child: Text('No conversations found.'),
+                  );
+                }
+                return ListView.builder(
+                  itemCount: chatProvider.conversations.length,
+                  itemBuilder: (context, index) {
+                    final conversation = chatProvider.conversations[index];
+                    return ListTile(
+                      leading: const Icon(Icons.message),
+                      title: Text(conversation.title),
+                      onTap: () {
+                        chatProvider.selectConversationId(
+                            conversation.id); // Set selected conversation
+                        chatProvider.setTapHistory(true);
+                        setState(() {
+                          _selectedItem = 'Chat';
+                          _showPersonalOptions = false;
+                        });
+                        widget.onItemTap('Chat');
                       },
                     );
-                  }
-                },
-              ),
+                  },
+                );
+              }),
             ),
             const Divider(),
 
@@ -263,9 +311,12 @@ class _NavDrawerState extends State<NavDrawer> with TickerProviderStateMixin {
               const Divider(),
               // Sign out button
               ListTile(
-                leading: const Icon(Icons.logout),
+                leading: _isLoadingSignOut
+                    ? LoadingAnimationWidget.inkDrop(
+                        color: Colors.blueGrey, size: 30)
+                    : const Icon(Icons.logout),
                 title: const Text('Sign Out'),
-                onTap: _handleSignOut,
+                onTap: _isLoadingSignOut ? null : _handleSignOut,
               ),
             ],
           );

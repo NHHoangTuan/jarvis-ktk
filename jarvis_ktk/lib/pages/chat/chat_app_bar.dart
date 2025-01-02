@@ -1,12 +1,16 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:jarvis_ktk/data/providers/chat_provider.dart';
+import 'package:jarvis_ktk/data/providers/token_provider.dart';
+import 'package:jarvis_ktk/services/cache_service.dart';
+import 'package:jarvis_ktk/utils/resized_image.dart';
 import 'package:provider/provider.dart';
-import '../../data/models/token_usage.dart';
+
 import '../../data/network/token_api.dart';
-import '../../services/cache_service.dart';
+
 import '../../services/service_locator.dart';
-import 'chat_model.dart';
+
 import 'widgets/select_agent_dropdown.dart';
 
 class ChatAppBar extends StatefulWidget implements PreferredSizeWidget {
@@ -21,31 +25,32 @@ class ChatAppBar extends StatefulWidget implements PreferredSizeWidget {
 
 class _ChatAppBarState extends State<ChatAppBar> {
   final tokenApi = getIt<TokenApi>();
-  StreamController<TokenUsage?> _tokenUsageController =
-      StreamController<TokenUsage?>.broadcast();
+  bool _isLoadingToken = false;
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
-    _loadInitialTokens();
+    _handleLoadTokenUsage();
   }
 
-  Future<void> _loadInitialTokens() async {
-    final tokens = await CacheService.getCachedTokenUsage(tokenApi);
-    _tokenUsageController.add(tokens);
-  }
-
-  Future<void> _refreshTokens() async {
-    if (_tokenUsageController.isClosed) return;
-    final tokens = await CacheService.getCachedTokenUsage(tokenApi);
-    _tokenUsageController.add(tokens);
+  Future<void> _handleLoadTokenUsage() async {
+    setState(() {
+      _isLoadingToken = true;
+    });
+    try {
+      await Provider.of<TokenProvider>(context, listen: false).loadTokenUsage();
+    } catch (e) {
+      debugPrint('Error loading token usage: $e');
+    } finally {
+      setState(() {
+        _isLoadingToken = false;
+      });
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    final chatModel = Provider.of<ChatModel>(context);
-
+    final chatProvider = Provider.of<ChatProvider>(context, listen: false);
     return AppBar(
       elevation: 0,
       backgroundColor: Colors.blue[50],
@@ -54,18 +59,12 @@ class _ChatAppBarState extends State<ChatAppBar> {
       title: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Expanded(
+          const Expanded(
             flex: 2,
             child: Row(
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
-                SelectAgentDropdown(
-                  selectedAgent: chatModel.selectedAgent,
-                  aiAgents: chatModel.aiAgents,
-                  onChanged: (value) {
-                    chatModel.setSelectedAgent(value!);
-                  },
-                ),
+                SelectAgentDropdown(),
               ],
             ),
           ),
@@ -74,23 +73,21 @@ class _ChatAppBarState extends State<ChatAppBar> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
-                StreamBuilder<TokenUsage?>(
-                    stream: _tokenUsageController.stream,
-                    initialData: null,
-                    builder: (context, snapshot) {
-                      if (snapshot.connectionState == ConnectionState.waiting) {
-                        return const CircularProgressIndicator();
-                      }
-
-                      if (snapshot.data?.availableTokens != null &&
-                          snapshot.data?.availableTokens !=
-                              chatModel.tokenCount) {
-                        _refreshTokens();
-                      }
-
-                      final tokenCount = snapshot.data?.availableTokens ?? 0;
-                      return TokenDisplay(tokenCount: tokenCount);
-                    })
+                if (_isLoadingToken)
+                  const SizedBox(
+                    height: 20,
+                    width: 20,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                    ),
+                  )
+                else
+                  Consumer<TokenProvider>(
+                    builder: (context, tokenProvider, child) {
+                      return TokenDisplay(
+                          tokenCount: tokenProvider.currentToken);
+                    },
+                  ),
               ],
             ),
           ),
@@ -101,8 +98,10 @@ class _ChatAppBarState extends State<ChatAppBar> {
           icon: const Icon(Icons.more_vert, color: Colors.black),
           onSelected: (String choice) {
             if (choice == 'New Chat') {
-              chatModel.clearMessages();
-              chatModel.resetConversationId();
+              chatProvider.clearChatHistory();
+              chatProvider.selectConversationId('');
+              chatProvider.setShowWelcomeMessage(true);
+              CacheService.clearChatHistoryCache();
             }
           },
           itemBuilder: (BuildContext context) {
@@ -123,18 +122,12 @@ class _ChatAppBarState extends State<ChatAppBar> {
       ],
     );
   }
-
-  @override
-  void dispose() {
-    _tokenUsageController.close();
-    super.dispose();
-  }
 }
 
 class TokenDisplay extends StatelessWidget {
   final int tokenCount;
 
-  const TokenDisplay({required this.tokenCount});
+  const TokenDisplay({super.key, required this.tokenCount});
 
   @override
   Widget build(BuildContext context) {
@@ -147,10 +140,10 @@ class TokenDisplay extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Icon(
-            Icons.local_fire_department,
-            color: Colors.orange,
-            size: 20,
+          const ResizedImage(
+            imagePath: 'assets/fire_2.png',
+            width: 18,
+            height: 18,
           ),
           const SizedBox(width: 4),
           Text(

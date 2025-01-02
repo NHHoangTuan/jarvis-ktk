@@ -4,25 +4,26 @@ import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:jarvis_ktk/data/models/chat.dart';
 import 'package:jarvis_ktk/data/models/prompt.dart';
 import 'package:jarvis_ktk/data/models/user.dart';
-import 'package:jarvis_ktk/data/network/chat_api.dart';
 import 'package:jarvis_ktk/data/network/prompt_api.dart';
+import 'package:jarvis_ktk/data/providers/chat_provider.dart';
+import 'package:jarvis_ktk/data/providers/token_provider.dart';
 import 'package:jarvis_ktk/services/service_locator.dart';
 import 'package:provider/provider.dart';
 
 import '../../services/cache_service.dart';
 import '../prompt_bottom_sheet/prompt_bottom_sheet.dart';
-import 'chat_model.dart';
 import 'widgets/message_bubble.dart';
 import 'widgets/welcome.dart';
 
 class ChatBody extends StatefulWidget {
-  final String? conversationId;
+  final String conversationId;
 
   const ChatBody({
     super.key,
-    this.conversationId,
+    required this.conversationId,
   });
 
   @override
@@ -36,7 +37,9 @@ class _ChatBodyState extends State<ChatBody> {
   late FocusNode _messageFocusNode;
   bool _showPromptList = false;
   User? _user;
+  //List<ChatHistory> _listChatHistory = [];
 
+  bool _isLoadingBotResponse = false;
   bool _isLoading = false;
 
   @override
@@ -45,7 +48,17 @@ class _ChatBodyState extends State<ChatBody> {
     _messageController = TextEditingController();
     _messageFocusNode = FocusNode();
     _messageController.addListener(_handleSlashAction);
+
     _initialize();
+  }
+
+  @override
+  void didUpdateWidget(ChatBody oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    if (widget.conversationId != '') {
+      _handleLoadConversationHistory(isRefresh: true);
+    }
   }
 
   Future<void> _initialize() async {
@@ -58,6 +71,10 @@ class _ChatBodyState extends State<ChatBody> {
     }
     if (_user != null) {
       _promptsFuture = getIt<PromptApi>().getPrompts();
+    }
+
+    if (widget.conversationId != '') {
+      _handleLoadConversationHistory();
     }
   }
 
@@ -80,86 +97,80 @@ class _ChatBodyState extends State<ChatBody> {
     }
   }
 
-  Future<void> _sendMessage(ChatModel chatModel) async {
+  Future<void> _sendMessage() async {
     if (_messageController.text.trim().isEmpty) return;
 
     setState(() {
-      _isLoading = true;
+      _isLoadingBotResponse = true;
     });
-
-    final selectedAI = chatModel.aiAgents.firstWhere(
-      (agent) => agent['id'] == chatModel.selectedAgent,
-    );
 
     final userMessage = _messageController.text;
+    final chatProvider = context.read<ChatProvider>();
 
-    chatModel.addMessage({
-      'text': userMessage,
-      'isUser': true,
-      'timestamp': DateTime.now(),
-      'avatar': 'assets/user_avatar.jpg',
-    });
-
-    chatModel.addMessage({
-      'text': '',
-      'isUser': false,
-      'timestamp': DateTime.now(),
-      'avatar': selectedAI['avatar'],
-    });
+    chatProvider.chatHistory.add(ChatHistory(
+      query: userMessage,
+      answer: '',
+      createdAt: DateTime.now().millisecondsSinceEpoch ~/ 1000,
+      files: [],
+    ));
 
     _messageController.clear();
     _messageFocusNode.unfocus();
-    chatModel.hideWelcomeMessage();
-
-    final chatApi = getIt<ChatApi>();
+    context.read<ChatProvider>().setShowWelcomeMessage(false);
 
     // Gửi tin nhắn qua API và nhận phản hồi
     try {
-      final response = await chatApi.sendMessage({
-        'content': userMessage,
-        "metadata": {
-          "conversation": {"id": chatModel.conversationId},
-        },
-        "assistant": {"id": chatModel.selectedAgent, "model": "dify"}
-      });
+      await context.read<ChatProvider>().sendMessage(userMessage, []);
 
-      if (response.statusCode == 200) {
-        var remainingUsage = response.data['remainingUsage'];
-        chatModel.setTokenCount(remainingUsage);
-        CacheService.updateAvailableTokenUsage(remainingUsage);
+      if (mounted) {
+        final assistantResponse = context.read<ChatProvider>().currentResponse!;
 
-        var conversationId = response.data['conversationId'];
-        chatModel.setConversationId(conversationId);
+        var remainingUsage = assistantResponse.remainingUsage;
+        context.read<TokenProvider>().setCurrentToken(remainingUsage);
+        var conversationId = assistantResponse.conversationId;
+        chatProvider.selectConversationId(conversationId);
 
-        final newMessage = {
-          'text': response.data['message'],
-          'isUser': false,
-          'timestamp': DateTime.now(),
-          'avatar': selectedAI['avatar'],
-        };
-        // Cập nhật dữ liệu vào ChatModel
-        chatModel.updateMessage(chatModel.messages.length - 1, newMessage);
+        // Cập nhật dữ liệu
+        chatProvider.chatHistory[chatProvider.chatHistory.length - 1] =
+            ChatHistory(
+          query: userMessage,
+          answer: assistantResponse.message,
+          createdAt: DateTime.now().millisecondsSinceEpoch ~/ 1000,
+          files: [],
+        );
+
         CacheService.setCurrentHistoryLength(
             CacheService.getCurrentHistoryLength() + 1);
-      } else {
-        // Parse error message từ response data
-        final details = response.data['details'] as List;
-        if (details.isNotEmpty) {
-          final issue = details[0]['issue'] as String;
-          showToast(issue);
 
-          // Xóa tin nhắn cuối cùng nếu có lỗi
-          chatModel.removeMessage(chatModel.messages.length - 1);
-          chatModel.removeMessage(chatModel.messages.length - 1);
-        }
+        showToast(chatProvider.selectedConversationId);
       }
     } catch (e) {
       debugPrint("Error sending message: $e");
+      showToast('Error sending message. Try again later.');
+      chatProvider.chatHistory.removeAt(chatProvider.chatHistory.length - 1);
     } finally {
       setState(() {
-        _isLoading = false;
+        _isLoadingBotResponse = false;
       });
     }
+  }
+
+  Future<void> _handleLoadConversationHistory({bool isRefresh = false}) async {
+    if (_user == null) return;
+    if (context.read<ChatProvider>().selectedConversationId == '') return;
+    setState(() {
+      _isLoading = true;
+    });
+    await context.read<ChatProvider>().loadConversationHistory(
+        context.read<ChatProvider>().selectedConversationId,
+        AssistantId.GPT_4O_MINI,
+        isRefresh: isRefresh);
+    // if (mounted) {
+    //   _listChatHistory = context.read<ChatProvider>().chatHistory;
+    // }
+    setState(() {
+      _isLoading = false;
+    });
   }
 
   void showToast(String message) {
@@ -175,7 +186,7 @@ class _ChatBodyState extends State<ChatBody> {
 
   @override
   Widget build(BuildContext context) {
-    final chatModel = Provider.of<ChatModel>(context);
+    final chatProvider = Provider.of<ChatProvider>(context);
     return GestureDetector(
       onTap: () {
         FocusScope.of(context).requestFocus(FocusNode());
@@ -185,25 +196,39 @@ class _ChatBodyState extends State<ChatBody> {
           Column(
             children: [
               Expanded(
-                child: chatModel.showWelcomeMessage
-                    ? const WelcomeMessage()
-                    : ListView.builder(
-                        reverse: true,
-                        padding: const EdgeInsets.all(16),
-                        itemCount: chatModel.messages.length,
-                        itemBuilder: (context, index) {
-                          final message = chatModel
-                              .messages[chatModel.messages.length - 1 - index];
-                          return MessageBubble(
-                            text: message['text'],
-                            isUser: message['isUser'],
-                            timestamp: message['timestamp'],
-                            avatar: message['avatar'],
-                            isLoading:
-                                !message['isUser'] && index == 0 && _isLoading,
-                          );
-                        },
-                      ),
+                child: _isLoading
+                    ? const Center(child: CircularProgressIndicator())
+                    : chatProvider.chatHistory.isEmpty
+                        ? const WelcomeMessage()
+                        : ListView.builder(
+                            padding: const EdgeInsets.all(16),
+                            itemCount: chatProvider.chatHistory.length * 2,
+                            itemBuilder: (context, index) {
+                              final isUser = index % 2 ==
+                                  0; // query là của user, answer là của bot
+                              final messageIndex = index ~/ 2;
+                              final message =
+                                  chatProvider.chatHistory[messageIndex];
+                              final text =
+                                  isUser ? message.query : message.answer;
+                              final timestamp =
+                                  DateTime.fromMillisecondsSinceEpoch(
+                                      message.createdAt * 1000);
+                              return MessageBubble(
+                                text: text,
+                                isUser: isUser,
+                                timestamp: timestamp,
+                                avatar: isUser
+                                    ? 'assets/user_avatar.png' // Đường dẫn avatar của user
+                                    : chatProvider.selectedAiAgent['avatar'] ??
+                                        'assets/chatbot.png', // Đường dẫn avatar của bot,
+                                isLoading: !isUser &&
+                                    _isLoadingBotResponse &&
+                                    messageIndex ==
+                                        chatProvider.chatHistory.length - 1,
+                              );
+                            },
+                          ),
               ),
               if (_showPromptList)
                 FutureBuilder<List<Prompt>>(
@@ -303,7 +328,7 @@ class _ChatBodyState extends State<ChatBody> {
                           ),
                         ),
                         dropdownBuilder: (ctx, selectedItem) => const Icon(
-                          Icons.add_box_outlined,
+                          Icons.add_circle_outline_rounded,
                           color: Colors.black,
                         ),
                         onChanged: (selectedItem) {
@@ -325,7 +350,7 @@ class _ChatBodyState extends State<ChatBody> {
                             decoration: InputDecoration(
                               hintText: 'Type a message...',
                               border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(25),
+                                borderRadius: BorderRadius.circular(16),
                                 borderSide: BorderSide.none,
                               ),
                               filled: true,
@@ -346,7 +371,7 @@ class _ChatBodyState extends State<ChatBody> {
                       const SizedBox(width: 8),
                       IconButton(
                         icon: const Icon(Icons.send),
-                        onPressed: () => _sendMessage(chatModel),
+                        onPressed: () => _sendMessage(),
                       ),
                     ],
                   ),

@@ -11,8 +11,6 @@ import 'package:provider/provider.dart';
 import '../../data/providers/bot_provider.dart'; // Import file edit_preview_bot.dart
 
 class PreviewBotPage extends StatefulWidget {
-  //final VoidCallback onPublish; // Thêm callback onPublish
-
   const PreviewBotPage({super.key});
 
   @override
@@ -70,7 +68,9 @@ class _PreviewBotPageState extends State<PreviewBotPage> {
                           BorderRadius.circular(8), // Set border radius to 5
                     ),
                   ),
-                  onPressed: () {}, // Gọi callback onPublish
+                  onPressed: () {
+                    Navigator.pushNamed(context, '/publishbot');
+                  }, // Gọi callback onPublish
                   child: const Row(
                     children: [
                       Icon(Icons.cloud_upload, color: Colors.white), // Add icon

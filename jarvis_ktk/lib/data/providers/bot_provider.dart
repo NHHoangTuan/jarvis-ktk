@@ -92,4 +92,13 @@ class BotProvider with ChangeNotifier {
     _selectedBot = bot;
     notifyListeners();
   }
+
+  void clearAll() {
+    _bots = [];
+    _importedKnowledges = [];
+    _selectedBot = null;
+    _currentMessageResponse = null;
+    _messages = [];
+    notifyListeners();
+  }
 }

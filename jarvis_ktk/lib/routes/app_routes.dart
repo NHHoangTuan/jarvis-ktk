@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:jarvis_ktk/data/models/knowledge.dart';
 import 'package:jarvis_ktk/pages/email_reply/email_reply_page.dart';
 import 'package:jarvis_ktk/pages/login/login_page.dart';
+import 'package:jarvis_ktk/pages/preview_bot/publish_bot.dart';
 import 'package:jarvis_ktk/pages/preview_bot/widgets/knowledge_info_page.dart';
 
 import '../pages/home_page.dart';
@@ -16,6 +17,7 @@ class AppRoutes {
   static const String previewbot = '/previewbot';
   static const String emailReply = '/email-reply';
   static const String knowledgeInfo = '/knowledge-info';
+  static const String publishbot = '/publishbot';
 
   // Route definitions
   static Map<String, Widget Function(BuildContext)> get routes => {
@@ -30,5 +32,6 @@ class AppRoutes {
               ModalRoute.of(context)!.settings.arguments as Knowledge;
           return KnowledgeInfoPage(knowledge: knowledge);
         },
+        publishbot: (context) => const PublishBotPage(),
       };
 }

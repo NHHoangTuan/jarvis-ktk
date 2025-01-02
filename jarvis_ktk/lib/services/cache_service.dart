@@ -8,9 +8,10 @@ import '../data/network/knowledge_api.dart';
 import '../data/network/token_api.dart';
 
 class CacheService {
-  static Map<String, List<Conversation>> _cache = {};
-  static Map<String, TokenUsage> _tokenCache = {};
-  static Map<String, List<Knowledge>> _knowledgeCache = {};
+  static final Map<String, List<Conversation>> _conversationsCache = {};
+  static final Map<String, TokenUsage> _tokenCache = {};
+  static final Map<String, List<Knowledge>> _knowledgeCache = {};
+  static final Map<String, List<ChatHistory>> _chatHistoryCache = {};
   static DateTime? _lastKnowledgeFetch;
   static DateTime? _lastFetch;
   static DateTime? _lastTokenFetch;
@@ -65,31 +66,69 @@ class CacheService {
     _lastTokenFetch = null;
   }
 
-  static Future<List<Conversation>?> getCachedConversations(
-      ChatApi chatApi) async {
+  static Future<List<Conversation>> getCachedConversations(
+    AssistantId? assistantId,
+    ChatApi chatApi,
+  ) async {
     // Nếu không tồn tại user thì trả về rỗng, dùng hàm getStoredUser() từ ApiService
     final apiService = getIt<ApiService>();
     final user = await apiService.getStoredUser();
-    if (user == null) return null;
+    if (user == null) return [];
 
     // Kiểm tra xem cache có tồn tại và còn hiệu lực không
-    if (_cache.containsKey('conversations') &&
+    if (_conversationsCache.containsKey('conversations') &&
         _lastFetch != null &&
         _currentHistoryLength == _historyLength) {
       final difference = DateTime.now().difference(_lastFetch!);
       if (difference < _cacheValidity) {
-        return _cache['conversations']!;
+        return _conversationsCache['conversations']!;
       }
     }
 
     // Nếu cache không tồn tại hoặc hết hạn, gọi API mới
-    final conversations = await chatApi.fetchConversations(
-        AssistantId.GPT_4O_MINI, AssistantModel.DIFY);
-    _cache['conversations'] = conversations;
+    final conversations = await chatApi.getConversations(
+        assistantId: AssistantId.GPT_4O_MINI,
+        assistantModel: AssistantModel.DIFY);
+    _conversationsCache['conversations'] = conversations;
     _lastFetch = DateTime.now();
     _historyLength = conversations.length;
     _currentHistoryLength = _historyLength;
     return conversations;
+  }
+
+  static Future<List<ChatHistory>> getCachedChatHistory(
+      String conversationId, ChatApi chatApi,
+      {bool isRefresh = false}) async {
+    // Nếu không tồn tại user thì trả về rỗng, dùng hàm getStoredUser() từ ApiService
+    final apiService = getIt<ApiService>();
+    final user = await apiService.getStoredUser();
+    if (user == null) return [];
+
+    // Kiểm tra xem cache có tồn tại và còn hiệu lực không
+    if (_chatHistoryCache.containsKey('chatHistory') &&
+        _lastFetch != null &&
+        _currentHistoryLength == _historyLength &&
+        !isRefresh) {
+      final difference = DateTime.now().difference(_lastFetch!);
+      if (difference < _cacheValidity) {
+        return _chatHistoryCache['chatHistory']!;
+      }
+    }
+
+    // Nếu cache không tồn tại hoặc hết hạn, gọi API mới
+    final chatHistory = await chatApi.getConversationHistory(conversationId,
+        assistantId: AssistantId.GPT_4O_MINI,
+        assistantModel: AssistantModel.DIFY);
+    _chatHistoryCache['chatHistory'] = chatHistory;
+    _lastFetch = DateTime.now();
+    _historyLength = chatHistory.length;
+    _currentHistoryLength = _historyLength;
+    return chatHistory;
+  }
+
+  static void clearChatHistoryCache() {
+    _chatHistoryCache.remove('chatHistory');
+    _lastFetch = null;
   }
 
   // lấy currentHistoryLength
@@ -130,8 +169,10 @@ class CacheService {
   }
 
   static void clearAllCache() {
-    _cache.clear();
+    _conversationsCache.clear();
     _tokenCache.clear();
+    _knowledgeCache.clear();
+    _chatHistoryCache.clear();
     _lastFetch = null;
     _lastTokenFetch = null;
   }
