@@ -56,11 +56,7 @@ class _MyBotPageState extends State<MyBotPage> {
     });
     try {
       debugPrint('Favorite bot: ${bot.isFavorite}');
-      dynamic data = {
-        'assistantName': bot.assistantName,
-        'isFavorite': !bot.isFavorite,
-      };
-      Provider.of<BotProvider>(context, listen: false).updateBot(bot.id, data);
+      Provider.of<BotProvider>(context, listen: false).favoriteBot(bot.id);
     } catch (e) {
       debugPrint('Error favoriting bot: $e');
     } finally {

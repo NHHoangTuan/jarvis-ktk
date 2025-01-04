@@ -3,6 +3,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:jarvis_ktk/data/models/knowledge.dart';
 import 'package:jarvis_ktk/data/network/knowledge_api.dart';
 import 'package:jarvis_ktk/services/service_locator.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
 
 import '../../common_widgets.dart';
 import 'unit_list_tile.dart';
@@ -101,9 +102,11 @@ class _UnitListState extends State<UnitList> {
           },
         ),
         if (_isLoading)
-          const Center(
-            child: CircularProgressIndicator(),
-          ),
+          Center(
+              child: LoadingAnimationWidget.inkDrop(
+            color: Colors.blueGrey,
+            size: 40,
+          )),
       ],
     );
   }

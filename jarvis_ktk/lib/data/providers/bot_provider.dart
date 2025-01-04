@@ -62,6 +62,14 @@ class BotProvider with ChangeNotifier {
     notifyListeners();
   }
 
+  Future<void> favoriteBot(String botId) async {
+    final updatedBot = await _botApi.favoriteBot(botId);
+    final index = _bots.indexWhere((bot) => bot.id == botId);
+    _bots[index] = updatedBot;
+    _selectedBot = updatedBot;
+    notifyListeners();
+  }
+
   Future<void> deleteBot(String botId) async {
     await _botApi.deleteBot(botId);
     _bots.removeWhere((bot) => bot.id == botId);

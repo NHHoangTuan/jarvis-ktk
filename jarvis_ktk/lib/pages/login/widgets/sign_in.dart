@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:jarvis_ktk/utils/colors.dart';
 import 'package:jarvis_ktk/utils/resized_image.dart';
 
@@ -10,7 +10,7 @@ class SignInView extends StatefulWidget {
   final VoidCallback onSignUpPressed;
   final VoidCallback onForgotPasswordPressed;
 
-  SignInView(this.onSignUpPressed, this.onForgotPasswordPressed);
+  const SignInView(this.onSignUpPressed, this.onForgotPasswordPressed);
 
   @override
   _SignInViewState createState() => _SignInViewState();
@@ -22,6 +22,21 @@ class _SignInViewState extends State<SignInView> {
   bool _obscureText = true; // Biến trạng thái để quản lý việc ẩn/hiện mật khẩu
   bool _isLoading = false;
   String? _errorMessage;
+
+  final GoogleSignIn _googleSignIn = GoogleSignIn(clientId: '873320321674-iqlr0v7dm4ureobr02p96kn1oadmiflg.apps.googleusercontent.com');
+
+  Future<void> _handleGoogleSignIn() async {
+    try {
+      final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
+      if (googleUser != null) {
+        final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+        await getIt<AuthApi>().signInWithGoogle(googleAuth.idToken!);
+        Navigator.pushNamedAndRemoveUntil(context, '/home', (route) => false);
+      }
+    } catch (error) {
+      showSnackbar("Google sign-in failed: $error");
+    }
+  }
 
   // Validate input
   bool _validateInputs() {
@@ -39,7 +54,7 @@ class _SignInViewState extends State<SignInView> {
   // Handle login
   Future<void> _handleSignIn() async {
     if (!_validateInputs()) {
-      showToast(_errorMessage!);
+      showSnackbar(_errorMessage!);
       return;
     }
 
@@ -67,26 +82,22 @@ class _SignInViewState extends State<SignInView> {
         if (details.isNotEmpty) {
           final issue = details[0]['issue'] as String;
           setState(() => _errorMessage = issue);
-          showToast(_errorMessage!);
+          showSnackbar(_errorMessage!);
         }
       }
     } catch (e) {
       setState(() => _errorMessage = "Network error occurred");
-      showToast(_errorMessage!);
+      showSnackbar(_errorMessage!);
     } finally {
       setState(() => _isLoading = false);
     }
   }
 
-  void showToast(String message) {
-    Fluttertoast.showToast(
-        msg: message,
-        toastLength: Toast.LENGTH_SHORT,
-        gravity: ToastGravity.BOTTOM,
-        timeInSecForIosWeb: 1,
-        backgroundColor: Colors.blueGrey.shade900,
-        textColor: Colors.white,
-        fontSize: 16.0);
+  void showSnackbar(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      content: Text(message),
+      duration: const Duration(seconds: 2),
+    ));
   }
 
   @override
@@ -227,9 +238,7 @@ class _SignInViewState extends State<SignInView> {
                     width: 24,
                   ),
                   label: const Text('Sign in with google'),
-                  onPressed: () {
-                    // Xử lý khi nhấn vào nút
-                  },
+                  onPressed: _handleGoogleSignIn,
                 )),
           ),
         ],

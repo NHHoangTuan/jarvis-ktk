@@ -6,6 +6,7 @@ import 'package:jarvis_ktk/data/network/prompt_api.dart';
 import 'package:jarvis_ktk/pages/prompt_bottom_sheet/widgets/prompt_list.dart';
 import 'package:jarvis_ktk/pages/prompt_bottom_sheet/widgets/public_prompt/public_prompt_search_bar.dart';
 import 'package:jarvis_ktk/services/service_locator.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
 
 import 'filter/filter_buttons.dart';
 
@@ -110,7 +111,10 @@ class PublicPromptContentState extends State<PublicPromptContent> {
               future: _promptsFuture,
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(child: CircularProgressIndicator());
+                  return Center(child: LoadingAnimationWidget.inkDrop(
+                    color: Colors.blueGrey,
+                    size: 40,
+                  ));
                 } else if (snapshot.hasError) {
                   WidgetsBinding.instance.addPostFrameCallback((_) {
                     ScaffoldMessenger.of(context).showSnackBar(

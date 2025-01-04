@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:jarvis_ktk/pages/email_reply/widgets/email_action_buttons.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
 
 import '../../../utils/colors.dart';
 
@@ -123,7 +124,12 @@ class _BotMessageState extends State<BotMessage> {
                 ),
                 Padding(
                   padding: const EdgeInsets.all(8.0),
-                  child: Text(
+                  child: widget.message == "Loading"
+                      ? LoadingAnimationWidget.waveDots(
+                    color: Colors.blueGrey,
+                    size: 20,
+                  )
+                      : Text(
                     widget.message,
                     style: const TextStyle(
                       fontSize: 14,

@@ -5,6 +5,7 @@ class ApiEndpoints {
 
   // Auth
   static const String signIn = 'auth/sign-in';
+  static const String signInWithGoogle = 'auth/google-sign-in';
   static const String kbSignIn = 'auth/external-sign-in';
   static const String signUp = 'auth/sign-up';
   static const String refreshToken = 'auth/refresh';
@@ -44,6 +45,7 @@ class ApiEndpoints {
   static const String deleteImportKnowledge =
       'ai-assistant/{assistantId}/knowledges/{knowledgeId}';
   static const String askAssistant = 'ai-assistant/{assistantId}/ask';
+  static const String favoriteAssistant = 'ai-assistant/{assistantId}/favorite';
   static const String updateAssistantWithNewThreadPlayground =
       'ai-assistant/thread/playground';
   static const String retrieveMessageOfThread =

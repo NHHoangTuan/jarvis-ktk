@@ -7,6 +7,7 @@ import 'package:jarvis_ktk/data/network/prompt_api.dart';
 import 'package:jarvis_ktk/pages/prompt_bottom_sheet/widgets/my_prompt/expansion_tile_box.dart';
 import 'package:jarvis_ktk/services/service_locator.dart';
 import 'package:jarvis_ktk/utils/colors.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
 
 import '../../../../data/models/user.dart';
 import '../prompt_list.dart';
@@ -94,7 +95,10 @@ class MyPromptContentState extends State<MyPromptContent> {
               future: _promptsFuture,
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(child: CircularProgressIndicator());
+                  return Center(child: LoadingAnimationWidget.inkDrop(
+                    color: Colors.blueGrey,
+                    size: 40,
+                  ));
                 } else if (snapshot.hasError) {
                   return Center(child: Text('Error: ${snapshot.error}'));
                 } else if (!snapshot.hasData || snapshot.data!.isEmpty) {

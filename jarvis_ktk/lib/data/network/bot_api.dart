@@ -247,4 +247,17 @@ class BotApi {
 
     throw Exception('Failed to get threads');
   }
+
+  Future<Bot> favoriteBot(String assistantId) async {
+    final response = await _knowledgeApiService.post(
+      ApiEndpoints.favoriteAssistant,
+      pathVars: {'assistantId': assistantId},
+    );
+
+    if (response.statusCode == 201) {
+      return Bot.fromJson(response.data);
+    }
+
+    throw Exception('Failed to favorite bot');
+  }
 }

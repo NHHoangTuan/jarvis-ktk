@@ -26,6 +26,27 @@ class AuthApi {
     return response;
   }
 
+  Future<Response> signInWithGoogle(String token) async {
+    final response = await _apiService.post(
+      ApiEndpoints.signInWithGoogle,
+      data: {'token': token},
+    );
+
+    if (response.statusCode == 200) {
+      final data = response.data['token'];
+      final String accessToken = data['accessToken'];
+      final String refreshToken = data['refreshToken'];
+
+      // Save tokens using FlutterSecureStorage
+      await _apiService.saveTokens(accessToken, refreshToken);
+    }
+    else{
+      throw Exception(response.data['message']);
+    }
+
+    return response;
+  }
+
   Future<Response> signUp(
       String username, String password, String email) async {
     return _apiService.post(

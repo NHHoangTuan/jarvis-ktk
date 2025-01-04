@@ -7,6 +7,7 @@ import 'package:jarvis_ktk/pages/personal/widgets/add_knowledge_dialog.dart';
 import 'package:jarvis_ktk/pages/personal/widgets/empty_knowledge_screen.dart';
 import 'package:jarvis_ktk/services/service_locator.dart';
 import 'package:jarvis_ktk/utils/colors.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
 
 import 'widgets/knowledge_list.dart';
 
@@ -130,7 +131,10 @@ class _KnowledgePageState extends State<KnowledgePage> {
           future: _knowledgeFuture,
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
-              return const Center(child: CircularProgressIndicator());
+              return Center(child: LoadingAnimationWidget.inkDrop(
+                color: Colors.blueGrey,
+                size: 30,
+              ));
             } else if (snapshot.hasError) {
               return Center(child: Text('Error: ${snapshot.error}'));
             } else if (!snapshot.hasData || snapshot.data!.isEmpty) {

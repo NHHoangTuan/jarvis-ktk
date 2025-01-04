@@ -4,15 +4,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:jarvis_ktk/data/models/chat.dart';
-import 'package:jarvis_ktk/data/models/prompt.dart';
 import 'package:jarvis_ktk/data/models/user.dart';
-import 'package:jarvis_ktk/data/network/prompt_api.dart';
 import 'package:jarvis_ktk/data/providers/chat_provider.dart';
 import 'package:jarvis_ktk/data/providers/token_provider.dart';
 import 'package:jarvis_ktk/pages/chat/widgets/message_input.dart';
 import 'package:jarvis_ktk/pages/chat/widgets/prompt_widget.dart';
 import 'package:jarvis_ktk/pages/chat/widgets/welcome_bot.dart';
-import 'package:jarvis_ktk/services/service_locator.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:provider/provider.dart';
 
 import '../../data/models/message.dart';
@@ -34,12 +32,12 @@ class ChatBody extends StatefulWidget {
 }
 
 class _ChatBodyState extends State<ChatBody> {
-  late Future<List<Prompt>> _promptsFuture;
   final FlutterSecureStorage _storage = const FlutterSecureStorage();
   late TextEditingController _messageController;
   late FocusNode _messageFocusNode;
   bool _showPromptList = false;
   User? _user;
+
   //List<ChatHistory> _listChatHistory = [];
 
   bool _isLoadingBotResponse = false;
@@ -72,9 +70,6 @@ class _ChatBodyState extends State<ChatBody> {
         _user = User.fromJson(userMap);
       });
     }
-    if (_user != null) {
-      _promptsFuture = getIt<PromptApi>().getPrompts();
-    }
 
     if (widget.conversationId != '') {
       _handleLoadConversationHistory();
@@ -89,7 +84,9 @@ class _ChatBodyState extends State<ChatBody> {
   }
 
   void _handleSlashAction() {
-    if (_messageController.text.startsWith('/') && _user != null) {
+    if (_messageController.text.startsWith('/') &&
+        _messageController.text.trim().length == 1 &&
+        _user != null) {
       setState(() {
         _showPromptList = true;
       });
@@ -271,7 +268,11 @@ class _ChatBodyState extends State<ChatBody> {
             children: [
               Expanded(
                 child: _isLoading
-                    ? const Center(child: CircularProgressIndicator())
+                    ? Center(
+                        child: LoadingAnimationWidget.inkDrop(
+                        color: Colors.blueGrey,
+                        size: 20,
+                      ))
                     : chatProvider.chatHistory.isEmpty
                         ? (chatProvider.isBOT
                             ? const WelcomeBot()
@@ -300,7 +301,8 @@ class _ChatBodyState extends State<ChatBody> {
                                         ? 'assets/chatbot.png'
                                         : chatProvider
                                                 .selectedAiAgent['avatar'] ??
-                                            'assets/chatbot.png', // Đường dẫn avatar của bot,
+                                            'assets/chatbot.png',
+                                // Đường dẫn avatar của bot,
                                 isLoading: !isUser &&
                                     _isLoadingBotResponse &&
                                     messageIndex ==
@@ -310,15 +312,18 @@ class _ChatBodyState extends State<ChatBody> {
                           ),
               ),
               if (_showPromptList)
-                PromptWidget(
-                    promptsFuture: _promptsFuture,
-                    messageController: _messageController,
-                    onClosePromptList: () {
-                      setState(() {
-                        _showPromptList = false;
-                      });
-                    },
-                    user: _user),
+                Container(
+                  color: Colors.grey.shade200, // Change background color here
+                  height: 200,
+                  child: PromptWidget(
+                      messageController: _messageController,
+                      onClosePromptList: () {
+                        setState(() {
+                          _showPromptList = false;
+                        });
+                      },
+                      user: _user),
+                ),
               MessageInput(
                   messageController: _messageController,
                   messageFocusNode: _messageFocusNode,

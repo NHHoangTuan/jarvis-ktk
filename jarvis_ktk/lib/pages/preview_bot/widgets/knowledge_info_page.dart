@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:jarvis_ktk/data/models/knowledge.dart';
 import 'package:jarvis_ktk/data/network/knowledge_api.dart';
 import 'package:jarvis_ktk/services/service_locator.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
 
 import 'unit/dialog/add_unit_dialog.dart';
 import 'unit/info/empty_unit_screen.dart';
@@ -43,7 +44,11 @@ class _KnowledgeInfoPageState extends State<KnowledgeInfoPage> {
         future: _unitList,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
+            return Center(
+                child: LoadingAnimationWidget.inkDrop(
+              color: Colors.blueGrey,
+              size: 40,
+            ));
           } else if (snapshot.hasError) {
             return Center(child: Text('Error: ${snapshot.error}'));
           } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
@@ -70,7 +75,10 @@ class KnowledgeInfoAppBar extends StatelessWidget
   final Size preferredSize;
 
   const KnowledgeInfoAppBar(
-      {super.key, required this.title, required this.onClick, required this.knowledgeId})
+      {super.key,
+      required this.title,
+      required this.onClick,
+      required this.knowledgeId})
       : preferredSize = const Size.fromHeight(kToolbarHeight);
 
   @override

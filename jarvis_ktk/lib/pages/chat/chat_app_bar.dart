@@ -17,6 +17,7 @@ import '../../services/service_locator.dart';
 import 'widgets/select_agent_dropdown.dart';
 
 class ChatAppBar extends StatefulWidget implements PreferredSizeWidget {
+  @override
   State<ChatAppBar> createState() => _ChatAppBarState();
 
   @override
