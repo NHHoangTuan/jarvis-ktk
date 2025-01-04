@@ -48,6 +48,8 @@ class ApiEndpoints {
       'ai-assistant/thread/playground';
   static const String retrieveMessageOfThread =
       'ai-assistant/thread/{openAiThreadId}/messages';
+  static const String getThreads = 'ai-assistant/{assistantId}/threads';
+  static const String createThread = 'ai-assistant/thread';
   static const String knowledge = 'knowledge';
   static const String knowledgeById = 'knowledge/{id}';
   static const String knowledgeUnits = 'knowledge/{id}/units';

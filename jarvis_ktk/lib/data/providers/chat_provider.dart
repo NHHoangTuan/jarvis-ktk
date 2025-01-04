@@ -10,49 +10,48 @@ class ChatProvider with ChangeNotifier {
   String _selectedConversationId = '';
   bool _isShowWelcomeMessage = true;
   bool _isTapHistory = false;
+  bool _isBOT = false;
   final List<Map<String, String>> _aiAgents = [
     {
       'id': AssistantId.CLAUDE_3_HAIKU_20240307.name,
-      'name': 'claude-3-haiku',
+      'name': 'Claude 3 Haiku',
       'avatar': 'assets/claude-3-haiku.png',
       'tokens': '1'
     },
     {
       'id': AssistantId.CLAUDE_3_5_SONNET_20240620.name,
-      'name': 'claude-3-5-sonnet',
+      'name': 'Claude 3.5 Sonnet',
       'avatar': 'assets/claude-3-5-sonnet.webp',
       'tokens': '3'
     },
     {
       'id': AssistantId.GEMINI_1_5_FLASH_LATEST.name,
-      'name': 'gemini-1.5-flash',
+      'name': 'Gemini 1.5 Flash',
       'avatar': 'assets/gemini.png',
       'tokens': '1'
     },
     {
       'id': AssistantId.GEMINI_1_5_PRO_LATEST.name,
-      'name': 'gemini-1.5-pro',
+      'name': 'Gemini 1.5 Pro',
       'avatar': 'assets/gemini.png',
       'tokens': '5'
     },
     {
       'id': AssistantId.GPT_4O.name,
-      'name': 'gpt-4o',
+      'name': 'GPT 4o',
       'avatar': 'assets/gpt-4o.webp',
       'tokens': '5'
     },
     {
       'id': AssistantId.GPT_4O_MINI.name,
-      'name': 'gpt-4o-mini',
+      'name': 'GPT 4o Mini',
       'avatar': 'assets/gpt-4o-mini.webp',
       'tokens': '1'
     },
   ];
-  //Conversation _selectedConversation =
-  //Conversation(id: '', title: '', createdAt: -1);
   Map<String, String> _selectedAiAgent = {
     'id': AssistantId.CLAUDE_3_HAIKU_20240307.name,
-    'name': 'claude-3-haiku',
+    'name': 'Claude 3 Haiku',
     'avatar': 'assets/claude-3-haiku.png',
     'tokens': '1'
   };
@@ -63,13 +62,13 @@ class ChatProvider with ChangeNotifier {
 
   List<Conversation> get conversations => _conversations;
   List<ChatHistory> get chatHistory => _chatHistory;
-  //Conversation get selectedConversation => _selectedConversation;
   List<Map<String, String>> get aiAgents => _aiAgents;
   Map<String, String> get selectedAiAgent => _selectedAiAgent;
   MessageResponse? get currentResponse => _currentResponse;
   String get selectedConversationId => _selectedConversationId;
   bool get isShowWelcomeMessage => _isShowWelcomeMessage;
   bool get isTapHistory => _isTapHistory;
+  bool get isBOT => _isBOT;
 
   Future<void> loadConversations(AssistantId? assistantId) async {
     _conversations =
@@ -80,9 +79,6 @@ class ChatProvider with ChangeNotifier {
   Future<void> loadConversationHistory(
       String conversationId, AssistantId? assistantId,
       {bool isRefresh = false}) async {
-    // _chatHistory = await CacheService.getCachedChatHistory(
-    //     conversationId, _chatApi,
-    //     isRefresh: isRefresh);
     _chatHistory = await _chatApi.getConversationHistory(conversationId,
         assistantId: assistantId, assistantModel: AssistantModel.DIFY);
     notifyListeners();
@@ -122,11 +118,6 @@ class ChatProvider with ChangeNotifier {
         await _chatApi.sendMessage(assistant, content, files, metadata);
   }
 
-  // void selectConversation(Conversation conversation) {
-  //   _selectedConversation = conversation;
-  //   notifyListeners();
-  // }
-
   void selectAiAgentId(String aiAgentId) {
     _selectedAiAgent['id'] = aiAgentId;
     notifyListeners();
@@ -148,6 +139,21 @@ class ChatProvider with ChangeNotifier {
 
   void setTapHistory(bool isTap) {
     _isTapHistory = isTap;
+    notifyListeners();
+  }
+
+  void setBOT(bool isBOT) {
+    _isBOT = isBOT;
+    notifyListeners();
+  }
+
+  void setChatHistory(List<ChatHistory> chatHistory) {
+    _chatHistory = chatHistory;
+    notifyListeners();
+  }
+
+  void setConversations(List<Conversation> conversations) {
+    _conversations = conversations;
     notifyListeners();
   }
 
@@ -174,11 +180,12 @@ class ChatProvider with ChangeNotifier {
     _isTapHistory = false;
     _selectedAiAgent = {
       'id': AssistantId.CLAUDE_3_HAIKU_20240307.name,
-      'name': 'claude-3-haiku',
+      'name': 'Claude 3 Haiku',
       'avatar': 'assets/claude-3-haiku.png',
       'tokens': '1'
     };
     _currentResponse = null;
+    _isBOT = false;
     notifyListeners();
   }
 }

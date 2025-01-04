@@ -1,10 +1,13 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:jarvis_ktk/data/providers/bot_provider.dart';
 import 'package:jarvis_ktk/data/providers/chat_provider.dart';
 import 'package:jarvis_ktk/data/providers/token_provider.dart';
+import 'package:jarvis_ktk/pages/chat/widgets/select_bot_dropdown.dart';
 import 'package:jarvis_ktk/services/cache_service.dart';
 import 'package:jarvis_ktk/utils/resized_image.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:provider/provider.dart';
 
 import '../../data/network/token_api.dart';
@@ -26,11 +29,13 @@ class ChatAppBar extends StatefulWidget implements PreferredSizeWidget {
 class _ChatAppBarState extends State<ChatAppBar> {
   final tokenApi = getIt<TokenApi>();
   bool _isLoadingToken = false;
+  bool _isLoadingBot = false;
 
   @override
   void initState() {
     super.initState();
     _handleLoadTokenUsage();
+    _handleLoadBots();
   }
 
   Future<void> _handleLoadTokenUsage() async {
@@ -48,9 +53,24 @@ class _ChatAppBarState extends State<ChatAppBar> {
     }
   }
 
+  Future<void> _handleLoadBots() async {
+    setState(() {
+      _isLoadingBot = true;
+    });
+    try {
+      await Provider.of<BotProvider>(context, listen: false).loadBots();
+    } catch (e) {
+      debugPrint('Error loading bots: $e');
+    } finally {
+      setState(() {
+        _isLoadingBot = false;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    final chatProvider = Provider.of<ChatProvider>(context, listen: false);
+    final chatProvider = Provider.of<ChatProvider>(context, listen: true);
     return AppBar(
       elevation: 0,
       backgroundColor: Colors.blue[50],
@@ -59,12 +79,22 @@ class _ChatAppBarState extends State<ChatAppBar> {
       title: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Expanded(
+          Expanded(
             flex: 2,
             child: Row(
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
-                SelectAgentDropdown(),
+                if (chatProvider.isBOT)
+                  if (_isLoadingBot)
+                    LoadingAnimationWidget.twistingDots(
+                      leftDotColor: const Color(0xFF1A1A3F),
+                      rightDotColor: const Color(0xFFEA3799),
+                      size: 20,
+                    )
+                  else
+                    const SelectBotDropdown()
+                else
+                  const SelectAgentDropdown(),
               ],
             ),
           ),
@@ -97,26 +127,36 @@ class _ChatAppBarState extends State<ChatAppBar> {
         PopupMenuButton<String>(
           icon: const Icon(Icons.more_vert, color: Colors.black),
           onSelected: (String choice) {
-            if (choice == 'New Chat') {
+            if (choice == 'newchat') {
               chatProvider.clearChatHistory();
               chatProvider.selectConversationId('');
               chatProvider.setShowWelcomeMessage(true);
               CacheService.clearChatHistoryCache();
+            } else if (choice == 'switchaiagent') {
+              chatProvider.setBOT(!chatProvider.isBOT);
+              chatProvider.clearChatHistory();
+              chatProvider.selectConversationId('');
+              chatProvider.setShowWelcomeMessage(true);
             }
           },
-          itemBuilder: (BuildContext context) {
-            return {'New Chat'}.map((String choice) {
-              return PopupMenuItem<String>(
-                value: choice,
-                child: ListTile(
-                  leading: const Icon(Icons.chat),
-                  title: Text(choice),
-                ),
-              );
-            }).toList();
-          },
+          itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
+            const PopupMenuItem<String>(
+              value: 'newchat',
+              child: ListTile(
+                leading: Icon(Icons.chat_outlined),
+                title: Text('New Chat'),
+              ),
+            ),
+            const PopupMenuItem<String>(
+              value: 'switchaiagent',
+              child: ListTile(
+                leading: Icon(Icons.swap_horizontal_circle_outlined),
+                title: Text('Switch AI Agent'),
+              ),
+            ),
+          ],
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
+            borderRadius: BorderRadius.circular(16),
           ),
         ),
       ],

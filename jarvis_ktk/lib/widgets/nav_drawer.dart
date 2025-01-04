@@ -9,6 +9,7 @@ import 'package:jarvis_ktk/utils/resized_image.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:provider/provider.dart';
 
+import '../data/models/chat.dart';
 import '../data/models/user.dart';
 import '../data/network/api_service.dart';
 import '../data/network/auth_api.dart';
@@ -46,7 +47,9 @@ class _NavDrawerState extends State<NavDrawer> with TickerProviderStateMixin {
     if (_selectedItem == 'My Bot' || _selectedItem == 'Knowledge') {
       _showPersonalOptions = true;
     }
-    _handleLoadConversations();
+    Future.microtask(() {
+      _handleLoadConversations();
+    });
   }
 
   // Handle login
@@ -95,8 +98,32 @@ class _NavDrawerState extends State<NavDrawer> with TickerProviderStateMixin {
     setState(() {
       _isLoadingHistory = true;
     });
+
+    final chatProvider = context.read<ChatProvider>();
+    final botProvider = context.read<BotProvider>();
+
     try {
-      await context.read<ChatProvider>().loadConversations(null);
+      if (chatProvider.isBOT) {
+        if (botProvider.threads.isEmpty) {
+          await botProvider.loadThreads();
+        }
+
+        if (botProvider.threads.isNotEmpty) {
+          final conversations = botProvider.threads
+              .map((thread) => Conversation(
+                    id: thread.openAiThreadId,
+                    title: thread.threadName,
+                    createdAt:
+                        DateTime.parse(thread.createdAt).millisecondsSinceEpoch,
+                  ))
+              .toList();
+          chatProvider.setConversations(conversations);
+        } else {
+          chatProvider.setConversations([]);
+        }
+      } else {
+        await chatProvider.loadConversations(null);
+      }
     } catch (e) {
       debugPrint('Error loading conversations: $e');
     } finally {

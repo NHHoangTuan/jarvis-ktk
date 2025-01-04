@@ -1,5 +1,6 @@
 import 'package:jarvis_ktk/data/models/bot.dart';
 import 'package:jarvis_ktk/data/models/message.dart';
+import 'package:jarvis_ktk/data/models/thread.dart';
 import 'package:jarvis_ktk/data/network/knowledge_api_service.dart';
 
 import '../../constants/api_endpoints.dart';
@@ -199,5 +200,51 @@ class BotApi {
     }
 
     throw Exception('Failed to update assistant with new thread playground');
+  }
+
+  Future<Thread> createThread(String assistantId, String? firstMessage) async {
+    final response = await _knowledgeApiService.post(
+      ApiEndpoints.createThread,
+      data: {"assistantId": assistantId, "firstMessage": firstMessage ?? ''},
+    );
+
+    if (response.statusCode == 201) {
+      return Thread.fromJson(response.data);
+    }
+
+    throw Exception('Failed to create thread');
+  }
+
+  Future<List<Thread>> getThreads(
+    String assistantId, {
+    String? query,
+    String? order,
+    String? orderField,
+    int? offset,
+    int? limit,
+  }) async {
+    final params = {
+      if (query != null) 'query': query,
+      if (order != null) 'order': order,
+      if (orderField != null) 'orderField': orderField,
+      if (offset != null) 'offset': offset,
+      if (limit != null) 'limit': limit,
+    };
+    final response = await _knowledgeApiService.get(
+      ApiEndpoints.getThreads,
+      params: params,
+      pathVars: {'assistantId': assistantId},
+    );
+
+    List<Thread> threadList = [];
+
+    if (response.statusCode == 200) {
+      for (var thread in response.data['data']) {
+        threadList.add(Thread.fromJson(thread));
+      }
+      return threadList;
+    }
+
+    throw Exception('Failed to get threads');
   }
 }

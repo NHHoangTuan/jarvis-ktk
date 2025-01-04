@@ -1,6 +1,5 @@
 import 'dart:convert';
 
-import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -10,11 +9,15 @@ import 'package:jarvis_ktk/data/models/user.dart';
 import 'package:jarvis_ktk/data/network/prompt_api.dart';
 import 'package:jarvis_ktk/data/providers/chat_provider.dart';
 import 'package:jarvis_ktk/data/providers/token_provider.dart';
+import 'package:jarvis_ktk/pages/chat/widgets/message_input.dart';
+import 'package:jarvis_ktk/pages/chat/widgets/prompt_widget.dart';
+import 'package:jarvis_ktk/pages/chat/widgets/welcome_bot.dart';
 import 'package:jarvis_ktk/services/service_locator.dart';
 import 'package:provider/provider.dart';
 
+import '../../data/models/message.dart';
+import '../../data/providers/bot_provider.dart';
 import '../../services/cache_service.dart';
-import '../prompt_bottom_sheet/prompt_bottom_sheet.dart';
 import 'widgets/message_bubble.dart';
 import 'widgets/welcome.dart';
 
@@ -106,6 +109,7 @@ class _ChatBodyState extends State<ChatBody> {
 
     final userMessage = _messageController.text;
     final chatProvider = context.read<ChatProvider>();
+    final botProvider = context.read<BotProvider>();
 
     chatProvider.chatHistory.add(ChatHistory(
       query: userMessage,
@@ -116,33 +120,51 @@ class _ChatBodyState extends State<ChatBody> {
 
     _messageController.clear();
     _messageFocusNode.unfocus();
-    context.read<ChatProvider>().setShowWelcomeMessage(false);
+    chatProvider.setShowWelcomeMessage(false);
 
     // Gửi tin nhắn qua API và nhận phản hồi
     try {
-      await context.read<ChatProvider>().sendMessage(userMessage, []);
+      if (chatProvider.isBOT) {
+        if (chatProvider.selectedConversationId == '') {
+          await botProvider.createThread(
+              botProvider.selectedBot!.id, userMessage);
+
+          // Set selected conversation ID to the last thread ID
+          chatProvider.selectConversationId(botProvider.newThreadId);
+        }
+        await botProvider.askBot(botProvider.selectedBot!.id,
+            chatProvider.selectedConversationId, userMessage);
+      } else {
+        await chatProvider.sendMessage(userMessage, []);
+      }
 
       if (mounted) {
-        final assistantResponse = context.read<ChatProvider>().currentResponse!;
+        String answer = '';
+        if (!chatProvider.isBOT) {
+          final assistantResponse = chatProvider.currentResponse!;
 
-        var remainingUsage = assistantResponse.remainingUsage;
-        context.read<TokenProvider>().setCurrentToken(remainingUsage);
-        var conversationId = assistantResponse.conversationId;
-        chatProvider.selectConversationId(conversationId);
+          var remainingUsage = assistantResponse.remainingUsage;
+          context.read<TokenProvider>().setCurrentToken(remainingUsage);
+          var conversationId = assistantResponse.conversationId;
+          chatProvider.selectConversationId(conversationId);
+
+          answer = assistantResponse.message;
+        } else {
+          answer = botProvider.currentMessageResponse!;
+        }
 
         // Cập nhật dữ liệu
         chatProvider.chatHistory[chatProvider.chatHistory.length - 1] =
             ChatHistory(
           query: userMessage,
-          answer: assistantResponse.message,
+          answer: answer,
           createdAt: DateTime.now().millisecondsSinceEpoch ~/ 1000,
           files: [],
         );
 
         CacheService.setCurrentHistoryLength(
             CacheService.getCurrentHistoryLength() + 1);
-
-        showToast(chatProvider.selectedConversationId);
+        await botProvider.loadThreads();
       }
     } catch (e) {
       debugPrint("Error sending message: $e");
@@ -161,16 +183,68 @@ class _ChatBodyState extends State<ChatBody> {
     setState(() {
       _isLoading = true;
     });
-    await context.read<ChatProvider>().loadConversationHistory(
-        context.read<ChatProvider>().selectedConversationId,
-        AssistantId.GPT_4O_MINI,
-        isRefresh: isRefresh);
-    // if (mounted) {
-    //   _listChatHistory = context.read<ChatProvider>().chatHistory;
-    // }
+    final chatProvider = context.read<ChatProvider>();
+    final botProvider = context.read<BotProvider>();
+
+    if (chatProvider.isBOT) {
+      await botProvider
+          .retrieveMessageOfThread(chatProvider.selectedConversationId);
+      final chatHistory = convertMessageDataToChatHistory(botProvider.messages);
+      chatProvider.setChatHistory(chatHistory);
+    } else {
+      await chatProvider.loadConversationHistory(
+          chatProvider.selectedConversationId, AssistantId.GPT_4O_MINI,
+          isRefresh: isRefresh);
+    }
     setState(() {
       _isLoading = false;
     });
+  }
+
+  List<ChatHistory> convertMessageDataToChatHistory(
+      List<MessageData>? messageDataList) {
+    List<ChatHistory> chatHistoryList = [];
+
+    if (messageDataList == null) return chatHistoryList;
+
+    String? query;
+    String? answer;
+    int? createdAt;
+    List<String> files = [];
+
+    for (var message in messageDataList) {
+      if (message.role == 'user') {
+        query = message.content
+            .map((content) => content.text.value)
+            .join(' '); // Gộp nội dung query nếu cần
+        createdAt = message.createdAt;
+      } else if (message.role == 'assistant') {
+        answer = message.content
+            .map((content) => content.text.value)
+            .join(' '); // Gộp nội dung answer nếu cần
+        // Lấy các files nếu có
+        files = message.content
+            .where((content) => content.type == 'file')
+            .map((content) => content.text.value)
+            .toList();
+      }
+
+      // Khi có đủ cả query và answer thì thêm vào danh sách ChatHistory
+      if (query != null && answer != null) {
+        chatHistoryList.add(ChatHistory(
+          query: query,
+          answer: answer,
+          createdAt: createdAt ?? 0,
+          files: files,
+        ));
+        // Reset query và answer để xử lý message tiếp theo
+        query = null;
+        answer = null;
+        files = [];
+      }
+    }
+
+    return chatHistoryList;
   }
 
   void showToast(String message) {
@@ -199,7 +273,9 @@ class _ChatBodyState extends State<ChatBody> {
                 child: _isLoading
                     ? const Center(child: CircularProgressIndicator())
                     : chatProvider.chatHistory.isEmpty
-                        ? const WelcomeMessage()
+                        ? (chatProvider.isBOT
+                            ? const WelcomeBot()
+                            : const WelcomeMessage())
                         : ListView.builder(
                             padding: const EdgeInsets.all(16),
                             itemCount: chatProvider.chatHistory.length * 2,
@@ -220,8 +296,11 @@ class _ChatBodyState extends State<ChatBody> {
                                 timestamp: timestamp,
                                 avatar: isUser
                                     ? 'assets/user_avatar.png' // Đường dẫn avatar của user
-                                    : chatProvider.selectedAiAgent['avatar'] ??
-                                        'assets/chatbot.png', // Đường dẫn avatar của bot,
+                                    : chatProvider.isBOT
+                                        ? 'assets/chatbot.png'
+                                        : chatProvider
+                                                .selectedAiAgent['avatar'] ??
+                                            'assets/chatbot.png', // Đường dẫn avatar của bot,
                                 isLoading: !isUser &&
                                     _isLoadingBotResponse &&
                                     messageIndex ==
@@ -231,152 +310,19 @@ class _ChatBodyState extends State<ChatBody> {
                           ),
               ),
               if (_showPromptList)
-                FutureBuilder<List<Prompt>>(
-                  future: _promptsFuture,
-                  builder: (context, snapshot) {
-                    if (snapshot.connectionState == ConnectionState.waiting) {
-                      return const Center(child: CircularProgressIndicator());
-                    } else if (snapshot.hasError) {
-                      return Center(child: Text('Error: ${snapshot.error}'));
-                    } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                      return const Center(child: Text('No prompts available'));
-                    } else {
-                      final prompts = snapshot.data!;
-                      final filteredPrompts = prompts.where((prompt) {
-                        if (prompt is PublicPrompt) {
-                          return prompt.isFavorite ||
-                              prompt.userId == _user?.id;
-                        }
-                        return true;
-                      }).toList();
-                      final myPrompts =
-                          filteredPrompts.whereType<MyPrompt>().toList();
-                      final publicPrompts =
-                          filteredPrompts.whereType<PublicPrompt>().toList();
-                      return SizedBox(
-                        height: 200,
-                        child: ListView(
-                          children: [
-                            if (myPrompts.isNotEmpty) ...[
-                              const ListTile(
-                                title: Text('My Prompts',
-                                    style:
-                                        TextStyle(fontWeight: FontWeight.bold)),
-                              ),
-                              ...myPrompts.map((prompt) => ListTile(
-                                    title: Text(prompt.title),
-                                    onTap: () {
-                                      _messageController.text = prompt.content;
-                                      setState(() {
-                                        _showPromptList = false;
-                                      });
-                                    },
-                                  )),
-                            ],
-                            if (publicPrompts.isNotEmpty) ...[
-                              const ListTile(
-                                title: Text('Public Prompts',
-                                    style:
-                                        TextStyle(fontWeight: FontWeight.bold)),
-                              ),
-                              ...publicPrompts.map((prompt) => ListTile(
-                                    title: Text(prompt.title),
-                                    onTap: () {
-                                      _messageController.text = prompt.content;
-                                      setState(() {
-                                        _showPromptList = false;
-                                      });
-                                    },
-                                  )),
-                            ],
-                          ],
-                        ),
-                      );
-                    }
-                  },
-                ),
-              Container(
-                padding: const EdgeInsets.all(8),
-                color: Colors.white,
-                child: SafeArea(
-                  child: Row(
-                    children: [
-                      DropdownSearch<(IconData, String)>(
-                        mode: Mode.custom,
-                        items: (f, cs) => [
-                          (Icons.image, 'Upload image'),
-                          (Icons.photo_camera, 'Take a photo'),
-                          (Icons.electric_bolt, 'Prompt'),
-                        ],
-                        compareFn: (item1, item2) => item1.$1 == item2.$1,
-                        popupProps: PopupProps.modalBottomSheet(
-                          fit: FlexFit.loose,
-                          itemBuilder:
-                              (context, item, isDisabled, isSelected) =>
-                                  Padding(
-                            padding: const EdgeInsets.all(16.0),
-                            child: ListTile(
-                              leading: Icon(item.$1, color: Colors.black),
-                              title: Text(
-                                item.$2,
-                                style: const TextStyle(
-                                    color: Colors.black,
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.bold),
-                              ),
-                            ),
-                          ),
-                        ),
-                        dropdownBuilder: (ctx, selectedItem) => const Icon(
-                          Icons.add_circle_outline_rounded,
-                          color: Colors.black,
-                        ),
-                        onChanged: (selectedItem) {
-                          if (selectedItem != null &&
-                              selectedItem.$2 == 'Prompt') {
-                            showPromptBottomSheet(context, onClick: (prompt) {
-                              _messageController.text = prompt.content;
-                            });
-                          }
-                        },
-                      ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: Center(
-                          // Fixed height for the text box
-                          child: TextField(
-                            controller: _messageController,
-                            focusNode: _messageFocusNode,
-                            decoration: InputDecoration(
-                              hintText: 'Type a message...',
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(16),
-                                borderSide: BorderSide.none,
-                              ),
-                              filled: true,
-                              fillColor: Colors.grey[200],
-                              contentPadding: const EdgeInsets.symmetric(
-                                horizontal: 20,
-                                vertical: 10,
-                              ),
-                            ),
-                            maxLines: 4,
-                            minLines: 1,
-                            keyboardType: TextInputType.multiline,
-                            textAlignVertical: TextAlignVertical
-                                .center, // Center vertical alignment
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      IconButton(
-                        icon: const Icon(Icons.send),
-                        onPressed: () => _sendMessage(),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
+                PromptWidget(
+                    promptsFuture: _promptsFuture,
+                    messageController: _messageController,
+                    onClosePromptList: () {
+                      setState(() {
+                        _showPromptList = false;
+                      });
+                    },
+                    user: _user),
+              MessageInput(
+                  messageController: _messageController,
+                  messageFocusNode: _messageFocusNode,
+                  onSendMessage: _sendMessage)
             ],
           ),
         ],

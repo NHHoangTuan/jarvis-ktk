@@ -45,6 +45,8 @@ class _ChatAreaState extends State<ChatArea>
       // Get the selected bot
 
       final botId = context.read<BotProvider>().selectedBot?.id;
+      final threadId =
+          context.read<BotProvider>().selectedBot?.openAiThreadIdPlay;
 
       String userMessage = _controller.text;
 
@@ -73,7 +75,7 @@ class _ChatAreaState extends State<ChatArea>
       });
       _controller.clear();
 
-      await context.read<BotProvider>().askBot(botId!, userMessage);
+      await context.read<BotProvider>().askBot(botId!, threadId!, userMessage);
 
       String botMessage = "";
       if (mounted) {
@@ -100,7 +102,7 @@ class _ChatAreaState extends State<ChatArea>
       );
       _isWaitingForResponse = false;
     } catch (e) {
-      debugPrint(e.toString());
+      debugPrint("Error sending message: $e");
     }
   }
 
