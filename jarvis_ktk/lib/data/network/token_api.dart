@@ -8,8 +8,11 @@ class TokenApi {
 
   TokenApi(this._apiService);
 
-  Future<TokenUsage?> fetchTokenUsage() async {
+  Future<TokenUsage> fetchTokenUsage() async {
     final response = await _apiService.get(ApiEndpoints.tokenUsage);
+    if (response.statusCode != 200) {
+      throw Exception('Failed to get token usage');
+    }
     return TokenUsage.fromJson(response.data);
   }
 

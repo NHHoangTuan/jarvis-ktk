@@ -14,6 +14,7 @@ void showPromptBottomSheet(BuildContext context, {required void Function(Prompt)
       borderRadius: BorderRadius.vertical(top: Radius.circular(25.0)),
     ),
     isScrollControlled: true,
+    useSafeArea: true,
     builder: (context) => PromptBottomSheet(onClick: onClick),
   );
 }
@@ -47,29 +48,44 @@ class _PromptBottomSheetState extends State<PromptBottomSheet>
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-        behavior: HitTestBehavior.opaque,
-        onTap: () {
-          FocusScope.of(context).requestFocus(FocusNode());
-        },
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            PromptAppBar(myPromptKey: _myPromptKey, publicPromptKey: _publicPromptKey),
-            PromptTabBar(
-              tabController: _tabController,
+    return DraggableScrollableSheet(
+      expand: false,
+      initialChildSize: 0.6,
+      minChildSize: 0.3,
+      maxChildSize: 1.0,
+      snap: true,
+      snapAnimationDuration: const Duration(milliseconds: 400),
+      snapSizes: const [0.6, 1.0],
+      builder: (context, scrollController) {
+        return SingleChildScrollView(
+          controller: scrollController,
+          child: GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onTap: () {
+              FocusScope.of(context).requestFocus(FocusNode());
+            },
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                PromptAppBar(myPromptKey: _myPromptKey, publicPromptKey: _publicPromptKey),
+                PromptTabBar(
+                  tabController: _tabController,
+                ),
+                SizedBox(
+                  height: MediaQuery.of(context).size.height * 0.825,
+                  child: TabBarView(
+                    controller: _tabController,
+                    children: [
+                      MyPromptContent(key: _myPromptKey, onClick: widget.onClick),
+                      PublicPromptContent(key: _publicPromptKey, onClick: widget.onClick),
+                    ],
+                  ),
+                ),
+              ],
             ),
-            SizedBox(
-              height: 500,
-              child: TabBarView(
-                controller: _tabController,
-                children: [
-                  MyPromptContent(key: _myPromptKey, onClick: widget.onClick),
-                  PublicPromptContent(key: _publicPromptKey, onClick: widget.onClick),
-                ],
-              ),
-            ),
-          ],
-        ));
+          )
+        );
+      },
+    );
   }
 }

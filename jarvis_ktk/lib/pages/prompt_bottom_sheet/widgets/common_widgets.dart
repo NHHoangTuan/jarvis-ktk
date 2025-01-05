@@ -198,11 +198,19 @@ class _PromptTextFormField extends State<PromptTextFormField> {
           contentPadding: const EdgeInsets.only(
               left: 8, top: 6, bottom: 6, right: 8),
           isDense: true,
+
           enabledBorder: const OutlineInputBorder(
             borderSide: BorderSide(color: Colors.grey, width: 0.9),
           ),
         ),
+        textInputAction: TextInputAction.newline,
+        keyboardType: TextInputType.multiline,
         onChanged: widget.onChanged,
+        maxLines: widget.hintMaxLines,
+        onFieldSubmitted: (value) {
+          _controller.text += '\n';
+          _controller.selection = TextSelection.fromPosition(TextPosition(offset: _controller.text.length));
+        },
       ),
     );
   }

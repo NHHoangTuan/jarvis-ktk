@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:jarvis_ktk/utils/colors.dart';
 
 class PromptTabBar extends StatelessWidget {
   final TabController tabController;
@@ -26,7 +27,7 @@ class PromptTabBar extends StatelessWidget {
             dividerColor: Colors.transparent,
             indicator: BoxDecoration(
               borderRadius: BorderRadius.circular(25.0),
-              color: Colors.black,
+              color: SimpleColors.navyBlue,
             ),
             labelColor: Colors.white,
             unselectedLabelColor: Colors.black,

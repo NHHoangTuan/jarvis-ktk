@@ -28,6 +28,10 @@ class ChatInput extends StatelessWidget {
             child: TextField(
               autofocus: false,
               controller: controller,
+              maxLines: 4,
+              minLines: 1,
+              style: const TextStyle(fontSize: 14),
+              keyboardType: TextInputType.multiline,
               decoration: InputDecoration(
                 fillColor: SimpleColors.babyBlue.withOpacity(0.15),
                 filled: true,

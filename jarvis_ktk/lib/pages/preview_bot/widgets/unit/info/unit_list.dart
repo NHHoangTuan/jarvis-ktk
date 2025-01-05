@@ -1,16 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:jarvis_ktk/data/models/knowledge.dart';
+import 'package:jarvis_ktk/data/network/knowledge_api.dart';
+import 'package:jarvis_ktk/services/service_locator.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
 
 import '../../common_widgets.dart';
 import 'unit_list_tile.dart';
 
-
 class UnitList extends StatefulWidget {
+  final String knowledgeId;
   final List<Unit> unitList;
-  final VoidCallback onUnitDeleted;
 
   const UnitList(
-      {super.key, required this.unitList, required this.onUnitDeleted});
+      {super.key, required this.unitList, required this.knowledgeId});
 
   @override
   State<UnitList> createState() => _UnitListState();
@@ -19,6 +22,7 @@ class UnitList extends StatefulWidget {
 class _UnitListState extends State<UnitList> {
   late List<Unit> _unitList;
   final GlobalKey<AnimatedListState> _listKey = GlobalKey<AnimatedListState>();
+  bool _isLoading = false;
 
   @override
   void initState() {
@@ -39,8 +43,13 @@ class _UnitListState extends State<UnitList> {
 
       if (confirmDelete == true) {
         setState(() {
+          try {
+            getIt<KnowledgeApi>().deleteUnit(widget.knowledgeId, unit.id);
+          } catch (e) {
+            Fluttertoast.showToast(msg: 'Failed to delete unit');
+            return;
+          }
           _unitList.removeAt(index);
-          widget.onUnitDeleted();
           _listKey.currentState?.removeItem(
             index,
             (context, animation) => SizeTransition(
@@ -48,9 +57,9 @@ class _UnitListState extends State<UnitList> {
               child: Column(
                 children: [
                   UnitListTile(
-                      unit: unit,
-                      onDelete: () {},
-                      onToggleEnabled: (newValue) {}
+                    unit: unit,
+                    onDelete: () {},
+                    onLoading: (isLoading) => _setLoading(isLoading),
                   ),
                   const Divider(indent: 16.0, endIndent: 16.0),
                 ],
@@ -62,35 +71,43 @@ class _UnitListState extends State<UnitList> {
     }
   }
 
-  void _toggleUnitEnabled(Unit unit, bool newValue) {
+  void _setLoading(bool isLoading) {
     setState(() {
-      unit.isEnabled = newValue; // Update the unit's enabled state
+      _isLoading = isLoading;
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedList(
-      key: _listKey,
-      initialItemCount: _unitList.length,
-      itemBuilder: (context, index, animation) {
-        final item = _unitList[index];
-        return SizeTransition(
-          sizeFactor: animation,
-          child: Column(
-            children: [
-              UnitListTile(
-                unit: item,
-                onDelete: () => _deleteUnit(item),
-                onToggleEnabled: (newValue) =>
-                    _toggleUnitEnabled(item, newValue),
+    return Stack(
+      children: [
+        AnimatedList(
+          key: _listKey,
+          initialItemCount: _unitList.length,
+          itemBuilder: (context, index, animation) {
+            final item = _unitList[index];
+            return SizeTransition(
+              sizeFactor: animation,
+              child: Column(
+                children: [
+                  UnitListTile(
+                    unit: item,
+                    onDelete: () => _deleteUnit(item),
+                    onLoading: (isLoading) => _setLoading(isLoading),
+                  ),
+                  const Divider(indent: 16.0, endIndent: 16.0),
+                ],
               ),
-              const Divider(indent: 16.0, endIndent: 16.0),
-            ],
-          ),
-        );
-      },
+            );
+          },
+        ),
+        if (_isLoading)
+          Center(
+              child: LoadingAnimationWidget.inkDrop(
+            color: Colors.blueGrey,
+            size: 40,
+          )),
+      ],
     );
   }
 }
-

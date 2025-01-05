@@ -1,3 +1,31 @@
+class MessageResponse {
+  final String conversationId;
+  final String message;
+  final int remainingUsage;
+
+  MessageResponse({
+    required this.conversationId,
+    required this.message,
+    required this.remainingUsage,
+  });
+
+  factory MessageResponse.fromJson(Map<String, dynamic> json) {
+    return MessageResponse(
+      conversationId: json['conversationId'] ?? '',
+      message: json['message'] ?? '',
+      remainingUsage: json['remainingUsage'] ?? 0,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'conversationId': conversationId,
+      'message': message,
+      'remainingUsage': remainingUsage,
+    };
+  }
+}
+
 class ChatHistory {
   final String answer;
   final int createdAt;
@@ -58,13 +86,50 @@ class Conversation {
   }
 }
 
+class ApiResponse<T> {
+  final String cursor;
+  final bool hasMore;
+  final int limit;
+  final List<T> items;
+
+  ApiResponse({
+    required this.cursor,
+    required this.hasMore,
+    required this.limit,
+    required this.items,
+  });
+
+  factory ApiResponse.fromJson(
+    Map<String, dynamic> json,
+    T Function(Map<String, dynamic>) fromJsonT,
+  ) {
+    return ApiResponse<T>(
+      cursor: json['cursor'] ?? '',
+      hasMore: json['has_more'] ?? false,
+      limit: json['limit'] ?? 0,
+      items: (json['items'] as List)
+          .map((item) => fromJsonT(item as Map<String, dynamic>))
+          .toList(),
+    );
+  }
+
+  Map<String, dynamic> toJson(Map<String, dynamic> Function(T) toJsonT) {
+    return {
+      'cursor': cursor,
+      'has_more': hasMore,
+      'limit': limit,
+      'items': items.map(toJsonT).toList(),
+    };
+  }
+}
+
 enum AssistantId {
   CLAUDE_3_5_SONNET_20240620,
   CLAUDE_3_HAIKU_20240307,
   GEMINI_1_5_FLASH_LATEST,
   GEMINI_1_5_PRO_LATEST,
   GPT_4O,
-  GPT_4O_MINI
+  GPT_4O_MINI,
 }
 
 extension AssistantIdExtension on AssistantId {
@@ -88,7 +153,7 @@ extension AssistantIdExtension on AssistantId {
   }
 }
 
-///Always is "dify"
+/// Always is "dify"
 enum AssistantModel { DIFY }
 
 extension AssistantModelExtension on AssistantModel {

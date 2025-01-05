@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:jarvis_ktk/pages/email_reply/widgets/email_action_buttons.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
 
 import '../../../utils/colors.dart';
 
@@ -11,6 +11,8 @@ class ChatMessage extends StatelessWidget {
   final bool isBot;
   final void Function(String) onSendMessage;
   final bool isPreviousMessage;
+  final VoidCallback? onRetry;
+  final String? botName;
 
   const ChatMessage({
     super.key,
@@ -18,15 +20,19 @@ class ChatMessage extends StatelessWidget {
     required this.isBot,
     required this.onSendMessage,
     this.isPreviousMessage = false,
+    this.botName,
+    this.onRetry,
   });
 
   @override
   Widget build(BuildContext context) {
     return isBot
         ? BotMessage(
+            botName: botName!,
             message: message,
             onSendMessage: onSendMessage,
             isPreviousMessage: isPreviousMessage,
+            onRetry: onRetry,
           )
         : UserMessage(message: message);
   }
@@ -45,12 +51,15 @@ class BotMessage extends StatefulWidget {
   final String message;
   final void Function(String) onSendMessage;
   final bool isPreviousMessage;
+  final VoidCallback? onRetry;
+  final String botName;
 
   const BotMessage({
     super.key,
     required this.message,
     required this.onSendMessage,
     required this.isPreviousMessage,
+    this.onRetry, required this.botName,
   });
 
   @override
@@ -102,11 +111,11 @@ class _BotMessageState extends State<BotMessage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 8.0),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 8.0),
                   child: Text(
-                    "Jarvis reply",
-                    style: TextStyle(
+                    widget.botName,
+                    style: const TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.bold,
                       color: SimpleColors.royalBlue,
@@ -119,7 +128,12 @@ class _BotMessageState extends State<BotMessage> {
                 ),
                 Padding(
                   padding: const EdgeInsets.all(8.0),
-                  child: Text(
+                  child: widget.message == "Loading"
+                      ? LoadingAnimationWidget.waveDots(
+                    color: Colors.blueGrey,
+                    size: 20,
+                  )
+                      : Text(
                     widget.message,
                     style: const TextStyle(
                       fontSize: 14,
@@ -136,63 +150,33 @@ class _BotMessageState extends State<BotMessage> {
                       left: 8, right: 8, bottom: 8, top: 0),
                   child: Row(
                     children: [
-                      SizedBox(
-                        height: 25,
-                        width: 50,
-                        child: TextButton(
-                          style: TextButton.styleFrom(
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(24.0),
-                            ),
-                            padding: EdgeInsets.zero,
-                            backgroundColor:
-                                SimpleColors.babyBlue.withOpacity(0.15),
-                          ),
-                          onPressed: () {},
-                          child: const Text(
-                            "Insert",
-                            style: TextStyle(
-                              fontSize: 12, // Text size
-                              color: SimpleColors.royalBlue,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                      ),
                       Transform.flip(
                         flipX: true,
                         child: SizedBox(
-                          height: 24.0,
-                          width: 24.0,
+                          height: 30.0,
+                          width: 30.0,
                           child: IconButton(
                             onPressed: () async {
                               await Clipboard.setData(
                                   ClipboardData(text: widget.message));
-                              Fluttertoast.showToast(
-                                  msg: "Copied to clipboard",
-                                  toastLength: Toast.LENGTH_SHORT,
-                                  gravity: ToastGravity.BOTTOM,
-                                  timeInSecForIosWeb: 1,
-                                  textColor: Colors.white,
-                                  backgroundColor: Colors.grey[600],
-                                  fontSize: 16.0);
                             },
                             padding: EdgeInsets.zero,
                             icon: const Icon(Icons.copy,
-                                color: Colors.grey, size: 16),
+                                color: Colors.grey, size: 20),
                           ),
                         ),
                       ),
+                      if (widget.onRetry != null)
                       Transform.flip(
                         flipX: true,
                         child: SizedBox(
-                          height: 24.0,
-                          width: 24.0,
+                          height: 30.0,
+                          width: 30.0,
                           child: IconButton(
-                            onPressed: () {},
+                            onPressed: widget.onRetry,
                             padding: EdgeInsets.zero,
                             icon: const Icon(Icons.replay,
-                                color: Colors.grey, size: 16),
+                                color: Colors.grey, size: 20),
                           ),
                         ),
                       ),

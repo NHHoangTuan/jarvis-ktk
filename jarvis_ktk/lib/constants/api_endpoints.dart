@@ -1,8 +1,12 @@
 class ApiEndpoints {
   static const String baseUrl = 'https://api.dev.jarvis.cx/api/v1';
+  static const String knowledgeBaseUrl =
+      'https://knowledge-api.dev.jarvis.cx/kb-core/v1';
 
   // Auth
   static const String signIn = 'auth/sign-in';
+  static const String signInWithGoogle = 'auth/google-sign-in';
+  static const String kbSignIn = 'auth/external-sign-in';
   static const String signUp = 'auth/sign-up';
   static const String refreshToken = 'auth/refresh';
   static const String signOut = 'auth/sign-out';
@@ -19,6 +23,45 @@ class ApiEndpoints {
   static const String promptById = 'prompts/{id}';
   static const String promptFavorite = 'prompts/{id}/favorite';
 
+  // Email
+  static const String responseEmail = 'ai-email';
+  static const String suggestEmailIdeas = 'ai-email/reply-ideas';
+
   // Token
   static const String tokenUsage = 'tokens/usage';
+
+  // Knowledge Base
+
+  //// AI Assistant
+
+  static const String createAssistant = 'ai-assistant';
+  static const String getAssistants = 'ai-assistant';
+  static const String updateAssistant = 'ai-assistant/{assistantId}';
+  static const String deleteAssistant = 'ai-assistant/{assistantId}';
+  static const String importKnowledgeToAssistant =
+      'ai-assistant/{assistantId}/knowledges/{knowledgeId}';
+  static const String getImportedKnowledge =
+      'ai-assistant/{assistantId}/knowledges';
+  static const String deleteImportKnowledge =
+      'ai-assistant/{assistantId}/knowledges/{knowledgeId}';
+  static const String askAssistant = 'ai-assistant/{assistantId}/ask';
+  static const String favoriteAssistant = 'ai-assistant/{assistantId}/favorite';
+  static const String updateAssistantWithNewThreadPlayground =
+      'ai-assistant/thread/playground';
+  static const String retrieveMessageOfThread =
+      'ai-assistant/thread/{openAiThreadId}/messages';
+  static const String getThreads = 'ai-assistant/{assistantId}/threads';
+  static const String createThread = 'ai-assistant/thread';
+  static const String knowledge = 'knowledge';
+  static const String knowledgeById = 'knowledge/{id}';
+  static const String knowledgeUnits = 'knowledge/{id}/units';
+  static const String knowledgeUnitById = 'knowledge/{id}/units/{unitId}';
+  static const String knowledgeUnitStatus = 'knowledge/units/{unitId}/status';
+
+  // Unit
+  static const String localFileUnit = 'knowledge/{id}/local-file';
+  static const String googleDriveUnit = 'knowledge/{id}/google-drive';
+  static const String slackUnit = 'knowledge/{id}/slack';
+  static const String confluenceUnit = 'knowledge/{id}/confluence';
+  static const String webUnit = 'knowledge/{id}/web';
 }

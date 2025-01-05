@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:jarvis_ktk/utils/colors.dart';
-import 'package:jarvis_ktk/utils/resized_image.dart';
 
 import '../../../data/network/auth_api.dart';
 import '../../../services/service_locator.dart';
@@ -10,7 +8,7 @@ class SignInView extends StatefulWidget {
   final VoidCallback onSignUpPressed;
   final VoidCallback onForgotPasswordPressed;
 
-  SignInView(this.onSignUpPressed, this.onForgotPasswordPressed);
+  const SignInView(this.onSignUpPressed, this.onForgotPasswordPressed, {super.key});
 
   @override
   _SignInViewState createState() => _SignInViewState();
@@ -39,7 +37,7 @@ class _SignInViewState extends State<SignInView> {
   // Handle login
   Future<void> _handleSignIn() async {
     if (!_validateInputs()) {
-      showToast(_errorMessage!);
+      showSnackbar(_errorMessage!);
       return;
     }
 
@@ -67,26 +65,22 @@ class _SignInViewState extends State<SignInView> {
         if (details.isNotEmpty) {
           final issue = details[0]['issue'] as String;
           setState(() => _errorMessage = issue);
-          showToast(_errorMessage!);
+          showSnackbar(_errorMessage!);
         }
       }
     } catch (e) {
       setState(() => _errorMessage = "Network error occurred");
-      showToast(_errorMessage!);
+      showSnackbar(_errorMessage!);
     } finally {
       setState(() => _isLoading = false);
     }
   }
 
-  void showToast(String message) {
-    Fluttertoast.showToast(
-        msg: message,
-        toastLength: Toast.LENGTH_SHORT,
-        gravity: ToastGravity.BOTTOM,
-        timeInSecForIosWeb: 1,
-        backgroundColor: Colors.blueGrey.shade900,
-        textColor: Colors.white,
-        fontSize: 16.0);
+  void showSnackbar(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      content: Text(message),
+      duration: const Duration(seconds: 2),
+    ));
   }
 
   @override
@@ -185,52 +179,6 @@ class _SignInViewState extends State<SignInView> {
                 ],
               ),
             ),
-          ),
-          const Expanded(
-            flex: 0,
-            child: FractionallySizedBox(
-              widthFactor: 0.75,
-              child: Row(
-                children: [
-                  Expanded(child: Divider(color: Colors.grey)),
-                  Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 8.0),
-                    child: Text("or", style: TextStyle(color: Colors.grey)),
-                  ),
-                  Expanded(child: Divider(color: Colors.grey)),
-                ],
-              ),
-            ),
-          ),
-          const SizedBox(height: 16),
-          Expanded(
-            flex: 0,
-            child: FractionallySizedBox(
-                widthFactor: 0.75,
-                child: ElevatedButton.icon(
-                  style: ElevatedButton.styleFrom(
-                    foregroundColor: Colors.black,
-                    backgroundColor: Colors.transparent,
-                    // Nền trong suốt
-                    minimumSize: const Size(double.infinity, 50),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(25),
-                      side: const BorderSide(
-                          color: Colors.black,
-                          width: 0.6), // Thêm viền nếu muốn
-                    ),
-                    elevation: 0, // Bỏ hiệu ứng nổi của nút
-                  ),
-                  icon: const ResizedImage(
-                    imagePath: 'assets/google_logo.png',
-                    height: 24,
-                    width: 24,
-                  ),
-                  label: const Text('Sign in with google'),
-                  onPressed: () {
-                    // Xử lý khi nhấn vào nút
-                  },
-                )),
           ),
         ],
       ),

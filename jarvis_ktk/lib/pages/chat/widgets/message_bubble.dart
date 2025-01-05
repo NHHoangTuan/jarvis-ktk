@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
 
 import '../../../utils/resized_image.dart';
 
@@ -21,66 +22,44 @@ class MessageBubble extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8),
-      child: Row(
-        mainAxisAlignment:
-            isUser ? MainAxisAlignment.end : MainAxisAlignment.start,
+      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
+      child: Column(
+        crossAxisAlignment:
+            isUser ? CrossAxisAlignment.end : CrossAxisAlignment.start,
         children: [
-          if (!isUser)
-            ResizedImage(
-                imagePath: avatar, width: 32, height: 32, isRound: true),
-          const SizedBox(width: 8),
-          Flexible(
-            child: Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: isUser ? Colors.blue : Colors.white,
-                borderRadius: BorderRadius.circular(20),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.1),
-                    blurRadius: 4,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
+          ResizedImage(imagePath: avatar, width: 32, height: 32, isRound: true),
+          const SizedBox(height: 8),
+          if (isLoading)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(8, 0, 8, 0),
+              child: LoadingAnimationWidget.waveDots(
+                color: Colors.blueGrey,
+                size: 20,
               ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Container(
-                    child: isLoading
-                        ? const SizedBox(
-                            height: 20,
-                            width: 20,
-                            child: CircularProgressIndicator(
-                              color: Colors.blueGrey,
-                              strokeWidth: 2,
-                            ),
-                          )
-                        : Text(
-                            text,
-                            style: TextStyle(
-                              color: isUser ? Colors.white : Colors.black,
-                              fontSize: 16,
-                            ),
-                          ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    '${timestamp.hour}:${timestamp.minute}',
-                    style: TextStyle(
-                      color: isUser ? Colors.white70 : Colors.grey,
-                      fontSize: 12,
-                    ),
-                  ),
-                ],
+            )
+          else
+            Padding(
+              padding: const EdgeInsets.fromLTRB(8, 0, 8, 0),
+              child: Text(
+                text,
+                style: TextStyle(
+                  color: isUser ? Colors.black : Colors.black,
+                  fontSize: 16,
+                ),
+              ),
+            ),
+          const SizedBox(height: 8),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(8, 0, 8, 0),
+            child: Text(
+              '${timestamp.hour}:${timestamp.minute.toString().padLeft(2, '0')}',
+              style: TextStyle(
+                color: isUser ? Colors.grey : Colors.grey,
+                fontSize: 12,
               ),
             ),
           ),
           const SizedBox(width: 8),
-          if (isUser)
-            ResizedImage(
-                imagePath: avatar, width: 32, height: 32, isRound: true),
         ],
       ),
     );

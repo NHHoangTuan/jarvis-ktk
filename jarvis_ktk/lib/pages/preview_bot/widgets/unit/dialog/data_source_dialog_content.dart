@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:jarvis_ktk/data/models/knowledge.dart';
-import 'package:jarvis_ktk/data/models/mock_data.dart';
+import 'package:jarvis_ktk/data/models/data_source.dart';
 import 'package:jarvis_ktk/utils/resized_image.dart';
 
 import '../../../../../utils/colors.dart';
@@ -17,6 +17,13 @@ class DataSourceDialogContent extends StatefulWidget {
 
 class _DataSourceDialogContent extends State<DataSourceDialogContent> {
   String? selectedTitle;
+
+  @override
+  void initState() {
+    super.initState();
+    selectedTitle = dataSourceOptions[0].title;
+    widget.onSelected(dataSourceOptions[0]);
+  }
 
   @override
   Widget build(BuildContext context) {

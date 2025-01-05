@@ -1,55 +1,89 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:jarvis_ktk/data/providers/bot_provider.dart';
+import 'package:jarvis_ktk/data/providers/chat_provider.dart';
+import 'package:jarvis_ktk/data/providers/token_provider.dart';
+import 'package:jarvis_ktk/services/cache_service.dart';
+import 'package:jarvis_ktk/utils/resized_image.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:provider/provider.dart';
-import '../../data/models/token_usage.dart';
+
 import '../../data/network/token_api.dart';
-import '../../services/cache_service.dart';
+
 import '../../services/service_locator.dart';
-import 'chat_model.dart';
+
 import 'widgets/select_agent_dropdown.dart';
 
 class ChatAppBar extends StatefulWidget implements PreferredSizeWidget {
+  @override
   State<ChatAppBar> createState() => _ChatAppBarState();
 
   @override
   final Size preferredSize;
 
-  const ChatAppBar({super.key, required this.onAgentChanged})
+  const ChatAppBar({super.key})
       : preferredSize = const Size.fromHeight(kToolbarHeight);
-  final Function(String) onAgentChanged;
 }
 
 class _ChatAppBarState extends State<ChatAppBar> {
   final tokenApi = getIt<TokenApi>();
-  StreamController<TokenUsage?> _tokenUsageController =
-      StreamController<TokenUsage?>.broadcast();
+  bool _isLoadingToken = false;
+  bool _isLoadingBot = false;
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
-    _loadInitialTokens();
+    _handleLoadTokenUsage();
+    _handleLoadBots();
   }
 
-  Future<void> _loadInitialTokens() async {
-    final tokens = await CacheService.getCachedTokenUsage(tokenApi);
-    _tokenUsageController.add(tokens);
+  Future<void> _handleLoadTokenUsage() async {
+    setState(() {
+      _isLoadingToken = true;
+    });
+    try {
+      await Provider.of<TokenProvider>(context, listen: false).loadTokenUsage();
+    } catch (e) {
+      debugPrint('Error loading token usage: $e');
+    } finally {
+      setState(() {
+        _isLoadingToken = false;
+      });
+    }
   }
 
-  Future<void> _refreshTokens() async {
-    if (_tokenUsageController.isClosed) return;
-    final tokens = await CacheService.getCachedTokenUsage(tokenApi);
-    _tokenUsageController.add(tokens);
+  Future<void> _handleLoadBots() async {
+    setState(() {
+      _isLoadingBot = true;
+    });
+    try {
+      final botProvider = Provider.of<BotProvider>(context, listen: false);
+      final chatProvider = Provider.of<ChatProvider>(context, listen: false);
+      await botProvider.loadBots();
+      for (final bot in botProvider.bots) {
+        // kiểm tra nếu bot là favorite và không nằm trong ai agent thì thêm vào
+        if (bot.isFavorite &&
+            !chatProvider.aiAgents.any((element) => element['id'] == bot.id)) {
+          chatProvider.addBotToAiAgents(bot);
+        }
+      }
+    } catch (e) {
+      debugPrint('Error loading bots: $e');
+    } finally {
+      setState(() {
+        _isLoadingBot = false;
+      });
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    final chatModel = Provider.of<ChatModel>(context);
-
+    final chatProvider = Provider.of<ChatProvider>(context, listen: true);
     return AppBar(
       elevation: 0,
       backgroundColor: Colors.blue[50],
+      scrolledUnderElevation: 0,
       titleSpacing: 0,
       title: Row(
         mainAxisSize: MainAxisSize.min,
@@ -59,14 +93,24 @@ class _ChatAppBarState extends State<ChatAppBar> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
-                SelectAgentDropdown(
-                  selectedAgent: chatModel.selectedAgent,
-                  aiAgents: chatModel.aiAgents,
-                  onChanged: (value) {
-                    chatModel.setSelectedAgent(value!);
-                    widget.onAgentChanged(value);
-                  },
-                ),
+                // if (chatProvider.isBOT)
+                //   if (_isLoadingBot)
+                //     LoadingAnimationWidget.twistingDots(
+                //       leftDotColor: const Color(0xFF1A1A3F),
+                //       rightDotColor: const Color(0xFFEA3799),
+                //       size: 20,
+                //     )
+                //   else
+                //     const SelectBotDropdown()
+                // else
+                if (_isLoadingBot)
+                  LoadingAnimationWidget.twistingDots(
+                    leftDotColor: const Color(0xFF1A1A3F),
+                    rightDotColor: const Color(0xFFEA3799),
+                    size: 20,
+                  )
+                else
+                  const SelectAgentDropdown(),
               ],
             ),
           ),
@@ -75,23 +119,19 @@ class _ChatAppBarState extends State<ChatAppBar> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
-                StreamBuilder<TokenUsage?>(
-                    stream: _tokenUsageController.stream,
-                    initialData: null,
-                    builder: (context, snapshot) {
-                      if (snapshot.connectionState == ConnectionState.waiting) {
-                        return const CircularProgressIndicator();
-                      }
-
-                      if (snapshot.data?.availableTokens != null &&
-                          snapshot.data?.availableTokens !=
-                              chatModel.tokenCount) {
-                        _refreshTokens();
-                      }
-
-                      final tokenCount = snapshot.data?.availableTokens ?? 0;
-                      return TokenDisplay(tokenCount: tokenCount);
-                    })
+                if (_isLoadingToken)
+                  LoadingAnimationWidget.twistingDots(
+                    leftDotColor: const Color(0xFF1A1A3F),
+                    rightDotColor: const Color(0xFFEA3799),
+                    size: 20,
+                  )
+                else
+                  Consumer<TokenProvider>(
+                    builder: (context, tokenProvider, child) {
+                      return TokenDisplay(
+                          tokenCount: tokenProvider.currentToken);
+                    },
+                  ),
               ],
             ),
           ),
@@ -101,41 +141,47 @@ class _ChatAppBarState extends State<ChatAppBar> {
         PopupMenuButton<String>(
           icon: const Icon(Icons.more_vert, color: Colors.black),
           onSelected: (String choice) {
-            if (choice == 'New Chat') {
-              chatModel.clearMessages();
-              chatModel.resetConversationId();
+            if (choice == 'newchat') {
+              chatProvider.clearChatHistory();
+              chatProvider.selectConversationId('');
+              chatProvider.setShowWelcomeMessage(true);
+              CacheService.clearChatHistoryCache();
+            } else if (choice == 'switchaiagent') {
+              chatProvider.setBOT(!chatProvider.isBOT);
+              chatProvider.clearChatHistory();
+              chatProvider.selectConversationId('');
+              chatProvider.setShowWelcomeMessage(true);
             }
           },
-          itemBuilder: (BuildContext context) {
-            return {'New Chat'}.map((String choice) {
-              return PopupMenuItem<String>(
-                value: choice,
-                child: ListTile(
-                  leading: const Icon(Icons.chat),
-                  title: Text(choice),
-                ),
-              );
-            }).toList();
-          },
+          itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
+            const PopupMenuItem<String>(
+              value: 'newchat',
+              child: ListTile(
+                leading: Icon(Icons.chat_outlined),
+                title: Text('New Chat'),
+              ),
+            ),
+            // const PopupMenuItem<String>(
+            //   value: 'switchaiagent',
+            //   child: ListTile(
+            //     leading: Icon(Icons.swap_horizontal_circle_outlined),
+            //     title: Text('Switch AI Agent'),
+            //   ),
+            // ),
+          ],
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
+            borderRadius: BorderRadius.circular(16),
           ),
         ),
       ],
     );
-  }
-
-  @override
-  void dispose() {
-    _tokenUsageController.close();
-    super.dispose();
   }
 }
 
 class TokenDisplay extends StatelessWidget {
   final int tokenCount;
 
-  const TokenDisplay({required this.tokenCount});
+  const TokenDisplay({super.key, required this.tokenCount});
 
   @override
   Widget build(BuildContext context) {
@@ -148,10 +194,10 @@ class TokenDisplay extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Icon(
-            Icons.local_fire_department,
-            color: Colors.orange,
-            size: 20,
+          const ResizedImage(
+            imagePath: 'assets/fire_2.png',
+            width: 18,
+            height: 18,
           ),
           const SizedBox(width: 4),
           Text(
