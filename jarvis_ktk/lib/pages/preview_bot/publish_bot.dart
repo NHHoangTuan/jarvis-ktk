@@ -10,15 +10,12 @@ class PublishBotPage extends StatefulWidget {
 
 class _PublishBotPageState extends State<PublishBotPage> {
   final TextEditingController _textController = TextEditingController();
-  int _charCount = 0;
 
   @override
   void initState() {
     super.initState();
     _textController.addListener(() {
-      setState(() {
-        _charCount = _textController.text.length;
-      });
+      setState(() {});
     });
   }
 

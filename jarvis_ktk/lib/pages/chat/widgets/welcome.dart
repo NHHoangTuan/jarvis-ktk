@@ -1,16 +1,33 @@
 import 'package:flutter/material.dart';
+import 'package:jarvis_ktk/utils/resized_image.dart';
+import 'package:jarvis_ktk/utils/toast.dart';
+import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart'; // Import thư viện này
+import '../../../data/providers/token_provider.dart';
 import 'command_card.dart'; // Import CommandCard nếu cần
 
 class WelcomeMessage extends StatelessWidget {
-  const WelcomeMessage({Key? key}) : super(key: key);
+  final void Function(String message) sendMessage;
+  const WelcomeMessage({Key? key, required this.sendMessage}) : super(key: key);
+
+  void _openUpgradeLink() async {
+    final Uri url = Uri.parse('https://admin.dev.jarvis.cx/pricing/overview');
+    if (!await launchUrl(url)) {
+      throw Exception('Could not launch $url');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
+    // Lấy tokenProvider từ context
+    final tokenProvider = Provider.of<TokenProvider>(context);
     return Center(
       child: Padding(
-        padding: const EdgeInsets.only(left: 16.0, right: 16.0, top: 16.0, bottom: 0.0),
+        padding: const EdgeInsets.only(
+            left: 16.0, right: 16.0, top: 16.0, bottom: 0.0),
         child: SingleChildScrollView(
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const Row(
                 children: [
@@ -35,6 +52,35 @@ class WelcomeMessage extends StatelessWidget {
                 style: TextStyle(fontSize: 16),
               ),
               const SizedBox(height: 16),
+              if (!tokenProvider.tokenUsage!.unlimited)
+                // Mục Nâng cấp tài khoản
+                Card(
+                  color: Colors.amber[100],
+                  child: InkWell(
+                    onTap: _openUpgradeLink,
+                    child: const Padding(
+                      padding: EdgeInsets.all(16.0),
+                      child: Row(
+                        children: [
+                          ResizedImage(
+                              imagePath: 'assets/upgrade.png',
+                              width: 50,
+                              height: 50),
+                          SizedBox(width: 16),
+                          Expanded(
+                            child: Text(
+                              'Upgrade Your Account\nUnlock more features',
+                              style: TextStyle(
+                                  fontSize: 16, fontWeight: FontWeight.bold),
+                            ),
+                          ),
+                          Icon(Icons.arrow_forward_ios, size: 16),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              const SizedBox(height: 24),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -44,6 +90,7 @@ class WelcomeMessage extends StatelessWidget {
                       child: InkWell(
                         onTap: () {
                           // Add action for upload image
+                          ToastUtils.showToast("Coming soon");
                         },
                         child: const Padding(
                           padding: EdgeInsets.all(16.0),
@@ -73,17 +120,19 @@ class WelcomeMessage extends StatelessWidget {
                   CommandCard(
                     command: 'Write an email',
                     description: 'to submission project',
-                    onTap: () {},
+                    onTap: () =>
+                        sendMessage('Write an email to submission project'),
                   ),
                   CommandCard(
                     command: 'Suggest events',
                     description: 'for this summer',
-                    onTap: () {},
+                    onTap: () => sendMessage('Suggest events for this summer'),
                   ),
                   CommandCard(
                     command: 'List some books',
                     description: 'related to adventure',
-                    onTap: () {},
+                    onTap: () =>
+                        sendMessage('List some books related to adventure'),
                   ),
                 ],
               ),

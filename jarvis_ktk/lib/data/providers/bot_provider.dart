@@ -31,9 +31,8 @@ class BotProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> loadThreads() async {
-    if (_selectedBot == null) return;
-    _threads = await _botApi.getThreads(_selectedBot!.id,
+  Future<void> loadThreads(String assistantId) async {
+    _threads = await _botApi.getThreads(assistantId,
         order: 'DESC', orderField: 'updatedAt', limit: 30);
     notifyListeners();
   }
@@ -66,7 +65,6 @@ class BotProvider with ChangeNotifier {
     final updatedBot = await _botApi.favoriteBot(botId);
     final index = _bots.indexWhere((bot) => bot.id == botId);
     _bots[index] = updatedBot;
-    _selectedBot = updatedBot;
     notifyListeners();
   }
 
@@ -96,8 +94,9 @@ class BotProvider with ChangeNotifier {
 
   Future<void> askBot(
       String botId, String openAiThreadId, String message) async {
+    final instructions = _selectedBot?.instructions ?? '';
     _currentMessageResponse = await _botApi.askAssistant(
-        botId, message, openAiThreadId, _selectedBot!.instructions);
+        botId, message, openAiThreadId, instructions);
     notifyListeners();
   }
 

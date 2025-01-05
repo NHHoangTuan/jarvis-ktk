@@ -8,6 +8,7 @@ import 'package:jarvis_ktk/services/cache_service.dart';
 import 'package:jarvis_ktk/utils/resized_image.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../data/models/chat.dart';
 import '../data/models/user.dart';
@@ -105,7 +106,7 @@ class _NavDrawerState extends State<NavDrawer> with TickerProviderStateMixin {
     try {
       if (chatProvider.isBOT) {
         if (botProvider.threads.isEmpty) {
-          await botProvider.loadThreads();
+          await botProvider.loadThreads(chatProvider.selectedAiAgent['id']!);
         }
 
         if (botProvider.threads.isNotEmpty) {
@@ -130,6 +131,13 @@ class _NavDrawerState extends State<NavDrawer> with TickerProviderStateMixin {
       setState(() {
         _isLoadingHistory = false;
       });
+    }
+  }
+
+  void _openUpgradeLink() async {
+    final Uri url = Uri.parse('https://admin.dev.jarvis.cx/pricing/overview');
+    if (!await launchUrl(url)) {
+      throw Exception('Could not launch $url');
     }
   }
 
@@ -272,37 +280,40 @@ class _NavDrawerState extends State<NavDrawer> with TickerProviderStateMixin {
 
             // Chat history section
             Expanded(
-              child: Consumer<ChatProvider>(
-                  builder: (context, chatProvider, snapshot) {
-                if (_isLoadingHistory) {
-                  return const Center(child: CircularProgressIndicator());
-                }
-                if (chatProvider.conversations.isEmpty) {
-                  return const Center(
-                    child: Text('No conversations found.'),
-                  );
-                }
-                return ListView.builder(
-                  itemCount: chatProvider.conversations.length,
-                  itemBuilder: (context, index) {
-                    final conversation = chatProvider.conversations[index];
-                    return ListTile(
-                      leading: const Icon(Icons.message),
-                      title: Text(conversation.title),
-                      onTap: () {
-                        chatProvider.selectConversationId(
-                            conversation.id); // Set selected conversation
-                        chatProvider.setTapHistory(true);
-                        setState(() {
-                          _selectedItem = 'Chat';
-                          _showPersonalOptions = false;
-                        });
-                        widget.onItemTap('Chat');
-                      },
+              child: RefreshIndicator(
+                onRefresh: _handleLoadConversations,
+                child: Consumer<ChatProvider>(
+                    builder: (context, chatProvider, snapshot) {
+                  if (_isLoadingHistory) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+                  if (chatProvider.conversations.isEmpty) {
+                    return const Center(
+                      child: Text('No conversations found.'),
                     );
-                  },
-                );
-              }),
+                  }
+                  return ListView.builder(
+                    itemCount: chatProvider.conversations.length,
+                    itemBuilder: (context, index) {
+                      final conversation = chatProvider.conversations[index];
+                      return ListTile(
+                        leading: const Icon(Icons.message),
+                        title: Text(conversation.title),
+                        onTap: () {
+                          chatProvider.selectConversationId(
+                              conversation.id); // Set selected conversation
+                          chatProvider.setTapHistory(true);
+                          setState(() {
+                            _selectedItem = 'Chat';
+                            _showPersonalOptions = false;
+                          });
+                          widget.onItemTap('Chat');
+                        },
+                      );
+                    },
+                  );
+                }),
+              ),
             ),
             const Divider(),
 
@@ -316,6 +327,7 @@ class _NavDrawerState extends State<NavDrawer> with TickerProviderStateMixin {
 
   Widget _buildAccountSection() {
     final apiService = getIt<ApiService>();
+    final tokenProvider = Provider.of<TokenProvider>(context);
 
     return FutureBuilder<User?>(
       future: apiService.getStoredUser(),
@@ -334,6 +346,76 @@ class _NavDrawerState extends State<NavDrawer> with TickerProviderStateMixin {
                 ),
                 title: Text(snapshot.data!.username),
                 subtitle: Text(snapshot.data!.email),
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Text(
+                          'Token Usage 🔥',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        Text(
+                          '${tokenProvider.currentToken} / ${tokenProvider.tokenUsage!.totalTokens}',
+                          style: const TextStyle(
+                            fontSize: 16,
+                            color: Colors.blueGrey,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    LinearProgressIndicator(
+                      value: tokenProvider.currentToken /
+                          tokenProvider.tokenUsage!.totalTokens,
+                      backgroundColor: Colors.grey[300],
+                      valueColor:
+                          const AlwaysStoppedAnimation<Color>(Colors.blue),
+                    ),
+                    const SizedBox(height: 16),
+                    if (!tokenProvider
+                        .tokenUsage!.unlimited) // Nếu chưa nâng cấp lên Pro
+                      Center(
+                        child: ElevatedButton(
+                          onPressed: () {
+                            _openUpgradeLink();
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.transparent, // Màu nền
+                            foregroundColor: Colors.black, // Màu chữ
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 32, vertical: 12),
+
+                            elevation: 0, // Độ cao
+                          ),
+                          child: const Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              ResizedImage(
+                                  imagePath: 'assets/upgrade.png',
+                                  width: 20,
+                                  height: 20), // Biểu tượng ngôi sao
+                              SizedBox(width: 8),
+                              Text(
+                                'Upgrade to Pro',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
               ),
               const Divider(),
               // Sign out button

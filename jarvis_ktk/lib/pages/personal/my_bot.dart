@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 import 'package:jarvis_ktk/pages/personal/widgets/confirm_delete_dialog.dart';
 import 'package:jarvis_ktk/pages/personal/widgets/type_dropdown.dart';
 import 'package:jarvis_ktk/utils/resized_image.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:provider/provider.dart';
 
 import '../../data/models/bot.dart';
@@ -21,7 +22,7 @@ class _MyBotPageState extends State<MyBotPage> {
   final FocusNode _searchFocusNode = FocusNode(); // Thêm FocusNode
 
   bool _isLoading = false;
-  bool _isLoadingFavorite = false;
+  List<bool> _isLoadingFavorite = [];
 
   @override
   void initState() {
@@ -35,12 +36,28 @@ class _MyBotPageState extends State<MyBotPage> {
     super.dispose();
   }
 
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Update loading states when bots change
+    final botCount = context.read<BotProvider>().bots.length;
+    if (_isLoadingFavorite.length != botCount) {
+      setState(() {
+        _isLoadingFavorite = List.generate(botCount, (index) => false);
+      });
+    }
+  }
+
   Future<void> _handleLoadBots() async {
     setState(() {
       _isLoading = true;
     });
     try {
       await context.read<BotProvider>().loadBots();
+      if (mounted) {
+        _isLoadingFavorite = List.generate(
+            context.read<BotProvider>().bots.length, (index) => false);
+      }
     } catch (e) {
       debugPrint('Error loading bots: $e');
     } finally {
@@ -50,18 +67,18 @@ class _MyBotPageState extends State<MyBotPage> {
     }
   }
 
-  Future<void> _handleFavoriteBot(Bot bot) async {
+  Future<void> _handleFavoriteBot(Bot bot, int index) async {
     setState(() {
-      _isLoadingFavorite = true;
+      _isLoadingFavorite[index] = true;
     });
     try {
-      debugPrint('Favorite bot: ${bot.isFavorite}');
-      Provider.of<BotProvider>(context, listen: false).favoriteBot(bot.id);
+      final botProvider = context.read<BotProvider>();
+      await botProvider.favoriteBot(bot.id);
     } catch (e) {
       debugPrint('Error favoriting bot: $e');
     } finally {
       setState(() {
-        _isLoadingFavorite = false;
+        _isLoadingFavorite[index] = false;
       });
     }
   }
@@ -129,6 +146,11 @@ class _MyBotPageState extends State<MyBotPage> {
                   onRefresh: _handleLoadBots,
                   child: Consumer<BotProvider>(
                     builder: (context, botProvider, child) {
+                      if (_isLoadingFavorite.length !=
+                          botProvider.bots.length) {
+                        _isLoadingFavorite = List.generate(
+                            botProvider.bots.length, (index) => false);
+                      }
                       if (_isLoading) {
                         return const Center(child: CircularProgressIndicator());
                       }
@@ -150,7 +172,7 @@ class _MyBotPageState extends State<MyBotPage> {
                         ),
                         itemCount: botProvider.bots.length,
                         itemBuilder: (context, index) {
-                          return _buildGridItem(botProvider.bots[index]);
+                          return _buildGridItem(botProvider.bots[index], index);
                         },
                       );
                     },
@@ -162,7 +184,7 @@ class _MyBotPageState extends State<MyBotPage> {
         ],
       );
 
-  Widget _buildGridItem(Bot bot) {
+  Widget _buildGridItem(Bot bot, int index) {
     return Card(
         shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
@@ -217,13 +239,18 @@ class _MyBotPageState extends State<MyBotPage> {
                               child: Container(
                                 alignment: Alignment.center,
                                 child: IconButton(
-                                    icon: bot.isFavorite
-                                        ? const Icon(Icons.star,
-                                            color: Colors.yellow)
-                                        : const Icon(Icons.star_outline),
-                                    onPressed: () => _isLoadingFavorite
+                                    icon: _isLoadingFavorite[index]
+                                        ? LoadingAnimationWidget
+                                            .threeRotatingDots(
+                                                color: Colors.blueGrey,
+                                                size: 20)
+                                        : bot.isFavorite
+                                            ? const Icon(Icons.star,
+                                                color: Colors.yellow)
+                                            : const Icon(Icons.star_outline),
+                                    onPressed: () => _isLoadingFavorite[index]
                                         ? null
-                                        : _handleFavoriteBot(bot)),
+                                        : _handleFavoriteBot(bot, index)),
                               ),
                             ),
                             Expanded(
