@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 
-class PublicPromptSearchBar extends StatelessWidget {
+class PromptSearchBar extends StatelessWidget {
   final ValueChanged<String>? onChanged;
   final TextEditingController? controller;
 
-  const PublicPromptSearchBar({super.key, this.onChanged, this.controller});
+  const PromptSearchBar({super.key, this.onChanged, this.controller});
 
   @override
   Widget build(BuildContext context) {
