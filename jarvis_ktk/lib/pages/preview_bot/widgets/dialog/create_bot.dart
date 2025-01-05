@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:jarvis_ktk/utils/toast.dart';
 import 'package:provider/provider.dart';
 
 import '../../../../data/providers/bot_provider.dart';
@@ -141,6 +142,7 @@ class _CreateBotPageState extends State<CreateBotPage> {
                 GestureDetector(
                   onTap: () {
                     // Handle image upload
+                    ToastUtils.showToast("Coming soon");
                   },
                   child: Container(
                     width: 100,

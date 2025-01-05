@@ -1,5 +1,6 @@
 import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/material.dart';
+import 'package:jarvis_ktk/utils/toast.dart';
 
 import '../../prompt_bottom_sheet/prompt_bottom_sheet.dart';
 
@@ -26,9 +27,9 @@ class MessageInput extends StatelessWidget {
             DropdownSearch<(IconData, String)>(
               mode: Mode.custom,
               items: (f, cs) => [
-                (Icons.image, 'Upload image'),
-                (Icons.photo_camera, 'Take a photo'),
-                (Icons.electric_bolt, 'Prompt'),
+                (Icons.image_outlined, 'Upload image'),
+                (Icons.photo_camera_outlined, 'Take a photo'),
+                (Icons.electric_bolt_outlined, 'Prompt'),
               ],
               compareFn: (item1, item2) => item1.$1 == item2.$1,
               popupProps: PopupProps.modalBottomSheet(
@@ -52,10 +53,21 @@ class MessageInput extends StatelessWidget {
                 color: Colors.black,
               ),
               onChanged: (selectedItem) {
-                if (selectedItem != null && selectedItem.$2 == 'Prompt') {
-                  showPromptBottomSheet(context, onClick: (prompt) {
-                    messageController.text = prompt.content;
-                  });
+                if (selectedItem != null) {
+                  switch (selectedItem.$2) {
+                    case 'Upload image':
+                      ToastUtils.showToast("Coming soon");
+                      break;
+                    case 'Take a photo':
+                      ToastUtils.showToast("Coming soon");
+                      break;
+                    case 'Prompt':
+                      showPromptBottomSheet(context, onClick: (prompt) {
+                        messageController.text = prompt.content;
+                      });
+                      break;
+                    default:
+                  }
                 }
               },
             ),

@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:jarvis_ktk/utils/resized_image.dart';
 import 'package:jarvis_ktk/utils/toast.dart';
+import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart'; // Import thư viện này
+import '../../../data/providers/token_provider.dart';
 import 'command_card.dart'; // Import CommandCard nếu cần
 
 class WelcomeMessage extends StatelessWidget {
@@ -17,9 +19,12 @@ class WelcomeMessage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Lấy tokenProvider từ context
+    final tokenProvider = Provider.of<TokenProvider>(context);
     return Center(
       child: Padding(
-        padding: const EdgeInsets.only(left: 16.0, right: 16.0, top: 16.0, bottom: 0.0),
+        padding: const EdgeInsets.only(
+            left: 16.0, right: 16.0, top: 16.0, bottom: 0.0),
         child: SingleChildScrollView(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -47,33 +52,34 @@ class WelcomeMessage extends StatelessWidget {
                 style: TextStyle(fontSize: 16),
               ),
               const SizedBox(height: 16),
-              // Mục Nâng cấp tài khoản
-              Card(
-                color: Colors.amber[100],
-                child: InkWell(
-                  onTap: _openUpgradeLink,
-                  child: const Padding(
-                    padding: EdgeInsets.all(16.0),
-                    child: Row(
-                      children: [
-                        ResizedImage(
-                            imagePath: 'assets/upgrade.png',
-                            width: 50,
-                            height: 50),
-                        SizedBox(width: 16),
-                        Expanded(
-                          child: Text(
-                            'Upgrade Your Account\nUnlock more features',
-                            style: TextStyle(
-                                fontSize: 16, fontWeight: FontWeight.bold),
+              if (!tokenProvider.tokenUsage!.unlimited)
+                // Mục Nâng cấp tài khoản
+                Card(
+                  color: Colors.amber[100],
+                  child: InkWell(
+                    onTap: _openUpgradeLink,
+                    child: const Padding(
+                      padding: EdgeInsets.all(16.0),
+                      child: Row(
+                        children: [
+                          ResizedImage(
+                              imagePath: 'assets/upgrade.png',
+                              width: 50,
+                              height: 50),
+                          SizedBox(width: 16),
+                          Expanded(
+                            child: Text(
+                              'Upgrade Your Account\nUnlock more features',
+                              style: TextStyle(
+                                  fontSize: 16, fontWeight: FontWeight.bold),
+                            ),
                           ),
-                        ),
-                        Icon(Icons.arrow_forward_ios, size: 16),
-                      ],
+                          Icon(Icons.arrow_forward_ios, size: 16),
+                        ],
+                      ),
                     ),
                   ),
                 ),
-              ),
               const SizedBox(height: 24),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,

@@ -132,8 +132,7 @@ class _AddCustomAssistantState extends State<AddCustomAssistant> {
 
                       if (botProvider.bots.isEmpty) {
                         return const Center(
-                          child: Text(
-                              'No knowledge found. Create your first one!'),
+                          child: Text('No bot found. Create your first one!'),
                         );
                       }
 
