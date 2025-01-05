@@ -88,7 +88,11 @@ class _HomePageState extends State<HomePage> {
                 break;
               case 'Knowledge': // Handle Knowledge case
                 _changeBody(const KnowledgePage());
-                _changeAppBar(AppBar(title: const Text('Knowledge')));
+                _changeAppBar(AppBar(
+                    title: const Text('Knowledge'),
+                    scrolledUnderElevation: 0,
+                    elevation: 0,
+                    backgroundColor: Colors.blue[50]));
                 break;
             }
 
