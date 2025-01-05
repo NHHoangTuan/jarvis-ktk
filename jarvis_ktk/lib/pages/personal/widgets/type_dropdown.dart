@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:dropdown_button2/dropdown_button2.dart';
+import 'package:provider/provider.dart';
+
+import '../../../data/providers/bot_provider.dart';
 
 class TypeDropdown extends StatefulWidget {
   const TypeDropdown({
@@ -16,6 +19,7 @@ class _TypeDropdownState extends State<TypeDropdown> {
 
   @override
   Widget build(BuildContext context) {
+    final botProvider = Provider.of<BotProvider>(context);
     return DropdownButtonHideUnderline(
       child: DropdownButton2<String>(
         isExpanded: true,
@@ -36,6 +40,8 @@ class _TypeDropdownState extends State<TypeDropdown> {
           setState(() {
             selectedValue = value;
           });
+          botProvider.setFilterValue(value!);
+          botProvider.filterBot();
         },
         buttonStyleData: ButtonStyleData(
           height: 50,
@@ -43,9 +49,7 @@ class _TypeDropdownState extends State<TypeDropdown> {
           padding: const EdgeInsets.only(left: 14, right: 14),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(8),
-            border: Border.all(
-              color: Colors.black,
-            ),
+            border: Border.all(color: Colors.black, width: 0.8),
           ),
         ),
         dropdownStyleData: DropdownStyleData(

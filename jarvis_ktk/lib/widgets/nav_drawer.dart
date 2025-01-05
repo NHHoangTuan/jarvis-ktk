@@ -363,7 +363,7 @@ class _NavDrawerState extends State<NavDrawer> with TickerProviderStateMixin {
                           ),
                         ),
                         Text(
-                          '${tokenProvider.currentToken} / ${tokenProvider.tokenUsage!.totalTokens}',
+                          '${tokenProvider.currentToken} / ${tokenProvider.tokenUsage.totalTokens}',
                           style: const TextStyle(
                             fontSize: 16,
                             color: Colors.blueGrey,
@@ -373,15 +373,19 @@ class _NavDrawerState extends State<NavDrawer> with TickerProviderStateMixin {
                     ),
                     const SizedBox(height: 8),
                     LinearProgressIndicator(
-                      value: tokenProvider.currentToken /
-                          tokenProvider.tokenUsage!.totalTokens,
+                      // Sử lí nếu value lỗi
+                      value: tokenProvider.tokenUsage.totalTokens == 0
+                          ? 1
+                          : tokenProvider.currentToken /
+                              tokenProvider.tokenUsage.totalTokens,
                       backgroundColor: Colors.grey[300],
                       valueColor:
                           const AlwaysStoppedAnimation<Color>(Colors.blue),
                     ),
                     const SizedBox(height: 16),
-                    if (!tokenProvider
-                        .tokenUsage!.unlimited) // Nếu chưa nâng cấp lên Pro
+                    if (tokenProvider.tokenUsage.unlimited == true)
+                      const SizedBox()
+                    else // Nếu chưa nâng cấp lên Pro
                       Center(
                         child: ElevatedButton(
                           onPressed: () {

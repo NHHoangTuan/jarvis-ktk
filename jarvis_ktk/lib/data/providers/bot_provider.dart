@@ -8,26 +8,33 @@ import '../network/bot_api.dart';
 class BotProvider with ChangeNotifier {
   final BotApi _botApi;
   List<Bot> _bots = [];
+  List<Bot> _filterBots = [];
   List<Thread> _threads = [];
   List<Map<String, dynamic>> _importedKnowledges = [];
   Bot? _selectedBot;
   String? _currentMessageResponse;
   List<MessageData>? _messages = [];
   String _newThreadId = '';
+  String _filterValue = 'All';
+  String _searchValue = '';
 
   BotProvider(this._botApi);
 
   List<Bot> get bots => _bots;
+  List<Bot> get filterBots => _filterBots;
   List<Thread> get threads => _threads;
   List<Map<String, dynamic>> get importedKnowledges => _importedKnowledges;
   Bot? get selectedBot => _selectedBot;
   String? get currentMessageResponse => _currentMessageResponse;
   List<MessageData>? get messages => _messages;
   String get newThreadId => _newThreadId;
+  String get filterValue => _filterValue;
+  String get searchValue => _searchValue;
 
   Future<void> loadBots() async {
     _bots = await _botApi.getBotList(
         order: 'DESC', orderField: 'createdAt', limit: 20);
+    _filterBots = _bots.toList();
     notifyListeners();
   }
 
@@ -114,8 +121,57 @@ class BotProvider with ChangeNotifier {
     notifyListeners();
   }
 
+  void filterBot() {
+    _filterBots = _bots.toList();
+
+    _filterBots = _filterBots
+        .where((filterBot) =>
+            filterBot.assistantName
+                .toLowerCase()
+                .contains(_searchValue.toLowerCase()) ||
+            (filterBot.description?.toLowerCase() ?? '')
+                .contains(_searchValue.toLowerCase()))
+        .toList();
+
+    if (_filterValue == 'All') {
+      _filterBots = _filterBots.toList();
+    } else if (_filterValue == 'Published') {
+      _filterBots = _filterBots.where((bot) => bot.isDefault).toList();
+    } else if (_filterValue == 'My Favourite') {
+      _filterBots = _filterBots.where((bot) => bot.isFavorite).toList();
+    }
+    notifyListeners();
+  }
+
+  // void searchBot(String value) {
+  //   if (value.isEmpty) {
+  //     _filterBots = _bots.toList();
+  //     return;
+  //   }
+
+  //   _filterBots = _filterBots
+  //       .where((filterBot) =>
+  //           filterBot.assistantName
+  //               .toLowerCase()
+  //               .contains(value.toLowerCase()) ||
+  //           (filterBot.description?.toLowerCase() ?? '')
+  //               .contains(value.toLowerCase()))
+  //       .toList();
+  //   notifyListeners();
+  // }
+
   void selectBot(Bot bot) {
     _selectedBot = bot;
+    notifyListeners();
+  }
+
+  void setFilterValue(String value) {
+    _filterValue = value;
+    notifyListeners();
+  }
+
+  void setSearchValue(String value) {
+    _searchValue = value;
     notifyListeners();
   }
 

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:jarvis_ktk/pages/preview_bot/widgets/dialog/add_knowledge_preview_bot.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:provider/provider.dart';
 
@@ -114,7 +115,12 @@ class _KnowledgePreviewBotPageState extends State<KnowledgePreviewBotPage>
                   if (_isExpanded) const Divider(),
                   Consumer<BotProvider>(builder: (context, botProvider, child) {
                     if (_isLoading) {
-                      return const Center(child: CircularProgressIndicator());
+                      return Center(
+                          child: LoadingAnimationWidget.flickr(
+                        leftDotColor: Colors.blue,
+                        rightDotColor: Colors.red,
+                        size: 20,
+                      ));
                     }
                     return AnimatedContainer(
                       duration: const Duration(milliseconds: 300),

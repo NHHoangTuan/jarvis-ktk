@@ -52,7 +52,9 @@ class WelcomeMessage extends StatelessWidget {
                 style: TextStyle(fontSize: 16),
               ),
               const SizedBox(height: 16),
-              if (!tokenProvider.tokenUsage!.unlimited)
+              if (tokenProvider.tokenUsage.unlimited == true)
+                const SizedBox()
+              else
                 // Mục Nâng cấp tài khoản
                 Card(
                   color: Colors.amber[100],

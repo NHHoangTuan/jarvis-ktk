@@ -23,25 +23,24 @@ class CacheService {
   static int _currentHistoryLength = 0;
 
   // Add token usage cache methods
-  static Future<TokenUsage?> getCachedTokenUsage(TokenApi tokenApi) async {
+  static Future<TokenUsage> getCachedTokenUsage(TokenApi tokenApi) async {
     final apiService = getIt<ApiService>();
     final user = await apiService.getStoredUser();
-    if (user == null) return null;
+    if (user == null)
+      return TokenUsage(availableTokens: 0, totalTokens: 0, unlimited: false);
 
     // Check if cache exists and is valid
     if (_tokenCache.containsKey('tokenUsage') && _lastTokenFetch != null) {
       final difference = DateTime.now().difference(_lastTokenFetch!);
       if (difference < _cacheValidity) {
-        return _tokenCache['tokenUsage'];
+        return _tokenCache['tokenUsage']!;
       }
     }
 
     // If cache doesn't exist or expired, fetch from API
     final tokenUsage = await tokenApi.fetchTokenUsage();
-    if (tokenUsage != null) {
-      _tokenCache['tokenUsage'] = tokenUsage;
-      _lastTokenFetch = DateTime.now();
-    }
+    _tokenCache['tokenUsage'] = tokenUsage;
+    _lastTokenFetch = DateTime.now();
     return tokenUsage;
   }
 

@@ -20,6 +20,8 @@ class MyBotPage extends StatefulWidget {
 
 class _MyBotPageState extends State<MyBotPage> {
   final FocusNode _searchFocusNode = FocusNode(); // Thêm FocusNode
+  final TextEditingController _searchController = TextEditingController();
+  String _searchTerm = '';
 
   bool _isLoading = false;
   List<bool> _isLoadingFavorite = [];
@@ -27,12 +29,14 @@ class _MyBotPageState extends State<MyBotPage> {
   @override
   void initState() {
     super.initState();
+    _searchController.addListener(_onSearchChanged);
     _handleLoadBots();
   }
 
   @override
   void dispose() {
     _searchFocusNode.dispose(); // Dispose FocusNode
+    _searchController.dispose();
     super.dispose();
   }
 
@@ -40,12 +44,21 @@ class _MyBotPageState extends State<MyBotPage> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     // Update loading states when bots change
-    final botCount = context.read<BotProvider>().bots.length;
+    final botCount = context.read<BotProvider>().filterBots.length;
     if (_isLoadingFavorite.length != botCount) {
       setState(() {
         _isLoadingFavorite = List.generate(botCount, (index) => false);
       });
     }
+  }
+
+  void _onSearchChanged() {
+    setState(() {
+      _searchTerm = _searchController.text;
+    });
+    final botProvider = context.read<BotProvider>();
+    botProvider.setSearchValue(_searchTerm);
+    botProvider.filterBot();
   }
 
   Future<void> _handleLoadBots() async {
@@ -56,7 +69,7 @@ class _MyBotPageState extends State<MyBotPage> {
       await context.read<BotProvider>().loadBots();
       if (mounted) {
         _isLoadingFavorite = List.generate(
-            context.read<BotProvider>().bots.length, (index) => false);
+            context.read<BotProvider>().filterBots.length, (index) => false);
       }
     } catch (e) {
       debugPrint('Error loading bots: $e');
@@ -117,11 +130,12 @@ class _MyBotPageState extends State<MyBotPage> {
   Widget _buildSearchField() => Expanded(
         flex: 7,
         child: TextField(
+          controller: _searchController,
           focusNode: _searchFocusNode,
           decoration: InputDecoration(
             hintText: 'Search',
             prefixIcon: const Icon(Icons.search, color: Colors.black),
-            border: OutlineInputBorder(borderRadius: BorderRadius.circular(5)),
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
             contentPadding: const EdgeInsets.all(8),
           ),
         ),
@@ -147,17 +161,17 @@ class _MyBotPageState extends State<MyBotPage> {
                   child: Consumer<BotProvider>(
                     builder: (context, botProvider, child) {
                       if (_isLoadingFavorite.length !=
-                          botProvider.bots.length) {
+                          botProvider.filterBots.length) {
                         _isLoadingFavorite = List.generate(
-                            botProvider.bots.length, (index) => false);
+                            botProvider.filterBots.length, (index) => false);
                       }
                       if (_isLoading) {
                         return const Center(child: CircularProgressIndicator());
                       }
 
-                      if (botProvider.bots.isEmpty) {
+                      if (botProvider.filterBots.isEmpty) {
                         return const Center(
-                          child: Text('No bots found. Create your first bot!'),
+                          child: Text('No bots found.'),
                         );
                       }
 
@@ -170,9 +184,10 @@ class _MyBotPageState extends State<MyBotPage> {
                           mainAxisSpacing: 8,
                           childAspectRatio: 3 / 1,
                         ),
-                        itemCount: botProvider.bots.length,
+                        itemCount: botProvider.filterBots.length,
                         itemBuilder: (context, index) {
-                          return _buildGridItem(botProvider.bots[index], index);
+                          return _buildGridItem(
+                              botProvider.filterBots[index], index);
                         },
                       );
                     },
