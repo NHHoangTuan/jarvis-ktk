@@ -149,15 +149,6 @@ class _AddKnowledgePreviewBotState extends State<AddKnowledgePreviewBot> {
                         ),
                       ),
                     ),
-                    const SizedBox(width: 8.0),
-                    Expanded(
-                        flex: 3,
-                        child: FloatingActionButton.extended(
-                          onPressed: () {},
-                          label: const Text('Create'),
-                          icon: const Icon(Icons.add_circle_outline),
-                          elevation: 0,
-                        )),
                   ],
                 ),
                 const SizedBox(height: 32.0),
