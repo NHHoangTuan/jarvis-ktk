@@ -20,11 +20,23 @@ class _AddKnowledgePreviewBotState extends State<AddKnowledgePreviewBot> {
   bool _isLoading = false;
   List<bool> _isLoadingButtonList = [];
   final FocusNode _searchFocusNode = FocusNode();
+  final TextEditingController _searchController = TextEditingController();
+  String _searchTerm = '';
 
   @override
   void initState() {
     super.initState();
+    _searchController.addListener(_onSearchChanged);
     _handleLoadKnowledges();
+  }
+
+  void _onSearchChanged() {
+    setState(() {
+      _searchTerm = _searchController.text;
+    });
+    final knowledgeProvider = context.read<KnowledgeProvider>();
+    knowledgeProvider.setSearchText(_searchTerm);
+    knowledgeProvider.filterKnowledge();
   }
 
   Future<void> _handleLoadKnowledges() async {
@@ -36,7 +48,7 @@ class _AddKnowledgePreviewBotState extends State<AddKnowledgePreviewBot> {
 
       if (mounted) {
         _isLoadingButtonList = List.generate(
-            context.read<KnowledgeProvider>().knowledges.length,
+            context.read<KnowledgeProvider>().filterKnowledges.length,
             (index) => false);
       }
     } catch (e) {
@@ -101,6 +113,7 @@ class _AddKnowledgePreviewBotState extends State<AddKnowledgePreviewBot> {
   @override
   void dispose() {
     _searchFocusNode.dispose();
+    _searchController.dispose();
     super.dispose();
   }
 
@@ -139,6 +152,7 @@ class _AddKnowledgePreviewBotState extends State<AddKnowledgePreviewBot> {
                     Expanded(
                       flex: 7,
                       child: TextField(
+                        controller: _searchController,
                         focusNode: _searchFocusNode,
                         decoration: InputDecoration(
                           hintText: 'Search',
@@ -161,14 +175,14 @@ class _AddKnowledgePreviewBotState extends State<AddKnowledgePreviewBot> {
                         );
                       }
 
-                      if (knowledgeProvider.knowledges.isEmpty) {
+                      if (knowledgeProvider.filterKnowledges.isEmpty) {
                         return const Center(
                           child: Text(
                               'No knowledge found. Create your first one!'),
                         );
                       }
 
-                      final knowledgeList = knowledgeProvider.knowledges;
+                      final knowledgeList = knowledgeProvider.filterKnowledges;
                       final importedKnowledges = botProvider.importedKnowledges;
 
                       return LayoutBuilder(builder: (context, constraints) {
@@ -312,6 +326,7 @@ class _AddKnowledgePreviewBotState extends State<AddKnowledgePreviewBot> {
                                         flex: 2,
                                         child: isKnowledgeImported
                                             ? FloatingActionButton.small(
+                                                heroTag: null,
                                                 onPressed:
                                                     _isLoadingButtonList[index]
                                                         ? null
@@ -342,6 +357,7 @@ class _AddKnowledgePreviewBotState extends State<AddKnowledgePreviewBot> {
                                                           ),
                                               )
                                             : FloatingActionButton.small(
+                                                heroTag: null,
                                                 onPressed:
                                                     _isLoadingButtonList[index]
                                                         ? null
