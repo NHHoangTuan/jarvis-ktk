@@ -49,6 +49,7 @@ class BotProvider with ChangeNotifier {
     _bots.add(newBot);
     // Sắp xếp lại danh sách bot theo thời gian tạo mới nhất
     _bots.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+    _filterBots = _bots.toList();
     // Chọn bot mới tạo
     _selectedBot = newBot;
     notifyListeners();
@@ -65,6 +66,7 @@ class BotProvider with ChangeNotifier {
     final index = _bots.indexWhere((bot) => bot.id == botId);
     _bots[index] = updatedBot;
     _selectedBot = updatedBot;
+    _filterBots = _bots.toList();
     notifyListeners();
   }
 
@@ -72,12 +74,14 @@ class BotProvider with ChangeNotifier {
     final updatedBot = await _botApi.favoriteBot(botId);
     final index = _bots.indexWhere((bot) => bot.id == botId);
     _bots[index] = updatedBot;
+    _filterBots = _bots.toList();
     notifyListeners();
   }
 
   Future<void> deleteBot(String botId) async {
     await _botApi.deleteBot(botId);
     _bots.removeWhere((bot) => bot.id == botId);
+    _filterBots = _bots.toList();
     notifyListeners();
   }
 
@@ -177,6 +181,7 @@ class BotProvider with ChangeNotifier {
 
   void clearAll() {
     _bots = [];
+    _filterBots = [];
     _importedKnowledges = [];
     _selectedBot = null;
     _currentMessageResponse = null;
