@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:jarvis_ktk/data/models/knowledge.dart';
-import 'package:jarvis_ktk/data/models/mock_data.dart';
+import 'package:jarvis_ktk/data/models/data_source.dart';
 
 import 'connect_dialog_base.dart';
 
@@ -16,7 +16,6 @@ class AddUnitContent extends StatelessWidget {
     final Map<String, Widget> dialogMap = {
       'Local files': FileUploadDialog(connectDialogKey: connectDialogKey,),
       'Website': WebsiteConnectDialog(connectDialogKey: connectDialogKey,),
-      'Google Drive': const GoogleDriveConnectDialog(),
       'Slack': SlackConnectDialog(connectDialogKey: connectDialogKey,),
       'Confluence': ConfluenceConnectDialog(connectDialogKey: connectDialogKey,),
     };
@@ -53,20 +52,6 @@ class WebsiteConnectDialog extends StatelessWidget {
       fields: [
         ConnectDialogField(key: 'unitName', title: 'Name', hintText: 'name'),
         ConnectDialogField(key: 'webUrl', title: 'Website URL', hintText: 'website URL'),
-      ],
-    );
-  }
-}
-
-class GoogleDriveConnectDialog extends StatelessWidget {
-  const GoogleDriveConnectDialog({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return ConnectDialogBase(
-      fields: [
-        ConnectDialogField(key: 'name', title: 'Name', hintText: 'name'),
-        FilePickerField(key: 'googleDriveCredential', title: 'Google Drive Credential'),
       ],
     );
   }

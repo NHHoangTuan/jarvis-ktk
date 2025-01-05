@@ -60,7 +60,6 @@ Map<String, dynamic> _$UnitToJson(Unit instance) => <String, dynamic>{
 
 const _$DataSourceTypeEnumMap = {
   DataSourceType.local_file: 'local_file',
-  DataSourceType.google_drive: 'google_drive',
   DataSourceType.slack: 'slack',
   DataSourceType.confluence: 'confluence',
   DataSourceType.web: 'web',

@@ -153,9 +153,5 @@ String getMetadata(Unit unit) {
       return unit.metadata['wiki_page_url']!;
     case DataSourceType.slack:
       return unit.metadata['slack_workspace']!;
-
-    case DataSourceType.google_drive:
-      break;
   }
-  return '';
 }
