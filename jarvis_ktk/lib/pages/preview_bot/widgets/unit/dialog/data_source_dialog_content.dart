@@ -19,6 +19,13 @@ class _DataSourceDialogContent extends State<DataSourceDialogContent> {
   String? selectedTitle;
 
   @override
+  void initState() {
+    super.initState();
+    selectedTitle = dataSourceOptions[0].title;
+    widget.onSelected(dataSourceOptions[0]);
+  }
+
+  @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
       child: Column(

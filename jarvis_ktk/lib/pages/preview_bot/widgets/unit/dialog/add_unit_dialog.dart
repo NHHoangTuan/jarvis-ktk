@@ -3,6 +3,7 @@ import 'package:jarvis_ktk/data/models/knowledge.dart';
 import 'package:jarvis_ktk/data/network/knowledge_api.dart';
 import 'package:jarvis_ktk/pages/preview_bot/widgets/unit/dialog/connect_dialog_base.dart';
 import 'package:jarvis_ktk/services/service_locator.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
 
 import '../../../../prompt_bottom_sheet/widgets/common_widgets.dart';
 import 'add_unit_content.dart';
@@ -13,7 +14,8 @@ class AddUnitDialog extends StatefulWidget {
   final String knowledgeId;
   final void Function() onClick;
 
-  const AddUnitDialog({super.key, required this.knowledgeId, required this.onClick});
+  const AddUnitDialog(
+      {super.key, required this.knowledgeId, required this.onClick});
 
   @override
   State<AddUnitDialog> createState() => _AddUnitDialogState();
@@ -23,16 +25,23 @@ class _AddUnitDialogState extends State<AddUnitDialog> {
   final PageController _pageController = PageController();
   int currentPage = 0;
   DataSource? selectedDataSource;
-  final GlobalKey<ConnectDialogBaseState> connectDialogKey = GlobalKey<ConnectDialogBaseState>();
+  final GlobalKey<ConnectDialogBaseState> connectDialogKey =
+      GlobalKey<ConnectDialogBaseState>();
+  bool _isLoading = false;
 
   void onConnect(DataSourceType type, Map<String, dynamic> fields) async {
     try {
+      setState(() {
+        _isLoading = true;
+      });
       switch (type) {
         case DataSourceType.local_file:
-          await getIt<KnowledgeApi>().uploadLocalFile(widget.knowledgeId, fields['selectedFile']);
+          await getIt<KnowledgeApi>()
+              .uploadLocalFile(widget.knowledgeId, fields['selectedFile']);
           break;
         case DataSourceType.web:
-          await getIt<KnowledgeApi>().uploadFromWebsite(widget.knowledgeId, fields['unitName'], fields['webUrl']);
+          await getIt<KnowledgeApi>().uploadFromWebsite(
+              widget.knowledgeId, fields['unitName'], fields['webUrl']);
           break;
         case DataSourceType.slack:
           await getIt<KnowledgeApi>().uploadFromSlack(
@@ -52,7 +61,7 @@ class _AddUnitDialogState extends State<AddUnitDialog> {
           );
           break;
         case DataSourceType.google_drive:
-        // await getIt<KnowledgeApi>().uploadFromGoogleDrive(widget.knowledgeId, fields['googleDriveUrl']);
+          // await getIt<KnowledgeApi>().uploadFromGoogleDrive(widget.knowledgeId, fields['googleDriveUrl']);
           break;
       }
     } catch (e) {
@@ -60,6 +69,9 @@ class _AddUnitDialogState extends State<AddUnitDialog> {
       showSnackBar(context, e.toString());
       return;
     }
+    setState(() {
+      _isLoading = false;
+    });
     widget.onClick();
     if (!mounted) return;
     Navigator.of(context).pop();
@@ -90,13 +102,23 @@ class _AddUnitDialogState extends State<AddUnitDialog> {
       content: SizedBox(
         width: MediaQuery.of(context).size.width,
         height: MediaQuery.of(context).size.height * 0.5,
-        child: PageView(
-          controller: _pageController,
-          children: [
-            DataSourceDialogContent(onSelected: _onSelected, key: const PageStorageKey('DataSourceDialogContent')),
-            AddUnitContent(connectDialogKey: connectDialogKey, key: const PageStorageKey('AddUnitContent')),
-          ],
-        ),
+        child: _isLoading
+            ? Center(
+                child: LoadingAnimationWidget.inkDrop(
+                color: Colors.blueGrey,
+                size: 40,
+              ))
+            : PageView(
+                controller: _pageController,
+                children: [
+                  DataSourceDialogContent(
+                      onSelected: _onSelected,
+                      key: const PageStorageKey('DataSourceDialogContent')),
+                  AddUnitContent(
+                      connectDialogKey: connectDialogKey,
+                      key: const PageStorageKey('AddUnitContent')),
+                ],
+              ),
       ),
       insetPadding: const EdgeInsets.all(10),
       actions: [
@@ -117,17 +139,21 @@ class _AddUnitDialogState extends State<AddUnitDialog> {
           }),
           if (selectedDataSource?.title != "Github repositories")
             TextButton(
-              onPressed: () {
+              onPressed: _isLoading
+                  ? null
+                  : () {
                 if (selectedDataSource == null) {
                   showSnackBar(context, 'Please select a data source');
                   return;
                 }
                 if (connectDialogKey.currentState!.fieldValues.isEmpty ||
-                    connectDialogKey.currentState!.fieldValues.values.any((element) => element == null)) {
+                    connectDialogKey.currentState!.fieldValues.values
+                        .any((element) => element == null)) {
                   showSnackBar(context, 'Please fill all fields');
                   return;
                 }
-                onConnect(selectedDataSource!.type, connectDialogKey.currentState!.fieldValues);
+                onConnect(selectedDataSource!.type,
+                    connectDialogKey.currentState!.fieldValues);
               },
               child: const Text('Connect'),
             ),
@@ -147,7 +173,8 @@ class _AddUnitDialogState extends State<AddUnitDialog> {
   }
 }
 
-void showAddUnitDialog(BuildContext context, String knowledgeId, void Function() onClick) {
+void showAddUnitDialog(
+    BuildContext context, String knowledgeId, void Function() onClick) {
   showDialog(
     context: context,
     builder: (BuildContext context) {

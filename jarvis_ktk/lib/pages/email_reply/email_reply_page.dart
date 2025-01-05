@@ -55,7 +55,7 @@ class _EmailReplyPage extends State<EmailReplyPage>
 
     setState(() {
       _messages.add(ChatMessage(
-        message: "I'm currently working on your request. Please wait a moment.",
+        message: "Loading",
         isBot: true,
         onSendMessage: _onAction,
         isPreviousMessage: true,
@@ -79,6 +79,7 @@ class _EmailReplyPage extends State<EmailReplyPage>
       });
     } catch (e) {
       setState(() {
+        _messages.removeAt(_messages.length - 1);
         _messages.add(ChatMessage(
           message: e.toString(),
           isBot: true,
