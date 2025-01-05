@@ -2,7 +2,6 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:jarvis_ktk/data/models/chat.dart';
 import 'package:jarvis_ktk/data/models/prompt.dart';
 import 'package:jarvis_ktk/data/models/user.dart';
@@ -11,8 +10,8 @@ import 'package:jarvis_ktk/data/providers/chat_provider.dart';
 import 'package:jarvis_ktk/data/providers/token_provider.dart';
 import 'package:jarvis_ktk/pages/chat/widgets/message_input.dart';
 import 'package:jarvis_ktk/pages/chat/widgets/prompt_widget.dart';
-import 'package:jarvis_ktk/pages/chat/widgets/welcome_bot.dart';
 import 'package:jarvis_ktk/services/service_locator.dart';
+import 'package:jarvis_ktk/utils/toast.dart';
 import 'package:provider/provider.dart';
 
 import '../../data/models/message.dart';
@@ -100,8 +99,11 @@ class _ChatBodyState extends State<ChatBody> {
     }
   }
 
-  Future<void> _sendMessage() async {
-    if (_messageController.text.trim().isEmpty) return;
+  Future<void> _sendMessage(String? message) async {
+    if (_messageController.text.trim().isEmpty && message == null) return;
+    if (_messageController.text.trim().isEmpty && message != null) {
+      _messageController.text = message;
+    }
 
     setState(() {
       _isLoadingBotResponse = true;
@@ -127,13 +129,15 @@ class _ChatBodyState extends State<ChatBody> {
       if (chatProvider.isBOT) {
         if (chatProvider.selectedConversationId == '') {
           await botProvider.createThread(
-              botProvider.selectedBot!.id, userMessage);
+              chatProvider.selectedAiAgent['id']!, userMessage);
 
           // Set selected conversation ID to the last thread ID
           chatProvider.selectConversationId(botProvider.newThreadId);
         }
-        await botProvider.askBot(botProvider.selectedBot!.id,
+        await botProvider.askBot(chatProvider.selectedAiAgent['id']!,
             chatProvider.selectedConversationId, userMessage);
+
+        await botProvider.loadThreads(chatProvider.selectedAiAgent['id']!);
       } else {
         await chatProvider.sendMessage(userMessage, []);
       }
@@ -164,11 +168,10 @@ class _ChatBodyState extends State<ChatBody> {
 
         CacheService.setCurrentHistoryLength(
             CacheService.getCurrentHistoryLength() + 1);
-        await botProvider.loadThreads();
       }
     } catch (e) {
       debugPrint("Error sending message: $e");
-      showToast('Error sending message. Try again later.');
+      ToastUtils.showToast('Error sending message. Try again later.');
       chatProvider.chatHistory.removeAt(chatProvider.chatHistory.length - 1);
     } finally {
       setState(() {
@@ -247,17 +250,6 @@ class _ChatBodyState extends State<ChatBody> {
     return chatHistoryList;
   }
 
-  void showToast(String message) {
-    Fluttertoast.showToast(
-        msg: message,
-        toastLength: Toast.LENGTH_SHORT,
-        gravity: ToastGravity.BOTTOM,
-        timeInSecForIosWeb: 1,
-        backgroundColor: Colors.blueGrey.shade900,
-        textColor: Colors.white,
-        fontSize: 16.0);
-  }
-
   @override
   Widget build(BuildContext context) {
     final chatProvider = Provider.of<ChatProvider>(context);
@@ -273,9 +265,7 @@ class _ChatBodyState extends State<ChatBody> {
                 child: _isLoading
                     ? const Center(child: CircularProgressIndicator())
                     : chatProvider.chatHistory.isEmpty
-                        ? (chatProvider.isBOT
-                            ? const WelcomeBot()
-                            : const WelcomeMessage())
+                        ? WelcomeMessage(sendMessage: _sendMessage)
                         : ListView.builder(
                             padding: const EdgeInsets.all(16),
                             itemCount: chatProvider.chatHistory.length * 2,
@@ -322,7 +312,7 @@ class _ChatBodyState extends State<ChatBody> {
               MessageInput(
                   messageController: _messageController,
                   messageFocusNode: _messageFocusNode,
-                  onSendMessage: _sendMessage)
+                  onSendMessage: () => _sendMessage(null))
             ],
           ),
         ],

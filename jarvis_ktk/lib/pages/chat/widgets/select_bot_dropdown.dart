@@ -20,7 +20,7 @@ class SelectBotDropdown extends StatefulWidget {
 class _SelectBotDropdownState extends State<SelectBotDropdown> {
   Future<void> _handleLoadThreads() async {
     final botProvider = Provider.of<BotProvider>(context, listen: false);
-    await botProvider.loadThreads();
+    await botProvider.loadThreads(botProvider.selectedBot!.id);
   }
 
   @override

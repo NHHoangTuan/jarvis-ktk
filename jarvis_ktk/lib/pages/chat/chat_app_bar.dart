@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:jarvis_ktk/data/providers/bot_provider.dart';
 import 'package:jarvis_ktk/data/providers/chat_provider.dart';
 import 'package:jarvis_ktk/data/providers/token_provider.dart';
-import 'package:jarvis_ktk/pages/chat/widgets/select_bot_dropdown.dart';
 import 'package:jarvis_ktk/services/cache_service.dart';
 import 'package:jarvis_ktk/utils/resized_image.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
@@ -58,7 +57,16 @@ class _ChatAppBarState extends State<ChatAppBar> {
       _isLoadingBot = true;
     });
     try {
-      await Provider.of<BotProvider>(context, listen: false).loadBots();
+      final botProvider = Provider.of<BotProvider>(context, listen: false);
+      final chatProvider = Provider.of<ChatProvider>(context, listen: false);
+      await botProvider.loadBots();
+      for (final bot in botProvider.bots) {
+        // kiểm tra nếu bot là favorite và không nằm trong ai agent thì thêm vào
+        if (bot.isFavorite &&
+            !chatProvider.aiAgents.any((element) => element['id'] == bot.id)) {
+          chatProvider.addBotToAiAgents(bot);
+        }
+      }
     } catch (e) {
       debugPrint('Error loading bots: $e');
     } finally {
@@ -84,15 +92,22 @@ class _ChatAppBarState extends State<ChatAppBar> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
-                if (chatProvider.isBOT)
-                  if (_isLoadingBot)
-                    LoadingAnimationWidget.twistingDots(
-                      leftDotColor: const Color(0xFF1A1A3F),
-                      rightDotColor: const Color(0xFFEA3799),
-                      size: 20,
-                    )
-                  else
-                    const SelectBotDropdown()
+                // if (chatProvider.isBOT)
+                //   if (_isLoadingBot)
+                //     LoadingAnimationWidget.twistingDots(
+                //       leftDotColor: const Color(0xFF1A1A3F),
+                //       rightDotColor: const Color(0xFFEA3799),
+                //       size: 20,
+                //     )
+                //   else
+                //     const SelectBotDropdown()
+                // else
+                if (_isLoadingBot)
+                  LoadingAnimationWidget.twistingDots(
+                    leftDotColor: const Color(0xFF1A1A3F),
+                    rightDotColor: const Color(0xFFEA3799),
+                    size: 20,
+                  )
                 else
                   const SelectAgentDropdown(),
               ],
@@ -104,12 +119,10 @@ class _ChatAppBarState extends State<ChatAppBar> {
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 if (_isLoadingToken)
-                  const SizedBox(
-                    height: 20,
-                    width: 20,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                    ),
+                  LoadingAnimationWidget.twistingDots(
+                    leftDotColor: const Color(0xFF1A1A3F),
+                    rightDotColor: const Color(0xFFEA3799),
+                    size: 20,
                   )
                 else
                   Consumer<TokenProvider>(
@@ -147,13 +160,13 @@ class _ChatAppBarState extends State<ChatAppBar> {
                 title: Text('New Chat'),
               ),
             ),
-            const PopupMenuItem<String>(
-              value: 'switchaiagent',
-              child: ListTile(
-                leading: Icon(Icons.swap_horizontal_circle_outlined),
-                title: Text('Switch AI Agent'),
-              ),
-            ),
+            // const PopupMenuItem<String>(
+            //   value: 'switchaiagent',
+            //   child: ListTile(
+            //     leading: Icon(Icons.swap_horizontal_circle_outlined),
+            //     title: Text('Switch AI Agent'),
+            //   ),
+            // ),
           ],
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),

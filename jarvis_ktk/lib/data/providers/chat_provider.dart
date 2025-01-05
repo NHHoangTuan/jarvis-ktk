@@ -3,6 +3,8 @@ import 'package:jarvis_ktk/data/models/chat.dart';
 import 'package:jarvis_ktk/data/network/chat_api.dart';
 import 'package:jarvis_ktk/services/cache_service.dart';
 
+import '../models/bot.dart';
+
 class ChatProvider with ChangeNotifier {
   final ChatApi _chatApi;
   List<Conversation> _conversations = [];
@@ -116,6 +118,21 @@ class ChatProvider with ChangeNotifier {
     };
     _currentResponse =
         await _chatApi.sendMessage(assistant, content, files, metadata);
+  }
+
+  void addBotToAiAgents(Bot bot) {
+    _aiAgents.add({
+      'id': bot.id,
+      'name': bot.assistantName,
+      'avatar': 'assets/chatbot.png',
+      'tokens': '0'
+    });
+    notifyListeners();
+  }
+
+  void deleteBotFromAiAgents(String botId) {
+    _aiAgents.removeWhere((element) => element['id'] == botId);
+    notifyListeners();
   }
 
   void selectAiAgentId(String aiAgentId) {
