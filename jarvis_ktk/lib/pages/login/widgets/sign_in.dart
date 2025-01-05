@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:google_sign_in/google_sign_in.dart';
 import 'package:jarvis_ktk/utils/colors.dart';
-import 'package:jarvis_ktk/utils/resized_image.dart';
 
 import '../../../data/network/auth_api.dart';
 import '../../../services/service_locator.dart';
@@ -10,7 +8,7 @@ class SignInView extends StatefulWidget {
   final VoidCallback onSignUpPressed;
   final VoidCallback onForgotPasswordPressed;
 
-  const SignInView(this.onSignUpPressed, this.onForgotPasswordPressed);
+  const SignInView(this.onSignUpPressed, this.onForgotPasswordPressed, {super.key});
 
   @override
   _SignInViewState createState() => _SignInViewState();
@@ -22,21 +20,6 @@ class _SignInViewState extends State<SignInView> {
   bool _obscureText = true; // Biến trạng thái để quản lý việc ẩn/hiện mật khẩu
   bool _isLoading = false;
   String? _errorMessage;
-
-  final GoogleSignIn _googleSignIn = GoogleSignIn(clientId: '873320321674-iqlr0v7dm4ureobr02p96kn1oadmiflg.apps.googleusercontent.com');
-
-  Future<void> _handleGoogleSignIn() async {
-    try {
-      final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
-      if (googleUser != null) {
-        final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
-        await getIt<AuthApi>().signInWithGoogle(googleAuth.idToken!);
-        Navigator.pushNamedAndRemoveUntil(context, '/home', (route) => false);
-      }
-    } catch (error) {
-      showSnackbar("Google sign-in failed: $error");
-    }
-  }
 
   // Validate input
   bool _validateInputs() {
@@ -196,50 +179,6 @@ class _SignInViewState extends State<SignInView> {
                 ],
               ),
             ),
-          ),
-          const Expanded(
-            flex: 0,
-            child: FractionallySizedBox(
-              widthFactor: 0.75,
-              child: Row(
-                children: [
-                  Expanded(child: Divider(color: Colors.grey)),
-                  Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 8.0),
-                    child: Text("or", style: TextStyle(color: Colors.grey)),
-                  ),
-                  Expanded(child: Divider(color: Colors.grey)),
-                ],
-              ),
-            ),
-          ),
-          const SizedBox(height: 16),
-          Expanded(
-            flex: 0,
-            child: FractionallySizedBox(
-                widthFactor: 0.75,
-                child: ElevatedButton.icon(
-                  style: ElevatedButton.styleFrom(
-                    foregroundColor: Colors.black,
-                    backgroundColor: Colors.transparent,
-                    // Nền trong suốt
-                    minimumSize: const Size(double.infinity, 50),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(25),
-                      side: const BorderSide(
-                          color: Colors.black,
-                          width: 0.6), // Thêm viền nếu muốn
-                    ),
-                    elevation: 0, // Bỏ hiệu ứng nổi của nút
-                  ),
-                  icon: const ResizedImage(
-                    imagePath: 'assets/google_logo.png',
-                    height: 24,
-                    width: 24,
-                  ),
-                  label: const Text('Sign in with google'),
-                  onPressed: _handleGoogleSignIn,
-                )),
           ),
         ],
       ),

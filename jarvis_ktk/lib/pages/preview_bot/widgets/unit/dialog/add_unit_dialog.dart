@@ -60,9 +60,6 @@ class _AddUnitDialogState extends State<AddUnitDialog> {
             fields['confluenceAccessToken'],
           );
           break;
-        case DataSourceType.google_drive:
-          // await getIt<KnowledgeApi>().uploadFromGoogleDrive(widget.knowledgeId, fields['googleDriveUrl']);
-          break;
       }
     } catch (e) {
       if (!mounted) return;
@@ -101,7 +98,7 @@ class _AddUnitDialogState extends State<AddUnitDialog> {
       title: const AddUnitDialogTitle(),
       content: SizedBox(
         width: MediaQuery.of(context).size.width,
-        height: MediaQuery.of(context).size.height * 0.5,
+        height: MediaQuery.of(context).size.height * 0.45,
         child: _isLoading
             ? Center(
                 child: LoadingAnimationWidget.inkDrop(

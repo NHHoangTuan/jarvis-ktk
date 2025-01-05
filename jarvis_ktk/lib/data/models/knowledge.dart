@@ -57,7 +57,6 @@ class Unit {
 
 enum DataSourceType {
   local_file,
-  google_drive,
   slack,
   confluence,
   web,
@@ -71,13 +70,6 @@ DataSource dataSourceTypeToString(DataSourceType type) {
         subtitle: 'Upload pdf, docx, ...',
         imagePath: 'assets/unit/file.png',
         type: DataSourceType.local_file,
-      );
-    case DataSourceType.google_drive:
-      return DataSource(
-        title: 'Google Drive',
-        subtitle: 'Connect Google drive to get data',
-        imagePath: 'assets/unit/google_drive.png',
-        type: DataSourceType.google_drive,
       );
     case DataSourceType.slack:
       return DataSource(
