@@ -91,6 +91,8 @@ class _KnowledgePageState extends State<KnowledgePage> {
       child: Scaffold(
         appBar: AppBar(
           titleSpacing: 0.0,
+          scrolledUnderElevation: 0,
+          elevation: 0,
           actions: [
             Expanded(
               child: Padding(
@@ -131,7 +133,8 @@ class _KnowledgePageState extends State<KnowledgePage> {
           future: _knowledgeFuture,
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
-              return Center(child: LoadingAnimationWidget.inkDrop(
+              return Center(
+                  child: LoadingAnimationWidget.inkDrop(
                 color: Colors.blueGrey,
                 size: 30,
               ));
@@ -207,14 +210,14 @@ class _SearchBarState extends State<SearchBar> {
           ),
           suffixIcon: _controller.text.isNotEmpty
               ? IconButton(
-            icon: const Icon(Icons.clear),
-            onPressed: () {
-              _controller.clear();
-              if (widget.onChanged != null) {
-                widget.onChanged!('');
-              }
-            },
-          )
+                  icon: const Icon(Icons.clear),
+                  onPressed: () {
+                    _controller.clear();
+                    if (widget.onChanged != null) {
+                      widget.onChanged!('');
+                    }
+                  },
+                )
               : null,
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(10.0),
