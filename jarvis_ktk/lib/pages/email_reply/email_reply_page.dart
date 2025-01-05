@@ -3,6 +3,7 @@ import 'package:jarvis_ktk/data/models/chat.dart';
 import 'package:jarvis_ktk/data/models/email_reply.dart';
 import 'package:jarvis_ktk/data/network/email_api.dart';
 import 'package:jarvis_ktk/data/providers/chat_provider.dart';
+import 'package:jarvis_ktk/data/providers/token_provider.dart';
 import 'package:jarvis_ktk/pages/email_reply/reply_draft_page.dart';
 import 'package:jarvis_ktk/services/service_locator.dart';
 import 'package:provider/provider.dart';
@@ -37,6 +38,7 @@ class _EmailReplyPage extends State<EmailReplyPage>
   Future<void> _sendResponseEmail(EmailReply emailReply,
       {bool retry = false}) async {
     final chatProvider = context.read<ChatProvider>();
+    final tokenProvider = context.read<TokenProvider>();
     final selectedAiAgent = chatProvider.selectedAiAgent;
     final Map<String, String> assistant = {
       'id':selectedAiAgent['id']!,
@@ -76,6 +78,7 @@ class _EmailReplyPage extends State<EmailReplyPage>
 
       final result = await getIt<EmailApi>().responseEmail(emailReply, assistant);
       emailReply.email = result.email;
+      tokenProvider.setCurrentToken(result.remainingUsage);
       lastEmailReply = emailReply;
 
       setState(() {
