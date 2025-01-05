@@ -11,7 +11,7 @@ import 'package:loading_animation_widget/loading_animation_widget.dart';
 
 import '../../../../data/models/user.dart';
 import '../prompt_list.dart';
-import '../public_prompt/public_prompt_search_bar.dart';
+import '../public_prompt/prompt_search_bar.dart';
 
 class MyPromptContent extends StatefulWidget {
   final void Function(Prompt) onClick;
@@ -80,7 +80,7 @@ class MyPromptContentState extends State<MyPromptContent> {
       backgroundColor: Colors.white,
       body: Column(
         children: [
-          PublicPromptSearchBar(
+          PromptSearchBar(
             onChanged: (text) {
               if (_searchFocusNode.hasFocus) {
                 setState(() {

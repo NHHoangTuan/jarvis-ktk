@@ -12,6 +12,7 @@ class ChatMessage extends StatelessWidget {
   final void Function(String) onSendMessage;
   final bool isPreviousMessage;
   final VoidCallback? onRetry;
+  final String? botName;
 
   const ChatMessage({
     super.key,
@@ -19,6 +20,7 @@ class ChatMessage extends StatelessWidget {
     required this.isBot,
     required this.onSendMessage,
     this.isPreviousMessage = false,
+    this.botName,
     this.onRetry,
   });
 
@@ -26,6 +28,7 @@ class ChatMessage extends StatelessWidget {
   Widget build(BuildContext context) {
     return isBot
         ? BotMessage(
+            botName: botName!,
             message: message,
             onSendMessage: onSendMessage,
             isPreviousMessage: isPreviousMessage,
@@ -49,13 +52,14 @@ class BotMessage extends StatefulWidget {
   final void Function(String) onSendMessage;
   final bool isPreviousMessage;
   final VoidCallback? onRetry;
+  final String botName;
 
   const BotMessage({
     super.key,
     required this.message,
     required this.onSendMessage,
     required this.isPreviousMessage,
-    this.onRetry,
+    this.onRetry, required this.botName,
   });
 
   @override
@@ -107,11 +111,11 @@ class _BotMessageState extends State<BotMessage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 8.0),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 8.0),
                   child: Text(
-                    "Jarvis reply",
-                    style: TextStyle(
+                    widget.botName,
+                    style: const TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.bold,
                       color: SimpleColors.royalBlue,
