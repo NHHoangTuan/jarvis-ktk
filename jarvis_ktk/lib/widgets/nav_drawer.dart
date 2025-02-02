@@ -44,12 +44,15 @@ class _NavDrawerState extends State<NavDrawer> with TickerProviderStateMixin {
   void initState() {
     super.initState();
     _selectedItem = widget.initialSelectedItem;
-    // Kiểm tra nếu mục hiện tại là "My Bot" hoặc "Knowledge" thì hiển thị các mục con của "Personal"
-    if (_selectedItem == 'My Bot' || _selectedItem == 'Knowledge') {
-      _showPersonalOptions = true;
-    }
-    Future.microtask(() {
-      _handleLoadConversations();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        if (_selectedItem == 'My Bot' || _selectedItem == 'Knowledge') {
+          setState(() {
+            _showPersonalOptions = true;
+          });
+        }
+        _handleLoadConversations();
+      }
     });
   }
 
@@ -96,6 +99,7 @@ class _NavDrawerState extends State<NavDrawer> with TickerProviderStateMixin {
   }
 
   Future<void> _handleLoadConversations() async {
+    if (!mounted) return;
     setState(() {
       _isLoadingHistory = true;
     });
@@ -128,9 +132,11 @@ class _NavDrawerState extends State<NavDrawer> with TickerProviderStateMixin {
     } catch (e) {
       debugPrint('Error loading conversations: $e');
     } finally {
-      setState(() {
-        _isLoadingHistory = false;
-      });
+      if (mounted) {
+        setState(() {
+          _isLoadingHistory = false;
+        });
+      }
     }
   }
 
@@ -363,7 +369,9 @@ class _NavDrawerState extends State<NavDrawer> with TickerProviderStateMixin {
                           ),
                         ),
                         Text(
-                          '${tokenProvider.currentToken} / ${tokenProvider.tokenUsage.totalTokens}',
+                          tokenProvider.tokenUsage.unlimited == true
+                              ? 'Unlimited'
+                              : '${tokenProvider.currentToken} / ${tokenProvider.tokenUsage.totalTokens}',
                           style: const TextStyle(
                             fontSize: 16,
                             color: Colors.blueGrey,
@@ -374,10 +382,13 @@ class _NavDrawerState extends State<NavDrawer> with TickerProviderStateMixin {
                     const SizedBox(height: 8),
                     LinearProgressIndicator(
                       // Sử lí nếu value lỗi
-                      value: tokenProvider.tokenUsage.totalTokens == 0
+                      value: tokenProvider.tokenUsage.unlimited == true
                           ? 1
-                          : tokenProvider.currentToken /
-                              tokenProvider.tokenUsage.totalTokens,
+                          : // Nếu không giới hạn
+                          tokenProvider.tokenUsage.totalTokens == 0
+                              ? 1
+                              : tokenProvider.currentToken /
+                                  tokenProvider.tokenUsage.totalTokens,
                       backgroundColor: Colors.grey[300],
                       valueColor:
                           const AlwaysStoppedAnimation<Color>(Colors.blue),
