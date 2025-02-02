@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:jarvis_ktk/data/models/message.dart';
 import 'package:jarvis_ktk/data/providers/bot_provider.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:provider/provider.dart';
 
 class ChatPreviewBotPage extends StatelessWidget {
@@ -36,6 +37,20 @@ class _ChatAreaState extends State<ChatArea>
   void initState() {
     super.initState();
     _handleRetrieveMessage();
+  }
+
+  void _scrollToBottom() {
+    Future.delayed(const Duration(milliseconds: 100), () {
+      if (_scrollController.hasClients) {
+        _scrollController.animateTo(
+          _scrollController.position.maxScrollExtent,
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeOut,
+        );
+      } else {
+        debugPrint("ScrollController không hoạt động.");
+      }
+    });
   }
 
   void _handleSendMessage() async {
@@ -74,6 +89,7 @@ class _ChatAreaState extends State<ChatArea>
         _isWaitingForResponse = true;
       });
       _controller.clear();
+      _scrollToBottom();
 
       await context.read<BotProvider>().askBot(botId!, threadId!, userMessage);
 
@@ -92,14 +108,8 @@ class _ChatAreaState extends State<ChatArea>
                   text: MessageText(value: botMessage, annotations: []))
             ]);
       });
+      _scrollToBottom();
 
-      // Scroll to the bottom with a slight offset
-      _scrollController.animateTo(
-        _scrollController.position.maxScrollExtent +
-            100, // Adjust the offset as needed
-        duration: const Duration(milliseconds: 300),
-        curve: Curves.easeOut,
-      );
       _isWaitingForResponse = false;
     } catch (e) {
       debugPrint("Error sending message: $e");
@@ -289,7 +299,9 @@ class ChatMessage extends StatelessWidget {
                       borderRadius: BorderRadius.circular(16.0),
                     ),
                     child: message == "Loading..."
-                        ? const Center(child: CircularProgressIndicator())
+                        ? Center(
+                            child: LoadingAnimationWidget.newtonCradle(
+                                size: 60, color: Colors.blue.shade900))
                         : Text(message),
                   ),
                 ),

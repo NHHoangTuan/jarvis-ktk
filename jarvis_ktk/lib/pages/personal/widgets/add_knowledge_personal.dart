@@ -31,7 +31,7 @@ class _AddKnowledgePersonalPageState extends State<AddKnowledgePersonalPage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const Center(
-              child: Icon(Icons.token, size: 40),
+              child: Icon(Icons.school_rounded, size: 40),
             ),
             Padding(
               padding: const EdgeInsets.only(top: 16.0),

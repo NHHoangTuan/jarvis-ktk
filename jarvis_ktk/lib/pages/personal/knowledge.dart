@@ -6,7 +6,6 @@ import 'package:jarvis_ktk/data/network/knowledge_api.dart';
 import 'package:jarvis_ktk/pages/personal/widgets/add_knowledge_dialog.dart';
 import 'package:jarvis_ktk/pages/personal/widgets/empty_knowledge_screen.dart';
 import 'package:jarvis_ktk/services/service_locator.dart';
-import 'package:jarvis_ktk/utils/colors.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 
 import 'widgets/knowledge_list.dart';
@@ -93,6 +92,8 @@ class _KnowledgePageState extends State<KnowledgePage> {
           titleSpacing: 0.0,
           scrolledUnderElevation: 0,
           elevation: 0,
+          backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+          surfaceTintColor: Colors.transparent,
           actions: [
             Expanded(
               child: Padding(
@@ -109,14 +110,20 @@ class _KnowledgePageState extends State<KnowledgePage> {
                     ),
                     Padding(
                       padding: const EdgeInsets.only(left: 8.0, right: 16.0),
+                      // child: FilledButton.tonalIcon(
+                      //   onPressed: _showCreateKnowledgeDialog,
+                      //   label: const Text('Add Knowledge'),
+                      //   icon: const Icon(Icons.add),
+                      // ),
+
                       child: TextButton.icon(
                         onPressed: _showCreateKnowledgeDialog,
-                        icon: const Icon(Icons.add_circle_outlined),
+                        icon: const Icon(Icons.add_outlined),
                         label: const Text('Add Knowledge',
                             style: TextStyle(fontSize: 12.0)),
                         style: TextButton.styleFrom(
-                          foregroundColor: Colors.white,
-                          backgroundColor: SimpleColors.navyBlue,
+                          foregroundColor: Colors.black,
+                          backgroundColor: Colors.lightBlue[100],
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(10.0),
                           ),
@@ -201,9 +208,6 @@ class _SearchBarState extends State<SearchBar> {
         showCursor: true,
         decoration: InputDecoration(
           hintText: 'Search',
-          fillColor: Colors.cyan[100],
-          filled: true,
-          hintStyle: TextStyle(color: Colors.cyan[400]),
           prefixIcon: const Icon(
             Icons.search,
             size: 25,

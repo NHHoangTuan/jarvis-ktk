@@ -1,4 +1,6 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:jarvis_ktk/data/network/bot_api.dart';
 import 'package:jarvis_ktk/data/network/knowledge_api.dart';
 import 'package:jarvis_ktk/data/network/token_api.dart';
@@ -14,6 +16,15 @@ import 'data/providers/token_provider.dart';
 
 void main() {
   setupLocator();
+  WidgetsFlutterBinding.ensureInitialized();
+  MobileAds.instance.initialize();
+
+  // Add test devices
+  if (kDebugMode) {
+    MobileAds.instance.updateRequestConfiguration(
+      RequestConfiguration(testDeviceIds: ['F6BE0FB55352045456E9D915CE0D8AB6']),
+    );
+  }
 
   runApp(
     MultiProvider(

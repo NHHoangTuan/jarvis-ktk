@@ -13,7 +13,8 @@ class CancelButton extends StatelessWidget {
       child: const Text(
         'Cancel',
         style: TextStyle(
-            color: Colors.blueAccent,
+            //color: Colors.blueAccent,
+            color: Colors.red,
             fontSize: 13,
             fontWeight: FontWeight.bold),
       ),
@@ -33,7 +34,8 @@ class SaveButton extends StatelessWidget {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(15.0),
         ),
-        backgroundColor: const Color(0xFFB3A0F4),
+        //backgroundColor: const Color(0xFFB3A0F4),
+        backgroundColor: Colors.blue[300],
       ),
       onPressed: onPressed,
       child: const Text(
@@ -57,7 +59,8 @@ class NextButton extends StatelessWidget {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(15.0),
         ),
-        backgroundColor: const Color(0xFFB3A0F4),
+        //backgroundColor: const Color(0xFFB3A0F4),
+        backgroundColor: Colors.blue[300],
       ),
       onPressed: onPressed,
       child: const Text(
@@ -149,13 +152,13 @@ class NewPromptDialogTitle extends StatelessWidget {
   }
 }
 
-class PromptTextFormField  extends StatefulWidget {
+class PromptTextFormField extends StatefulWidget {
   final String hintText;
   final int hintMaxLines;
   final String? initialValue;
   final ValueChanged<String> onChanged;
 
-  const PromptTextFormField ({
+  const PromptTextFormField({
     super.key,
     required this.hintText,
     required this.hintMaxLines,
@@ -165,7 +168,6 @@ class PromptTextFormField  extends StatefulWidget {
 
   @override
   State<PromptTextFormField> createState() => _PromptTextFormField();
-
 }
 
 class _PromptTextFormField extends State<PromptTextFormField> {
@@ -195,10 +197,9 @@ class _PromptTextFormField extends State<PromptTextFormField> {
           hintText: widget.hintText,
           hintMaxLines: widget.hintMaxLines,
           hintStyle: const TextStyle(color: Colors.grey, fontSize: 12),
-          contentPadding: const EdgeInsets.only(
-              left: 8, top: 6, bottom: 6, right: 8),
+          contentPadding:
+              const EdgeInsets.only(left: 8, top: 6, bottom: 6, right: 8),
           isDense: true,
-
           enabledBorder: const OutlineInputBorder(
             borderSide: BorderSide(color: Colors.grey, width: 0.9),
           ),
@@ -209,7 +210,8 @@ class _PromptTextFormField extends State<PromptTextFormField> {
         maxLines: widget.hintMaxLines,
         onFieldSubmitted: (value) {
           _controller.text += '\n';
-          _controller.selection = TextSelection.fromPosition(TextPosition(offset: _controller.text.length));
+          _controller.selection = TextSelection.fromPosition(
+              TextPosition(offset: _controller.text.length));
         },
       ),
     );
@@ -249,8 +251,7 @@ class PromptHelperCard extends StatelessWidget {
                       color: Colors.grey[300],
                       child: const Text(
                         '[ ]',
-                        style: TextStyle(
-                            fontSize: 11, color: Colors.black),
+                        style: TextStyle(fontSize: 11, color: Colors.black),
                       ),
                     ),
                   ),
@@ -325,17 +326,15 @@ class PromptDropdownButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return  Column(
+    return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text( hintText,
-            style: const TextStyle(
-                fontSize: 14, fontWeight: FontWeight.bold)),
+        Text(hintText,
+            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
         Padding(
             padding: const EdgeInsets.only(top: 4, bottom: 12),
             child: Container(
-              padding: const EdgeInsets.symmetric(
-                  horizontal: 12, vertical: 4),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
               height: 35,
               width: 130,
               decoration: BoxDecoration(
@@ -349,21 +348,18 @@ class PromptDropdownButton extends StatelessWidget {
                 menuMaxHeight: 200,
                 underline: const SizedBox.shrink(),
                 onChanged: onChanged,
-                items: items
-                    .map<DropdownMenuItem<String>>((String value) {
+                items: items.map<DropdownMenuItem<String>>((String value) {
                   return DropdownMenuItem<String>(
                     value: value,
                     child: Text(
                       value,
                       style: const TextStyle(
-                          fontSize:
-                          12), // Adjust text style if needed
+                          fontSize: 12), // Adjust text style if needed
                     ),
                   );
                 }).toList(),
               ),
-            )
-        ),
+            )),
       ],
     );
   }

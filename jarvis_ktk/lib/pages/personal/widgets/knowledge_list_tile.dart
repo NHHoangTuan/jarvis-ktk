@@ -8,7 +8,8 @@ class KnowledgeListTile extends StatefulWidget {
   final VoidCallback onDelete;
   final Function(Knowledge) onAllUnitsTap;
 
-  const KnowledgeListTile({super.key,
+  const KnowledgeListTile({
+    super.key,
     required this.knowledge,
     required this.onDelete,
     required this.onAllUnitsTap,
@@ -18,8 +19,7 @@ class KnowledgeListTile extends StatefulWidget {
   State<KnowledgeListTile> createState() => _KnowledgeListTileState();
 }
 
-  class _KnowledgeListTileState extends State<KnowledgeListTile> {
-
+class _KnowledgeListTileState extends State<KnowledgeListTile> {
   void onSave(String knowledgeName, String description) {
     setState(() {
       widget.knowledge.knowledgeName = knowledgeName;
@@ -31,7 +31,7 @@ class KnowledgeListTile extends StatefulWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding:
-      const EdgeInsets.only(left: 16.0, right: 16.0, top: 4.0, bottom: 4.0),
+          const EdgeInsets.only(left: 16.0, right: 16.0, top: 4.0, bottom: 4.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -40,25 +40,27 @@ class KnowledgeListTile extends StatefulWidget {
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(16.0),
             ),
-            elevation: 5,
+            elevation: 1,
             shadowColor: Colors.black.withOpacity(0.5),
             child: InkWell(
               onTap: () {
-                showEditKnowledgeDialog(context, onSave, widget.onDelete, widget.knowledge);
+                showEditKnowledgeDialog(
+                    context, onSave, widget.onDelete, widget.knowledge);
               },
               splashColor: Colors.pink.withOpacity(0.1),
               borderRadius: BorderRadius.circular(16.0),
               splashFactory: InkRipple.splashFactory,
               child: Ink(
-                decoration: const BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [Color(0xffffcae5), Color(0xffffe3f6)],
-                    stops: [0.4, 1.0],
-                    begin: Alignment.bottomLeft,
-                    end: Alignment.topRight,
-                  ),
-                  borderRadius: BorderRadius.all(Radius.circular(16.0)),
-                ),
+                // decoration: BoxDecoration(
+                //   gradient: LinearGradient(
+                //     //colors: [Color(0xffffcae5), Color(0xffffe3f6)],
+                //     colors: [Colors.blue.shade50, Colors.lightBlue.shade50],
+                //     stops: const [0.4, 1.0],
+                //     begin: Alignment.bottomLeft,
+                //     end: Alignment.topRight,
+                //   ),
+                //   borderRadius: const BorderRadius.all(Radius.circular(16.0)),
+                // ),
                 child: Padding(
                   padding: const EdgeInsets.all(16.0),
                   child: Column(
@@ -71,15 +73,16 @@ class KnowledgeListTile extends StatefulWidget {
                             style: const TextStyle(
                               fontSize: 20.0,
                               fontWeight: FontWeight.bold,
-                              color: Color(0xFFa12367),
+                              //color: Color(0xFFa12367),
                             ),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                           ),
                           const Spacer(),
-                          const Icon(
-                            Icons.token,
-                            color: Color(0xFFa12367),
+                          Icon(
+                            Icons.school_rounded,
+                            //color: Color.fromRGBO(209, 109, 106, 1),
+                            color: Colors.deepOrange.shade900,
                             size: 24.0,
                           ),
                         ],
@@ -98,10 +101,10 @@ class KnowledgeListTile extends StatefulWidget {
                       Text(
                         widget.knowledge.updatedAt.formatted,
                         style: const TextStyle(
-                          fontSize: 14.0,
-                          fontWeight: FontWeight.bold,
-                          color: Color(0xFFa12367),
-                        ),
+                            fontSize: 14.0,
+                            fontWeight: FontWeight.bold,
+                            //color: Color(0xFFa12367),
+                            color: Colors.grey),
                       ),
                       const SizedBox(height: 8.0),
                       Row(
@@ -109,17 +112,18 @@ class KnowledgeListTile extends StatefulWidget {
                         children: [
                           Text(
                             '• ${widget.knowledge.numUnits} units',
-                            style: const TextStyle(
-                              color: Color(0xFFa12367),
-                            ),
+                            style: TextStyle(
+                                //color: Color(0xFFa12367),
+                                color: Colors.deepOrange.shade900),
                           ),
                           TextButton(
-                            onPressed: () => widget.onAllUnitsTap(widget.knowledge),
+                            onPressed: () =>
+                                widget.onAllUnitsTap(widget.knowledge),
                             child: const Text(
                               'All units →',
                               style: TextStyle(
-                                color: Color(0xFFa12367),
-                              ),
+                                  //color: Color(0xFFa12367),
+                                  color: Colors.black),
                             ),
                           ),
                         ],
@@ -129,7 +133,6 @@ class KnowledgeListTile extends StatefulWidget {
                 ),
               ),
             ),
-
           ),
         ],
       ),
@@ -153,8 +156,6 @@ extension DateTimeExtension on DateTime {
       'November',
       'December'
     ][month - 1];
-    return '${monthName.substring(0, 3)} ${day.toString().padLeft(
-        2, '0')}, $year ${hour.toString().padLeft(2, '0')}:${minute.toString()
-        .padLeft(2, '0')} ${hour > 12 ? 'PM' : 'AM'}';
+    return '${monthName.substring(0, 3)} ${day.toString().padLeft(2, '0')}, $year ${hour.toString().padLeft(2, '0')}:${minute.toString().padLeft(2, '0')} ${hour > 12 ? 'PM' : 'AM'}';
   }
 }

@@ -81,6 +81,7 @@ class _HomePageState extends State<HomePage> {
                 break;
               case 'Email Reply':
                 _changeBody(const EmailReplyPage());
+                _changeAppBar(const ChatAppBar());
                 break;
               case 'My Bot': // Handle My Bot case
                 _changeBody(const MyBotPage());

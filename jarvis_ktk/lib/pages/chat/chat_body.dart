@@ -1,7 +1,9 @@
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:jarvis_ktk/data/models/chat.dart';
 import 'package:jarvis_ktk/data/models/user.dart';
 import 'package:jarvis_ktk/data/providers/chat_provider.dart';
@@ -11,6 +13,7 @@ import 'package:jarvis_ktk/pages/chat/widgets/prompt_widget.dart';
 import 'package:jarvis_ktk/utils/toast.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../data/models/message.dart';
 import '../../data/providers/bot_provider.dart';
@@ -33,9 +36,17 @@ class ChatBody extends StatefulWidget {
 class _ChatBodyState extends State<ChatBody> {
   final FlutterSecureStorage _storage = const FlutterSecureStorage();
   late TextEditingController _messageController;
+  final ScrollController _scrollController = ScrollController();
   late FocusNode _messageFocusNode;
   bool _showPromptList = false;
   User? _user;
+
+  InterstitialAd? _interstitialAd;
+  bool _isInterstitialAdReady = false;
+  static const String LAST_AD_TIME_KEY = 'last_ad_time';
+  static const int MIN_MESSAGES_BEFORE_AD = 3;
+  static const Duration MIN_TIME_BETWEEN_ADS = Duration(minutes: 3);
+  int _messageCount = 0;
 
   //List<ChatHistory> _listChatHistory = [];
 
@@ -50,6 +61,8 @@ class _ChatBodyState extends State<ChatBody> {
     _messageController.addListener(_handleSlashAction);
 
     _initialize();
+    _loadInterstitialAd();
+    _checkFirstRun();
   }
 
   @override
@@ -79,7 +92,68 @@ class _ChatBodyState extends State<ChatBody> {
   void dispose() {
     _messageController.dispose();
     _messageFocusNode.dispose();
+    _scrollController.dispose();
     super.dispose();
+  }
+
+  Future<void> _checkFirstRun() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    int? lastAdTime = prefs.getInt(LAST_AD_TIME_KEY);
+    bool shouldShowAd = false;
+
+    if (lastAdTime == null) {
+      // First time app launch
+      shouldShowAd = true;
+    } else {
+      final timeSinceLastAd = DateTime.now()
+          .difference(DateTime.fromMillisecondsSinceEpoch(lastAdTime));
+      shouldShowAd = timeSinceLastAd > MIN_TIME_BETWEEN_ADS;
+    }
+
+    if (shouldShowAd && _isInterstitialAdReady && mounted) {
+      await Future.delayed(const Duration(seconds: 2));
+      showInterstitialAd();
+      await prefs.setInt(
+          LAST_AD_TIME_KEY, DateTime.now().millisecondsSinceEpoch);
+    }
+  }
+
+  void _loadInterstitialAd() {
+    InterstitialAd.load(
+      adUnitId: kDebugMode
+          ? 'ca-app-pub-3940256099942544/1033173712'
+          : 'ca-app-pub-8437579288625202/6032691387',
+      request: const AdRequest(),
+      adLoadCallback: InterstitialAdLoadCallback(
+        onAdLoaded: (ad) {
+          _interstitialAd = ad;
+          _isInterstitialAdReady = true;
+
+          ad.fullScreenContentCallback = FullScreenContentCallback(
+            onAdDismissedFullScreenContent: (ad) {
+              _isInterstitialAdReady = false;
+              ad.dispose();
+              _loadInterstitialAd();
+            },
+            onAdFailedToShowFullScreenContent: (ad, error) {
+              _isInterstitialAdReady = false;
+              ad.dispose();
+              _loadInterstitialAd();
+            },
+          );
+        },
+        onAdFailedToLoad: (error) {
+          debugPrint('Interstitial ad failed to load: $error');
+          _isInterstitialAdReady = false;
+        },
+      ),
+    );
+  }
+
+  void showInterstitialAd() {
+    if (_isInterstitialAdReady && _interstitialAd != null) {
+      _interstitialAd!.show();
+    }
   }
 
   void _handleSlashAction() {
@@ -94,6 +168,20 @@ class _ChatBodyState extends State<ChatBody> {
         _showPromptList = false;
       });
     }
+  }
+
+  void _scrollToBottom() {
+    Future.delayed(const Duration(milliseconds: 100), () {
+      if (_scrollController.hasClients) {
+        _scrollController.animateTo(
+          _scrollController.position.maxScrollExtent,
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeOut,
+        );
+      } else {
+        debugPrint("ScrollController không hoạt động.");
+      }
+    });
   }
 
   Future<void> _sendMessage(String? message) async {
@@ -116,6 +204,8 @@ class _ChatBodyState extends State<ChatBody> {
       createdAt: DateTime.now().millisecondsSinceEpoch ~/ 1000,
       files: [],
     ));
+
+    _scrollToBottom();
 
     _messageController.clear();
     _messageFocusNode.unfocus();
@@ -163,8 +253,16 @@ class _ChatBodyState extends State<ChatBody> {
           files: [],
         );
 
+        _scrollToBottom();
+
         CacheService.setCurrentHistoryLength(
             CacheService.getCurrentHistoryLength() + 1);
+
+        _messageCount++;
+        if (_messageCount >= MIN_MESSAGES_BEFORE_AD) {
+          _checkFirstRun();
+          _messageCount = 0;
+        }
       }
     } catch (e) {
       debugPrint("Error sending message: $e");
@@ -199,6 +297,7 @@ class _ChatBodyState extends State<ChatBody> {
     setState(() {
       _isLoading = false;
     });
+    _scrollToBottom();
   }
 
   List<ChatHistory> convertMessageDataToChatHistory(
@@ -268,6 +367,7 @@ class _ChatBodyState extends State<ChatBody> {
                     : chatProvider.chatHistory.isEmpty
                         ? WelcomeMessage(sendMessage: _sendMessage)
                         : ListView.builder(
+                            controller: _scrollController,
                             padding: const EdgeInsets.all(16),
                             itemCount: chatProvider.chatHistory.length * 2,
                             itemBuilder: (context, index) {
